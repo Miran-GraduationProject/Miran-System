@@ -8,4 +8,10 @@ const FindUserByEmail= async (email) =>{
 
 }
 
-export default FindUserByEmail;
+const findUserByActivationToken = async (token) => {
+  const query = `SELECT * FROM User WHERE activationToken = '${token}' AND status = 'PendingActivation'`;
+    const result = await dbConnect.execute(query);
+    return result[0][0];
+};
+
+export default  {FindUserByEmail, findUserByActivationToken};

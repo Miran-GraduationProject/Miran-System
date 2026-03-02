@@ -3,8 +3,14 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import dbConnect from './config/dbConnect.js';
 import authRoutes from './routes/authRoutes.js';
+
 import userRoutes from './routes/userRoutes.js';
 import cors from 'cors';
+
+//import adminRoutes from './routes/adminRoutes.js';
+
+
+
 dotenv.config();
 
 const app=express();
@@ -18,8 +24,12 @@ app.use(cors({
 
 app.use(express.json());
 app.use("/api/auth",authRoutes);
+
 app.use("/api/users",userRoutes);
 
+
+
+//app.use("/api/staff", adminRoutes);
 
 
 
