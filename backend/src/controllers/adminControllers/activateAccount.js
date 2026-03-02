@@ -1,4 +1,5 @@
-import { findUserByActivationToken, activateStaffAccount } from '../../models/adminModel.js';
+import findUserByActivationToken from '../../models/userModel.js';
+import activateStaffAccount from '../../models/adminModel/activateStaffAccount.js';
 
 /**
  * تفعيل حساب الموظف

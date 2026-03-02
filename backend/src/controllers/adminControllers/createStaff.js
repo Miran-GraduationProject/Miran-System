@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-export { default as createStaffAccount } from '../../models/adminModel/createStaffAccount.js';
+export { default as createStaffAccount } from '../../models/adminModel/StaffAccount.js';
 import { sendActivationEmail } from '../../config/emailConnect.js';
 
 /**

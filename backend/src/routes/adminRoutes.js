@@ -1,6 +1,6 @@
 import express from 'express';
-import createStaff from '../controllers/adminControllers/createStaff';
-import activateAccount from '../controllers/adminControllers/activateAccount';
+import createStaff from '../controllers/adminControllers/createStaff.js';
+import activateAccount from '../controllers/adminControllers/activateAccount.js';
 
 const router = express.Router();
 
