@@ -17,10 +17,13 @@ const app=express();
 const port=3000;
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5173/"],
+    origin:true,
     methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders:["Content-Type","Authorization"],
     credentials: true
 }));
+
+
 
 app.use(express.json());
 app.use("/api/auth",authRoutes);

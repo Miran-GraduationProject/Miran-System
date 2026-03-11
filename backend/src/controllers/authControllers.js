@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import FindUserByEmail from "../models/userModel.js";
+import {FindUserByEmail} from "../models/userModel.js";
 import dotenv from "dotenv";
 dotenv.config();
 const login = async (req, res) => {
@@ -21,7 +21,7 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.userID, role: user.role },
+      { id: user.userID, role: user.role ,firstName:user.firstName ,secondName:user.secondName , lastName:user.lastName ,email:user.email },
       process.env.JWT_Secret,
       { expiresIn: "1h" },
     );
