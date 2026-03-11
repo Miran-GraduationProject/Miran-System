@@ -26,6 +26,12 @@ function Log() {
       localStorage.setItem("token", token);
       const decodedToken = jwtDecode(token);
       const user = decodedToken;
+      console.log(decodedToken)
+      localStorage.setItem("role",user.role)
+      localStorage.setItem("firstName",user.firstName)
+      localStorage.setItem("secondName",user.secondName)
+      localStorage.setItem("lastName",user.lastName)
+      localStorage.setItem("email",user.email)
 
       if (user.role === "Administrator") {
         navigate("/admin");
@@ -77,7 +83,7 @@ function Log() {
           </label>
           <a href="#">نسيت كلمة المرور؟</a>
         </div>
-        <button type="submit" onClick={handleLogin}>
+        <button type="button" onClick={handleLogin}>
           تسجيل الدخول
         </button>
       </form>
