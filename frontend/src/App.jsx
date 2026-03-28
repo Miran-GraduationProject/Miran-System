@@ -1,11 +1,19 @@
 import Log from "./pages/auth";
 import ProtectedRoute from "./components/protectedRoute";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
+
 import AdminDashboard from "./pages/AdminDashboard";
-import { Navigate } from "react-router-dom";
 import StudentDashboard from "./pages/StudentDashboard";
+import CoordinatorDashboard from "./pages/CoordinatorDashboard";
+import TrainingPeriodsPage from './pages/TrainingPeriodsPage';
+import HospitalsPage from './pages/HospitalsPage';
+import RegistrationMonitorPage from './pages/RegistrationMonitorPage';
+import StudentListPage from './pages/StudentListPage';
+import ConfirmedAllocationsPage from './pages/ConfirmedAllocationsPage';
+import StudentPreferencesPage from './pages/StudentPreferencesPage';
+
 import Navbar from "./components/navbar";
-import { Children } from "react";
+//import { Children } from "react";
 
 const Layout=({children})=>{
   const location =useLocation();
@@ -19,13 +27,12 @@ const Layout=({children})=>{
     </>
   )
 }
-
 function App() {
   return (
     <BrowserRouter>
-  
+
       <Routes>
-        <Route path="/nav" element={<Navbar />} />
+
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Log />} />
 
@@ -33,26 +40,103 @@ function App() {
           path="/admin"
           element={
             <Layout>
-            <ProtectedRoute Role="Administrator">
-              <AdminDashboard />
-            </ProtectedRoute>
+              <ProtectedRoute Role="Administrator">
+                <AdminDashboard />
+              </ProtectedRoute>
             </Layout>
           }
         />
 
-        
-         <Route
+        <Route
           path="/student"
           element={
             <Layout>
-            <ProtectedRoute Role="Student">
-              <StudentDashboard />
-            </ProtectedRoute>
+              <ProtectedRoute Role="Student">
+                <StudentDashboard />
+              </ProtectedRoute>
             </Layout>
           }
         />
-    
+
+        <Route
+          path="/coordinator"
+          element={
+            <Layout>
+              <ProtectedRoute Role="UniversityCoordinator">
+                <CoordinatorDashboard />
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/training-periods"
+          element={
+            <Layout>
+              <ProtectedRoute Role="UniversityCoordinator">
+                <TrainingPeriodsPage />
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/hospitals"
+          element={
+            <Layout>
+              <ProtectedRoute Role="UniversityCoordinator">
+                <HospitalsPage />
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/registration-monitor"
+          element={
+            <Layout>
+              <ProtectedRoute Role="UniversityCoordinator">
+                <RegistrationMonitorPage />
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/student-list"
+          element={
+            <Layout>
+              <ProtectedRoute Role="UniversityCoordinator">
+                <StudentListPage />
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/student-preferences"
+          element={
+            <Layout>
+              <ProtectedRoute Role="Student">
+                <StudentPreferencesPage />
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/confirmed-allocations"
+          element={
+            <Layout>
+              <ProtectedRoute Role="UniversityCoordinator">
+                <ConfirmedAllocationsPage />
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+
       </Routes>
+
     </BrowserRouter>
   );
 }

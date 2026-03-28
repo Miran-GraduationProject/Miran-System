@@ -6,6 +6,10 @@ import authRoutes from './routes/authRoutes.js';
 
 import userRoutes from './routes/userRoutes.js';
 import cors from 'cors';
+import coordinatorRoutes from './routes/coordinatorRoutes.js';
+import studentRoutes from './routes/studentRoutes.js';
+import hospitalRoutes from './routes/hospitalRoutes.js';
+
 
 //import adminRoutes from './routes/adminRoutes.js';
 
@@ -29,6 +33,11 @@ app.use(express.json());
 app.use("/api/auth",authRoutes);
 
 app.use("/api/users",userRoutes);
+
+
+app.use("/api/coordinator/training-period", coordinatorRoutes);
+app.use("/api/coordinator/hospitals", hospitalRoutes);
+app.use("/api/student", studentRoutes)
 
 
 
