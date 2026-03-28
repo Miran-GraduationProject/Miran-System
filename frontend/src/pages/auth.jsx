@@ -40,11 +40,11 @@ function Log() {
       } else if (user.role === "AcademicSupervisor") {
         navigate("/academicSupervisor");
       } else if (user.role === "UniversityCoordinator") {
-        navigate("/coordintator");
+        navigate("/coordinator");
       } else if (user.role === "HospitalSupervisor") {
         navigate("/hospitalSupervisor");
-      } else if (user.role === "HospitalSecretary") {
-        navigate("/hospitalSecretary");
+      } else if (user.role === "UniversitySecretary") {
+        navigate("/universitySecretary");
       }
     } catch (error) {
       console.error("Login failed", error);

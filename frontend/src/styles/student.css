@@ -1,0 +1,113 @@
+.student-container {
+  background-color: #f9fbfc;
+  min-height: 100vh;
+  direction: rtl;
+  padding: 40px;
+  font-family: sans-serif;
+}
+
+.student-page-header {
+  background-color: #d8e8e1;
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  border: 1px solid #c2d6ce;
+}
+
+.student-page-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.student-page-header p {
+  margin: 5px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.student-sections-title {
+  margin-bottom: 18px;
+}
+
+.student-sections-title h3 {
+  font-size: 17px;
+  color: #333;
+  margin: 0;
+}
+
+/* ── Cards Grid ── */
+.student-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+/* ── Main Card (green) ── */
+.student-main-card {
+  background: linear-gradient(145deg, #2d8a56, #3aab6b);
+  border: none;
+  border-radius: 18px;
+  padding: 28px 20px 24px;
+  cursor: pointer;
+  position: relative;
+  text-align: right;
+  color: white;
+  font-family: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(45, 138, 86, 0.3);
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.student-main-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(45, 138, 86, 0.4);
+}
+
+.student-card-arrow {
+  position: absolute;
+  top: 50%;
+  left: 18px;
+  transform: translateY(-50%);
+  font-size: 22px;
+  opacity: 0.7;
+}
+
+.student-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.student-card-icon-wrap {
+  background: rgba(255,255,255,0.2);
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.student-card-icon {
+  font-size: 24px;
+}
+
+.student-main-card h4 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: white;
+}
+
+.student-main-card p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.85;
+  color: white;
+}

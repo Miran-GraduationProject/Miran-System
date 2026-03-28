@@ -1,0 +1,339 @@
+.ca-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ── Header ── */
+.ca-header {
+  margin-bottom: 24px;
+}
+
+.ca-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+}
+
+.ca-header p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* ── Alerts ── */
+.ca-error {
+  background: #fde8e8;
+  color: #c0392b;
+  border: 1px solid #f5c0c0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.ca-notice {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  color: #666;
+  font-size: 15px;
+  margin-top: 16px;
+}
+
+.ca-empty {
+  text-align: center;
+  color: #888;
+  margin-top: 40px;
+  font-size: 15px;
+}
+
+/* ── Period Selector ── */
+.ca-period-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #444;
+  font-weight: 600;
+  background: white;
+  padding: 14px 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.ca-print-btn {
+  background: #f0f0f0;
+  color: #444;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: auto;
+}
+
+.ca-select {
+  border: 1px solid #ced4da;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  min-width: 220px;
+}
+
+.ca-select:focus {
+  outline: none;
+  border-color: #2d8a56;
+}
+
+/* ── Period Info Card ── */
+.ca-period-card {
+  background: linear-gradient(135deg, #2d8a56, #3aab6b);
+  border-radius: 16px;
+  padding: 20px 24px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.ca-period-card-top {
+  margin-bottom: 16px;
+}
+
+.ca-period-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ca-period-info h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.ca-badge-allocated {
+  background: rgba(255,255,255,0.25);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ca-period-dates {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.ca-date-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ca-date-label {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.ca-date-val {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ── Summary Stats ── */
+.ca-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.ca-stat-card {
+  background: white;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  border-top: 4px solid transparent;
+}
+
+.ca-stat-total { border-top-color: #2d8a56; }
+.ca-stat-total .ca-stat-num { color: #2d8a56; }
+
+.ca-stat-male { border-top-color: #1967d2; }
+.ca-stat-male .ca-stat-num { color: #1967d2; }
+
+.ca-stat-female { border-top-color: #8e44ad; }
+.ca-stat-female .ca-stat-num { color: #8e44ad; }
+
+.ca-stat-hospitals { border-top-color: #e67e22; }
+.ca-stat-hospitals .ca-stat-num { color: #e67e22; }
+
+.ca-stat-num {
+  font-size: 30px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.ca-stat-lbl {
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+}
+
+/* ── Hospital Section ── */
+.ca-hospital-section {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.ca-hospital-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ca-hospital-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ca-hospital-icon {
+  font-size: 22px;
+}
+
+.ca-hospital-title h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.ca-hospital-caps {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ca-cap-badge {
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ca-cap-male {
+  background: #e8f0fe;
+  color: #1967d2;
+}
+
+.ca-cap-female {
+  background: #f3e8fd;
+  color: #8e44ad;
+}
+
+.ca-cap-total {
+  background: #e8f8ee;
+  color: #2d8a56;
+}
+
+/* ── Students Grid ── */
+.ca-students-grid {
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.ca-gender-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ca-gender-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.ca-male-title {
+  background: #e8f0fe;
+  color: #1967d2;
+}
+
+.ca-female-title {
+  background: #f3e8fd;
+  color: #8e44ad;
+}
+
+.ca-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ca-table th {
+  background: #f8f9fa;
+  padding: 9px 12px;
+  text-align: right;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.ca-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f2f2f2;
+  color: #333;
+}
+
+.ca-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ca-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.ca-no-students {
+  color: #999;
+  font-size: 13px;
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 16px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .ca-period-dates { grid-template-columns: 1fr 1fr; }
+  .ca-summary { grid-template-columns: 1fr 1fr; }
+  .ca-students-grid { grid-template-columns: 1fr; }
+}
