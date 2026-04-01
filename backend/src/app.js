@@ -10,8 +10,7 @@ import coordinatorRoutes from './routes/coordinatorRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import hospitalRoutes from './routes/hospitalRoutes.js';
 
-
-//import adminRoutes from './routes/adminRoutes.js';
+import supervisorRoutes from './routes/supervisorRoutes.js'
 
 
 
@@ -39,9 +38,7 @@ app.use("/api/coordinator/training-period", coordinatorRoutes);
 app.use("/api/coordinator/hospitals", hospitalRoutes);
 app.use("/api/student", studentRoutes)
 
-
-
-//app.use("/api/staff", adminRoutes);
+app.use("/api/sopervisor", supervisorRoutes);
 
 
 
