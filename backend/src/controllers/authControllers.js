@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import {FindUserByEmail} from "../models/userModel.js";
 import dotenv from "dotenv";
 dotenv.config();
+console.log(process.env.JWT_Secret)
 const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -29,7 +30,7 @@ const login = async (req, res) => {
     res.status(200).json({ token });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "something went wrong" });
+    res.status(500).json({ error: error.message });
   }
 };
 

@@ -38,7 +38,7 @@ app.use("/api/coordinator/training-period", coordinatorRoutes);
 app.use("/api/coordinator/hospitals", hospitalRoutes);
 app.use("/api/student", studentRoutes)
 
-app.use("/api/sopervisor", supervisorRoutes);
+app.use("/api/supervisor", supervisorRoutes);
 
 
 

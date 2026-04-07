@@ -9,51 +9,23 @@ const getSupervisedStudents = async (academicSupervisorID) => {
     [academicSupervisorID]
   );
 
-  //if (!supRows[0] || !supRows[0].selectedHospital) return [];
-
   const supervisorHospital = supRows[0].selectedHospital;
 
   // جيب الطلاب الي داخلين في نفس المشتفى للمشرف
   const [rows] = await dbConnect.promise().execute(
-    `SELECT u.userID, u.firstName, u.lastName, u.gender, s.studentID, s.periodID
+    `SELECT u.firstName, u.lastName, u.gender, s.studentID, s.periodID
      FROM STUDENT s
      JOIN \`User\` u ON u.userID = s.studentID
-     WHERE s.selectedHospital = ?`,
+     WHERE u.selectedHospital = ?`,
     [supervisorHospital]
   );
 
-  return rows;
-};
-
-
-// جيب الطلاب الي يطابقو الاسم المدخل
-const searchStudent = async (academicSupervisorID, name) => {
-  //if (!name || !name.trim()) return [];
-
-    const keyword = name.trim(); // يزبط التنسيق يحذف المسافات
-
-    const studentsList = await getSupervisedStudents(academicSupervisorID);
-
-    const writtenName = `${keyword}`;
-
-    const [rows] = await dbConnect.promise().execute(
-        `SELECT u.userID, u.firstName, u.lastName, u.gender, s.studentID, s.periodID
-        FROM STUDENT s
-        JOIN \`User\` u ON u.userID = s.studentID
-        WHERE s.selectedHospital = ?
-            AND (
-            LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(?)
-            OR LOWER(u.firstName) LIKE LOWER(?)
-            OR LOWER(u.secondName) LIKE LOWER(?)
-            OR LOWER(u.lastName) LIKE LOWER(?)
-        )`,
-        [studentsList, writtenName, keyword, keyword]
-    );
+  if (!rows[0]) return ["No students assigned on your hospital"];
 
   return rows;
 };
 
-export {getSupervisedStudents, searchStudent};
+export {getSupervisedStudents};
 
 // --------------------------- خزعبلات ---------------------------------------------
 // const getSupervisedStudents = async (academicSupervisorID) => {

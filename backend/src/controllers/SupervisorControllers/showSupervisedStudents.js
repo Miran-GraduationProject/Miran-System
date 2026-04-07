@@ -3,9 +3,9 @@ import { getSupervisedStudents } from "../../models/supervisorModel.js";
 
 const showSupervisedStudents = async (req, res) => { // دالة غير متزامنة async عشان فيها دوال تطلب بيانات
   try {
-    const supervisorID = req.user.userID;
-   
+    const supervisorID = req.user.id;
     const students = await getSupervisedStudents(supervisorID);
+
     return res.json({ students });
   } catch (err) {
     return res.status(500).json({ message: "Error fetching students", error: err.message || err });
