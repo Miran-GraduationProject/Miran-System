@@ -45,3 +45,5 @@ app.use("/api/supervisor", supervisorRoutes);
 app.listen(port,()=>{
     console.log("server is running")
 })
+
+export default app;
