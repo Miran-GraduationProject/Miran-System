@@ -1,4 +1,4 @@
-import { getSupervisedStudents } from "../../models/supervisorModel.js";
+import { getSupervisedStudents }  from "../../models/supervisorModel.js";
 // كلاس يخلي المشرف يبحث عن الطالب بادخال الاسم
 
 

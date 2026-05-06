@@ -1,6 +1,5 @@
 import dbConnect from '../config/dbConnect.js';
 
-
 //جيب الطلاب المشرف عليهم بناءً على المشرف المحدد لكل مستشفى
 const getSupervisedStudents = async (academicSupervisorID) => {
   // جيب مستشفى المشرف المحدد
@@ -24,6 +23,8 @@ const getSupervisedStudents = async (academicSupervisorID) => {
 
   return rows;
 };
+
+
 
 export {getSupervisedStudents};
 

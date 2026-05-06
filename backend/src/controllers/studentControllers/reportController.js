@@ -1,32 +1,31 @@
-import dbConnect from "../../config/dbConnect.js";
+import {
+  getReport,
+  getReportFields,
+  submitReportAnswers
+} from "../../models/studentModel/reportModel.js";
 
-const db = dbConnect.promise();
-// 1. عرض التقرير + الحقول للطالب
-export const getReport = async (req, res) => {
+/* ================= يعرض التقرير لطالب ================= */
+export const getReportController = async (req, res) => {
   try {
     const { reportID } = req.params;
 
-    // جلب التقرير
-    const [report] = await db.query(
-      "SELECT * FROM CASE_REPORT WHERE reportID = ?",
-      [reportID]
-    );
+    // 1. يجيب التقرير من قاعدة البيانات
+    const report = await getReport(reportID);
 
-    if (report.length === 0) {
+    // 2. في حال ماحصل التقرير
+    if (!report.length) {
       return res.status(404).json({
         message: "Report not found"
       });
     }
 
-    // جلب الحقول (الأسئلة)
-    const [fields] = await db.query(
-      "SELECT * FROM ReportField WHERE templateID = ?",
-      [report[0].templateID]
-    );
+    // 3. يجيب الأسئلةالمرتبطة بالتمبلت
+    const fields = await getReportFields(report[0].templateID);
 
+    // 4. يرسلها لطالب
     res.json({
       report: report[0],
-      fields: fields
+      fields
     });
 
   } catch (error) {
@@ -38,31 +37,22 @@ export const getReport = async (req, res) => {
 };
 
 
-// 2. حفظ إجابات الطالب
-export const submitReport = async (req, res) => {
+/* ================= حفظ اجابات الطالب ================= */
+export const submitReportController = async (req, res) => {
   try {
     const { reportID, answers } = req.body;
 
-    // answers = [{fieldID, answer}]
-
+    // 1. التحقق من البيانات الأساسية
     if (!reportID || !answers) {
       return res.status(400).json({
         message: "reportID and answers are required"
       });
     }
 
-    for (let a of answers) {
-      await db.query(
-        `INSERT INTO REPORT_ANSWER (reportID, fieldID, answer)
-         VALUES (?, ?, ?)`,
-        [
-          reportID,
-          a.fieldID,
-          a.answer
-        ]
-      );
-    }
+    // 2. حفظ الإجابات في قاعدة البيانات
+    await submitReportAnswers(reportID, answers);
 
+    // 3. رسالة اتمام العملية
     res.json({
       message: "Report submitted successfully"
     });
@@ -74,4 +64,3 @@ export const submitReport = async (req, res) => {
     });
   }
 };
-
