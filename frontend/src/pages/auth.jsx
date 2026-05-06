@@ -38,7 +38,7 @@ function Log() {
       } else if (user.role === "Student") {
         navigate("/student");
       } else if (user.role === "AcademicSupervisor") {
-        navigate("/academicSupervisor");
+        navigate("/supervisor");
       } else if (user.role === "UniversityCoordinator") {
         navigate("/coordinator");
       } else if (user.role === "HospitalSupervisor") {

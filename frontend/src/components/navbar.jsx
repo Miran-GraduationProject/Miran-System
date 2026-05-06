@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {Link,useNavigate} from "react-router-dom"
 import "../styles/nav.css";
 import logo from "../assets/logo3.png";
-// import {useState} from "react";
 import { FaUserCircle } from "react-icons/fa";
 
 
@@ -22,9 +21,9 @@ function Navbar() {
   
   const navLink={
             AcademicSupervisor: [
-        { name: "  الرئيسية للمشرف", path: "/" },
-        { name: "إدارة المستخدمين", path: "/" },
-        { name: "الطلبات", path: "/" },
+        { name: "  الرئيسية للمشرف", path: "/supervisor" },
+        { name: " الطلاب", path: "/students" },
+        { name: "التقارير", path: "/" },
         ],
         Student: [
         { name: "الرئيسية للطالب", path: "/" },

@@ -5,12 +5,16 @@ import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-route
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import CoordinatorDashboard from "./pages/CoordinatorDashboard";
+import SupervisorDashboard from "./pages/SupervisorDashboard";
+
 import TrainingPeriodsPage from './pages/TrainingPeriodsPage';
 import HospitalsPage from './pages/HospitalsPage';
 import RegistrationMonitorPage from './pages/RegistrationMonitorPage';
 import StudentListPage from './pages/StudentListPage';
 import ConfirmedAllocationsPage from './pages/ConfirmedAllocationsPage';
 import StudentPreferencesPage from './pages/StudentPreferencesPage';
+import StudentDetails from './pages/StudentDetails';
+
 
 import Navbar from "./components/navbar";
 //import { Children } from "react";
@@ -64,6 +68,17 @@ function App() {
             <Layout>
               <ProtectedRoute Role="UniversityCoordinator">
                 <CoordinatorDashboard />
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/supervisor"
+          element={
+            <Layout>
+              <ProtectedRoute Role="AcademicSupervisor">
+                <SupervisorDashboard />
               </ProtectedRoute>
             </Layout>
           }
@@ -134,6 +149,18 @@ function App() {
             </Layout>
           }
         />
+
+        <Route
+          path="/supervisor/student/:studentID"
+          element={
+            <Layout>
+              <ProtectedRoute Role="AcademicSupervisor">
+                <StudentDetails/>
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+
 
       </Routes>
 

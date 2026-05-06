@@ -1,0 +1,64 @@
+/* كلاس فيه التنسيق العام لكل الصفحات بيساعدكم لمن تسوو صفحة جديدة */
+
+/* الصفحة البيضة من ورا */
+.container {
+    background-color: #f9fbfc;
+    min-height: 100vh;
+    direction: rtl;
+    padding: 40px;
+    font-family: sans-serif;
+}
+
+/*  المربع العلوي الأخضر الفاتح الي داخله العنوان */
+.page-header {
+    background-color: #d8e8e1;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    border: 1px solid #c2d6ce;
+}
+
+/* العنوان */
+.page-header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+/* الوصف تحت العنوان */
+.page-header p {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* ازرار مستطيلة تنقل بين الصفحات */
+.actions-section h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #444;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.action-item {
+    background: #f1f5f4;
+    border: 1px solid #e2e8e7;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    cursor: pointer;
+    position: relative;
+}
+
+.action-item p {
+    margin: 0 10px;
+    color: #555;
+    font-weight: 500;
+}

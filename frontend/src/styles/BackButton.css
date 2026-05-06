@@ -1,0 +1,36 @@
+/* From Uiverse.io by ZacharyCrespin */ 
+.backButton {
+  cursor: pointer;
+  font-weight: 700;
+  font-family: Helvetica,"sans-serif";
+  transition: all .2s;
+  padding: 10px 20px;
+  border-radius: 100px;
+  background: white;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  color: #343836;
+  margin-bottom: 20px;
+}
+
+.backButton:hover {
+  background: rgb(85, 164, 124);
+  color: white;
+}
+
+.backButton > svg {
+  width: 34px;
+  margin-left: 10px;
+  transition: transform .3s ease-in-out;
+}
+
+.backButton:hover svg {
+  transform: translateX(5px);
+}
+
+.backButton:active {
+  transform: scale(0.95);
+}
+
