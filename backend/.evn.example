@@ -1,7 +1,0 @@
-DB_Host="تحطون host هنا"
-DB_Port="وهنا ال port"
-DB_User="الاسم اللي عطيتكم هو للDatabase"
-DB_Password="كلمة مرور الDatabase"
-DB_Name="اسم الDatabase"
-
-BASE_URL=http://localhost:3000

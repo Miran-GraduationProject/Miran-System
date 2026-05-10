@@ -1,0 +1,7 @@
+DB_Host=mysql-208542-0.cloudclusters.net
+DB_Port=10123
+DB_User=Sama
+DB_Password=Sama30-2025
+DB_Name=Miran
+
+JWT_Secret=Software_Engineers_for_the_miran_project
