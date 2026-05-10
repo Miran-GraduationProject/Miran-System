@@ -1,16 +1,29 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
-import dbConnect from './config/dbConnect.js';
-import authRoutes from './routes/authRoutes.js';
+// 🧩 الأساسيات
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import bcrypt from "bcrypt";
+import path from "path";
+import fs from "fs";
 
-import userRoutes from './routes/userRoutes.js';
-import cors from 'cors';
-import coordinatorRoutes from './routes/coordinatorRoutes.js';
-import studentRoutes from './routes/studentRoutes.js';
-import hospitalRoutes from './routes/hospitalRoutes.js';
 
-import supervisorRoutes from './routes/supervisorRoutes.js'
+
+
+
+// 🗄️ الاتصال بقاعدة البيانات
+import dbConnect from "./config/dbConnect.js";
+
+// 📦 الروتس
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import coordinatorRoutes from "./routes/coordinatorRoutes.js";
+import studentRoutes from "./routes/studentRoutes.js";
+import hospitalRoutes from "./routes/hospitalRoutes.js";
+import supervisorRoutes from "./routes/supervisorRoutes.js";
+import reviewCaseRoutes from "./routes/reviewCase.routes.js";
+import mandatoryCasesRoutes from "./routes/mandatoryCases.routes.js";
+import logbookRoutes from "./routes/logbook.routes.js";
+
 
 
 
@@ -26,19 +39,46 @@ app.use(cors({
     credentials: true
 }));
 
-
-
 app.use(express.json());
-app.use("/api/auth",authRoutes);
+// 🧠 Authentication & Users
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
-app.use("/api/users",userRoutes);
-
-
+// 🎓 Coordinator & Hospital
 app.use("/api/coordinator/training-period", coordinatorRoutes);
 app.use("/api/coordinator/hospitals", hospitalRoutes);
-app.use("/api/student", studentRoutes)
 
+// 👩‍🎓 Student & Supervisor
+app.use("/api/student", studentRoutes);
 app.use("/api/supervisor", supervisorRoutes);
+
+// 📋 Review Cases & Mandatory Cases
+app.use("/api/review", reviewCaseRoutes);
+app.use("/api/mandatory", mandatoryCasesRoutes);
+
+
+
+// 📘 Logbook
+app.use("/api/logbook", logbookRoutes);
+
+
+
+// ✅ Endpoint لتحميل ملف اللوق بوك من الواجهة
+app.get("/api/logbook/download/:studentId", (req, res) => {
+  const { studentId } = req.params;
+  const filePath = path.join(process.cwd(), "uploads", `logbook_${studentId}.pdf`);
+
+  // تحقق إن الملف موجود
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ message: "File not found" });
+  }
+
+  // إرسال الملف للتحميل
+  res.download(filePath, `logbook_${studentId}.pdf`);
+});
+
+
+
 
 
 
