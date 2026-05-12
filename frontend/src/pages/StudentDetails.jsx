@@ -69,53 +69,89 @@ function StudentDetails() {
     const [student, setStudent] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    return (
-    <div className="container"> 
-      <main className="main-content">
-        
-        <button className="backButton" onClick={() => navigate(`/supervisor`)}>
-            <FaArrowRight />
-            العودة إلى قائمة الطلاب
-        </button>
+    useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
-        <header className="page-header">
-          <h1>تفاصيل الطالب</h1>
-          <p>عرض معلومات الطالب وتقاريره</p>
-        </header>
+        const res = await fetch(
+          `http://localhost:3000/api/supervisor/students/search/${studentID}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        <Card>
+        const data = await res.json();
 
-      <Header>
-        <h2>معلومات الطالب الشخصية</h2>
-      </Header>
+        if (!res.ok) {
+          console.error("Error:", data.message);
+          setStudent(null);
+        } else {
+          setStudent(data); // يرجع طالب واحد
+        }
 
-      <InfoSection>
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        <Row>
-          <Label>الاسم</Label>
-          <Value></Value>
-        </Row>
+    fetchStudent();
+  }, [studentID]);
 
-        <Row>
-          <Label>الرقم الجامعي</Label>
-          <Value></Value>
-        </Row>
+  if (loading) return <p>جاري تحميل...</p>;
+  if (!student) return <p>لم يتم العثور...</p>;
 
-        <Row>
-          <Label>البريد الجامعي</Label>
-          <Value></Value>
-        </Row>
+  return (
+  <div className="container"> 
+    <main className="main-content">
+      
+      <button className="backButton" onClick={() => navigate(`/supervisor`)}>
+          <FaArrowRight />
+          العودة إلى قائمة الطلاب
+      </button>
 
-        <Row>
-          <Label>المستوى</Label>
-          <Value></Value>
-        </Row>
+      <header className="page-header">
+        <h1>تفاصيل الطالب</h1>
+        <p>عرض معلومات الطالب وتقاريره</p>
+      </header>
 
-      </InfoSection>
+      <Card>
 
-    </Card>
-      </main>
-    </div>
-    );
+    <Header>
+      <h2>معلومات الطالب الشخصية</h2>
+    </Header>
+
+    <InfoSection>
+
+      <Row>
+        <Label>الاسم</Label>
+        <Value>{student.firstName} {student.middleName} {student.lastName}</Value>
+      </Row>
+
+      <Row>
+        <Label>الرقم الجامعي</Label>
+        <Value>{student.studentID}</Value>
+      </Row>
+
+      <Row>
+        <Label>البريد الجامعي</Label>
+        <Value>{student.email}</Value>
+      </Row>
+
+      <Row>
+        <Label>المستوى</Label>
+        <Value>{student.level}</Value>
+      </Row>
+
+    </InfoSection>
+
+  </Card>
+    </main>
+  </div>
+  );
 }
 export default StudentDetails;

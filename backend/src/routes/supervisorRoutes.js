@@ -1,7 +1,7 @@
 import express from 'express';
 import { verifyToken, verifyRole } from '../middlewares/atuhMiddleware.js';
 import { showSupervisedStudents } from '../controllers/SupervisorControllers/showSupervisedStudents.js';
-import { searchStudents } from '../controllers/SupervisorControllers/searchStudents.js';
+import { searchStudents, searchStudentsByID } from '../controllers/SupervisorControllers/searchStudents.js';
 import { createTrainingReportController } from "../controllers/SupervisorControllers/createTrainingReport.js";
 import {
   getTemplateByIdController,
@@ -19,6 +19,7 @@ const router = express.Router();
 router.use(verifyToken, verifyRole('AcademicSupervisor')); // use عشان تشغل على الكل
 router.get('/students', showSupervisedStudents);
 router.get('/students/search', searchStudents);
+router.get('/students/search/:studentID', searchStudentsByID);
 
 //---------------------------------------------
 
