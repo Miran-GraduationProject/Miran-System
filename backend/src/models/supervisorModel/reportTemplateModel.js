@@ -11,9 +11,23 @@ export const getTemplateById = async (templateID) => {
   );
 
   return rows;
+
+
+
 };
 
+/* ================= انشاء التمبلت ================= */
 
+export const createTemplate = async (academicSupervisorID, reportTitle) => {
+  const [result] = await db.execute(
+    `INSERT INTO TEMPLATE 
+     (academicSupervisorID, reportTitle, templateDate, reportDate, created_at, updated_at)
+     VALUES (?, ?, NOW(), NOW(), NOW(), NOW())`,
+    [academicSupervisorID, reportTitle]
+  );
+
+  return result;
+};
 /* ================= حقول التمبلت ================= */
 
 export const getTemplateFields = async (templateID) => {

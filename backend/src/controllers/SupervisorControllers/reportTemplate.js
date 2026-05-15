@@ -1,12 +1,38 @@
 import {
   getTemplateById,
+  createTemplate ,
   getTemplateFields,
   addReportField,
   updateReportField,
   deleteReportField
 } from "../../models/supervisorModel/reportTemplateModel.js";
 
+// ================= إنشاء تمبلت =================
+
+export const createTemplateController = async (req, res) => {
+  try {
+    const { reportTitle } = req.body;
+
+    const result = await createTemplate(
+      req.user.id,
+      reportTitle
+    );
+
+    res.status(201).json({
+      message: "Template created successfully",
+      templateID: result.insertId,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error creating template",
+      error: error.message,
+    });
+  }
+};
+
 /* ================= التمبلت ================= */
+
 export const getTemplateByIdController = async (req, res) => {
   try {
     const { templateID } = req.params;
