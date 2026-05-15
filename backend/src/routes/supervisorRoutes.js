@@ -12,6 +12,7 @@ import {
 } from "../controllers/SupervisorControllers/reportTemplate.js";
 import { getReportController } from '../controllers/SupervisorControllers/reportViewController.js';
 
+import { createCase, updateCase, deleteCase } from '../controllers/SupervisorControllers/cases.js';
 const router = express.Router();
 
 
@@ -37,5 +38,8 @@ router.delete('/field/:fieldID', deleteFieldController);
 router.get('/report/view/:reportID', getReportController);
 //------------------------------------------------------
 
+router.post('/cases', verifyToken, verifyRole('AcademicSupervisor'), createCase);
+router.put('/cases/:caseID', verifyToken, verifyRole('AcademicSupervisor'), updateCase);
+router.delete('/cases/:caseID', verifyToken, verifyRole('AcademicSupervisor'), deleteCase);
 
 export default router;

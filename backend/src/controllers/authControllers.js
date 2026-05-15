@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import {FindUserByEmail} from "../models/userModel.js";
 import dotenv from "dotenv";
 dotenv.config();
-console.log(process.env.JWT_Secret)
+console.log(process.env.JWT_SECRET)
 const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
