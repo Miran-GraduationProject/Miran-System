@@ -8,7 +8,8 @@ import {
   getTemplateFieldsController,
   addFieldController,
   updateFieldController,
-  deleteFieldController
+  deleteFieldController ,
+  createTemplateController
 } from "../controllers/SupervisorControllers/reportTemplate.js";
 import { getReportController } from '../controllers/SupervisorControllers/reportViewController.js';
 
@@ -27,7 +28,7 @@ router.post('/create-report', createTrainingReportController);
 
 router.get('/template/:templateID', getTemplateByIdController);
 router.get('/template-fields/:templateID', getTemplateFieldsController);
-
+router.post('/template', createTemplateController);
 
 router.post('/field', addFieldController);
 router.put('/field', updateFieldController);
