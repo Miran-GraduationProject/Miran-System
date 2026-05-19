@@ -23,8 +23,11 @@ function Navbar() {
             AcademicSupervisor: [
         { name: "  الرئيسية للمشرف", path: "/supervisor" },
         { name: " الطلاب", path: "/students" },
-        { name: "التقارير", path: "/" },
+        { name: "التقارير", path: "/reports" },
         ],
+
+      
+
         Student: [
         { name: "الرئيسية للطالب", path: "/" },
         { name: "نتائجي", path: "/" },

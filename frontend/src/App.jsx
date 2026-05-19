@@ -15,6 +15,10 @@ import ConfirmedAllocationsPage from './pages/ConfirmedAllocationsPage';
 import StudentPreferencesPage from './pages/StudentPreferencesPage';
 import StudentDetails from './pages/StudentDetails';
 
+import Reports from "./pages/Reports";
+import ReportCreate from "./pages/ReportCreate";
+import Templates from "./pages/Templates";
+
 
 import Navbar from "./components/navbar";
 //import { Children } from "react";
@@ -161,7 +165,38 @@ function App() {
           }
         />
 
+<Route
+  path="/reports"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <Reports />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
 
+<Route
+  path="/reports/create"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <ReportCreate />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
+<Route
+  path="/templates"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <Templates />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
       </Routes>
 
     </BrowserRouter>
