@@ -1,7 +1,10 @@
 .builder-page {
   direction: rtl;
   min-height: 100vh;
-  background: #f6f8f5;
+  background: linear-gradient(
+    to bottom,
+    #ecfdf5 0%,
+    #f7fcf9 100%);
   padding: 32px;
   color: #203820;
 }

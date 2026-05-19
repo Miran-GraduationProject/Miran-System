@@ -25,6 +25,8 @@ dotenv.config();
         password: process.env.DB_Password,
         port:parseInt(process.env.DB_Port) ,
         database: process.env.DB_Name,
+        enableKeepAlive: true,
+        keepAliveInitialDelay:0,
         ssl:{
             rejectUnauthorized: false
         }
@@ -52,7 +54,7 @@ dotenv.config();
 //   console.log("Connected!");
 // });
 
-
+const poolwithPromise = dbConnect.promise();
 export default dbConnect;
 
 // const Connection = mysql.createConnection ({
