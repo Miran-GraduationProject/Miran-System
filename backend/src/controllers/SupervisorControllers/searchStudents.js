@@ -43,6 +43,10 @@ const searchStudentsByID = async (req, res) => {
     const supervisorID = req.user.id;
     const { studentID } = req.params;
 
+    if (!/^\d+$/.test(studentID)) {
+      return res.status(400).json({ message: "Invalid student ID format" });
+    }
+    
     const students = await getSupervisedStudents(supervisorID);
     
   // فلتر الطلاب بناءً على رقمهم

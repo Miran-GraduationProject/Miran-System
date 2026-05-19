@@ -4,10 +4,14 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
     "start": "node src/app.js"
   },
   "keywords": [],
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {}
+  },
   "author": "",
   "license": "ISC",
   "description": "",
@@ -23,7 +27,8 @@
   },
   "devDependencies": {
     "@ljharb/tsconfig": "^0.3.2",
-    "jest": "^30.3.0",
+    "jest": "^30.4.2",
+    "just": "^0.1.8",
     "supertest": "^7.2.2"
   }
 }
