@@ -1,5 +1,8 @@
+body{
+    background-color: #ecfdf5;
+}
 .coord-container {
-    background-color: #f9fbfc;
+   background-color: #ecfdf5;
     min-height: 100vh;
     direction: rtl;
     padding: 40px;

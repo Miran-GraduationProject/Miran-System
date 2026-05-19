@@ -4,6 +4,7 @@ import { showSupervisedStudents } from '../controllers/SupervisorControllers/sho
 import { searchStudents, searchStudentsByID } from '../controllers/SupervisorControllers/searchStudents.js';
 import { createTrainingReportController } from "../controllers/SupervisorControllers/createTrainingReport.js";
 import {
+   getAllTemplatesController, //تعديل بعد الفرونت
   getTemplateByIdController,
   getTemplateFieldsController,
   addFieldController,
@@ -11,7 +12,10 @@ import {
   deleteFieldController ,
   createTemplateController
 } from "../controllers/SupervisorControllers/reportTemplate.js";
-import { getReportController } from '../controllers/SupervisorControllers/reportViewController.js';
+import {
+  getReportController,
+  getReportsController
+ } from '../controllers/SupervisorControllers/reportViewController.js';
 
 import { createCase, updateCase, deleteCase } from '../controllers/SupervisorControllers/cases.js';
 const router = express.Router();
@@ -27,7 +31,7 @@ router.get('/students/search/:studentID', searchStudentsByID);
 
 router.post('/create-report', createTrainingReportController);
 
-
+router.get('/templates', getAllTemplatesController); // تعديل بعد الفرونت
 router.get('/template/:templateID', getTemplateByIdController);
 router.get('/template-fields/:templateID', getTemplateFieldsController);
 router.post('/template', createTemplateController);
@@ -36,6 +40,7 @@ router.post('/field', addFieldController);
 router.put('/field', updateFieldController);
 router.delete('/field/:fieldID', deleteFieldController);
 
+router.get('/reports', getReportsController);
 router.get('/report/view/:reportID', getReportController);
 //------------------------------------------------------
 

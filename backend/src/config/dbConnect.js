@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 
-/*
+/**
  * This is the actual connection pool object we will use to talk to the database
  * 
  * Created a connection pool to connect to the MySQL database and all config data are pulled from the .env file
@@ -17,7 +17,7 @@ dotenv.config();
  * @env DB_Port
  * @env DB_Name
  */
-    // هذا لاصلي يا حلوين شيلو عنه الكومينت وامسحو الي فيه بياناتي اذا نسيت امسحها
+    
     const dbConnect = mysql.createPool({
         
         host: process.env.DB_Host,
@@ -30,7 +30,7 @@ dotenv.config();
         }
     })
 
- /*
+ /**
  * Testing the DB connection on startup.
  * 
  * Takes a connection from the pool and releases it 
@@ -54,3 +54,19 @@ dotenv.config();
 
 
 export default dbConnect;
+
+// const Connection = mysql.createConnection ({
+
+//         host: process.env.DB_Host,
+//         user: process.env.DB_User,
+//         password: process.env.DB_Password,
+//         port: process.env.DB_Port,
+//         database: process.env.DB_Name,
+//   });
+
+//   Connection.connect(function (err) {
+//   if (err) throw err;
+//   console.log("Connected!");
+// });
+   
+// export default Connection;
