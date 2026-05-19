@@ -1,4 +1,5 @@
 import {
+  getAllTemplates, // تعديل بعد الفرونت
   getTemplateById,
   createTemplate ,
   getTemplateFields,
@@ -6,6 +7,24 @@ import {
   updateReportField,
   deleteReportField
 } from "../../models/supervisorModel/reportTemplateModel.js";
+
+//====== تعديل بعد ماشفت الفرونت
+// ================= جلب كل القوالب =================
+
+export const getAllTemplatesController = async (req, res) => {
+  try {
+    const data = await getAllTemplates();
+
+    res.status(200).json(data);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching templates",
+      error: error.message,
+    });
+  }
+};
+//======
 
 // ================= إنشاء تمبلت =================
 
@@ -128,3 +147,4 @@ export const deleteFieldController = async (req, res) => {
     });
   }
 };
+

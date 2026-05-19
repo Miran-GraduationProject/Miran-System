@@ -1,9 +1,11 @@
 import {
   getReport,
-  getReportAnswers
+  getReportAnswers,
+  getAllReports,
+getReportsStats
 } from "../../models/supervisorModel/reportViewModel.js";
 
-/* ================= عرض التقرير   ================= */
+/* =================  عرض التقرير معين  ================= */
 
 export const getReportController = async (req, res) => {
   try {
@@ -27,6 +29,27 @@ export const getReportController = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Error fetching report",
+      error: error.message
+    });
+  }
+};
+
+
+// ================= جلب التقارير كلها والإحصائيات =================
+
+export const getReportsController = async (req, res) => {
+  try {
+    const reports = await getAllReports();
+    const stats = await getReportsStats();
+
+    res.status(200).json({
+      stats,
+      reports
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching reports",
       error: error.message
     });
   }
