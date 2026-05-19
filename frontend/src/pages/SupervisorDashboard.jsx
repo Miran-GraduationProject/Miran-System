@@ -101,8 +101,8 @@ function SupervisorDashboard() {
           <tr key={s.studentID}>
             <td>{s.firstName} {s.lastName}</td>
             <td>{s.studentID}</td>
-            <td>{s.trainingPeriod || "تحتاج تعديل في الباك ايند"}</td>
-            <td>{s.reportsCount || 0}</td>
+            <td>{s.periodName}</td>
+            <td>{s.reports || 0}</td>
             <td>
               <button
                 className="button"

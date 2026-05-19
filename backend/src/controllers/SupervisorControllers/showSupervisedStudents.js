@@ -1,4 +1,4 @@
-import { getSupervisedStudents } from "../../models/supervisorModel.js";
+import { getSupervisedStudents } from "../../models/supervisorModel/getSupervisedStudents.js";
 //كلاس يعرض الطلاب المشرف عليهم حسب المستشفى المربطين فيه
 
 const showSupervisedStudents = async (req, res) => { // دالة غير متزامنة async عشان فيها دوال تطلب بيانات

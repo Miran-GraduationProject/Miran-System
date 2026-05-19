@@ -1,4 +1,4 @@
-import { getSupervisedStudents }  from "../../models/supervisorModel.js";
+import { getSupervisedStudents }  from "../../models/supervisorModel/getSupervisedStudents.js";
 // كلاس يخلي المشرف يبحث عن الطالب بادخال الاسم
 
 
@@ -37,7 +37,32 @@ const searchStudents = async (req, res) => {
   }
 };
 
-export {searchStudents}
+//بحث برقم الطالب
+const searchStudentsByID = async (req, res) => {
+  try {
+    const supervisorID = req.user.id;
+    const { studentID } = req.params;
+
+    const students = await getSupervisedStudents(supervisorID);
+    
+  // فلتر الطلاب بناءً على رقمهم
+  const filtered = students.filter(
+    (student) => student.studentID == studentID
+  );
+
+  if (!filtered.length) {
+    return res.status(404).json({ message: "No student found with this ID under your supervision." });
+  }
+
+  return res.json(filtered[0]);
+
+  } catch (err) {
+    return res.status(500).json({ message: "Error searching student by ID", error: err.message || err });
+  }
+
+};
+
+export {searchStudents, searchStudentsByID}
 
 
 // ---- خزعبلات -----------------

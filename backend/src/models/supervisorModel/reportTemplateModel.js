@@ -11,9 +11,23 @@ export const getTemplateById = async (templateID) => {
   );
 
   return rows;
+
+
+
 };
 
+/* ================= انشاء التمبلت ================= */
 
+export const createTemplate = async (academicSupervisorID, reportTitle) => {
+  const [result] = await db.execute(
+    `INSERT INTO TEMPLATE 
+     (academicSupervisorID, reportTitle, templateDate, reportDate, created_at, updated_at)
+     VALUES (?, ?, NOW(), NOW(), NOW(), NOW())`,
+    [academicSupervisorID, reportTitle]
+  );
+
+  return result;
+};
 /* ================= حقول التمبلت ================= */
 
 export const getTemplateFields = async (templateID) => {
@@ -65,3 +79,29 @@ export const deleteReportField = async (fieldID) => {
  * 4. تعديل حقل موجود
  * 5. حذف حقل من التمبلت
  */
+
+// ========== تعديل بعد ماشفت الفرونت 
+// ================= جلب كل القوالب =================
+
+export const getAllTemplates = async () => {
+  const [rows] = await db.execute(`
+    SELECT 
+      t.templateID,
+      t.reportTitle,
+      t.templateDate,
+      t.reportDate,
+      t.created_at,
+      COUNT(rf.fieldID) AS fieldsCount
+    FROM TEMPLATE t
+    LEFT JOIN ReportField rf ON t.templateID = rf.templateID
+    GROUP BY 
+      t.templateID,
+      t.reportTitle,
+      t.templateDate,
+      t.reportDate,
+      t.created_at
+    ORDER BY t.templateID DESC
+  `);
+
+  return rows;
+};
