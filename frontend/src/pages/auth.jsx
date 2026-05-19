@@ -77,12 +77,7 @@ function Log() {
           />
           <CiLock className="lock-icon" />
         </div>
-        <div className="remember-forgot">
-          <label>
-            <input type="checkbox" /> تذكرني
-          </label>
-          <a href="#">نسيت كلمة المرور؟</a>
-        </div>
+     
         <button type="button" onClick={handleLogin}>
           تسجيل الدخول
         </button>

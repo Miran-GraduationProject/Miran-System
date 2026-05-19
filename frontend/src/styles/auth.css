@@ -2,10 +2,13 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    
 }
 
+
+
 .loginContainer{
-    background-color: #9dd1b4;
+    background-color: #ecfdf5;
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
@@ -21,6 +24,7 @@
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 400px;
+   
     
 }
 
@@ -42,12 +46,12 @@
     background: transparent;
     border: none;
     outline: none;
-    border: #26b164 1px solid;
-    color: #82cda4;
+    border: #155D27 1px solid;
+    color: #155D27;
 }
 
 .box input::placeholder{
-    color: #82cda4;
+    color: #155D27;
 }
 
 .user-icon{
@@ -55,7 +59,7 @@
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
-    color: #82cda4;
+    color: #155D27;
     font-size: 20px;
     stroke-width: 1.5px;
 }
@@ -65,7 +69,7 @@
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
-    color: #82cda4;
+    color: #155D27;
     font-size: 26px;
     stroke-width: 1px;
 }
@@ -82,24 +86,24 @@
     display: flex;
     align-items: center;
     font-size: 14px;
-    color: #82cda4;
+    color: #155D27;
 }
 
 .remember-forgot a{
     text-decoration: none;
-    color: #82cda4;
+    color: #155D27;
 }
 
 button{
     width: 100%;
     padding: 15px;
-    background-color: #82cda4;
+    background-color: #155D27;
     color: #fff;
     border: none;
     border-radius: 4px;
     font-size: 16px;
     cursor: pointer;
-    box-shadow: rgb(56, 207, 79) 0px 1px 3px;
+    box-shadow: rgb(0, 0, 0) 0px 1px 3px;
 }
 
 .logo{
@@ -108,7 +112,6 @@ button{
     margin-right: -40px;
     
     height: 30px; */
-    background-color: #228950;
     position: absolute;
     top: 0;
     left: 0;
@@ -118,7 +121,8 @@ button{
     border-radius: 8px;
 
 
-  background: linear-gradient(-45deg, #228950, #35a969, #11703b, #228950);
+  /* background: linear-gradient(-45deg, #228950, #35a969, #11703b, #228950); */
+  background: linear-gradient(-45deg, #155d27, #1a7431, #0e3d1a, #155d27);
   background-size: 400% 400%;
   animation: gradient 10s ease infinite;
 }

@@ -2,7 +2,7 @@
 
 /* الصفحة البيضة من ورا */
 .container {
-    background-color: #f9fbfc;
+    /* background-color: #f9fbfc; */
     min-height: 100vh;
     direction: rtl;
     padding: 40px;
