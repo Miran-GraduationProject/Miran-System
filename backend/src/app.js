@@ -32,6 +32,12 @@ dotenv.config();
 const app=express();
 const port=3000;
 
+/**
+ * CORS configuration
+ *
+ * allows frontend to access backend API
+ * and sets allowed methods and headers
+ */
 app.use(cors({
     origin:true,
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -40,30 +46,30 @@ app.use(cors({
 }));
 
 app.use(express.json());
-// 🧠 Authentication & Users
+// Authentication & Users
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
-// 🎓 Coordinator & Hospital
+// Coordinator & Hospital
 app.use("/api/coordinator/training-period", coordinatorRoutes);
 app.use("/api/coordinator/hospitals", hospitalRoutes);
 
-// 👩‍🎓 Student & Supervisor
+// Student & Supervisor
 app.use("/api/student", studentRoutes);
 app.use("/api/supervisor", supervisorRoutes);
 
-// 📋 Review Cases & Mandatory Cases
+// Review Cases & Mandatory Cases
 app.use("/api/review", reviewCaseRoutes);
 app.use("/api/mandatory", mandatoryCasesRoutes);
 
 
 
-// 📘 Logbook
+// Logbook
 app.use("/api/logbook", logbookRoutes);
 
 
 
-// ✅ Endpoint لتحميل ملف اللوق بوك من الواجهة
+// Endpoint لتحميل ملف اللوق بوك من الواجهة
 app.get("/api/logbook/download/:studentId", (req, res) => {
   const { studentId } = req.params;
   const filePath = path.join(process.cwd(), "uploads", `logbook_${studentId}.pdf`);
