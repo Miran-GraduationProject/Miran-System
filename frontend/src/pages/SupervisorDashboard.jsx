@@ -6,9 +6,8 @@ import '../styles/Button.css';
 import '../styles/page.css';
 import '../styles/search.css'
 import '../styles/studentList.css'
+import "../styles/reports.css";
 import { FaSearch } from "react-icons/fa";
-
-
 
 function SupervisorDashboard() {
 
@@ -16,6 +15,14 @@ function SupervisorDashboard() {
 
   const [search, setSearch] = useState("");
   const [students, setStudents] = useState([]);
+
+
+    // دالة تجيب الأحرف الأولى من اسم الطالب
+  const getStudentInitials = (s) => {
+    const f = s.firstName?.[0] || "";
+    const l = s.lastName?.[0] || "";
+    return (f + l).trim() || "؟";
+  };
 
   // عرض الطلاب
   useEffect(() => { // يشغل الكود مره وحدة اول ما تحمل الصفحة فقط
@@ -49,77 +56,111 @@ function SupervisorDashboard() {
   };
 
 // ----------------------------------------------------
+  // ----------------------------------------------------
   return (
-    <div className="container"> 
-      <main className="main-content">
-        {/* تحميل كلاس التنسيق من ملف css >>> main يعني محتوى الصفحة */}
-        
-        <header className="page-header">
-          <h1>لوحة التحكم الرئيسية</h1>
-          <p>إدارة ومتابعة الطلاب والتقارير </p>
-        </header>
+    <div className="reports-page">
+      <div className="top-reports-section">
+        <div className="reports-header">
+          <div className="reports-title">
+            <div className="page-icon">🏠</div>
 
-        <div className="search-card">
-
-          <p className="results-count">
-            عدد النتائج: {students.length} طلاب
-          </p>
-
-          <div className="group">
-  <FaSearch className="search-icon" />
-
-  <input
-    type="text"
-    className="input"
-    placeholder="البحث بإسم الطالب..."
-    value={search}
-    onChange={(e) => handleSearch(e.target.value)}
-  />
-</div>
-
+            <div>
+              <h1>لوحة التحكم الرئيسية</h1>
+              <p>إدارة التقارير ومتابعة الطلاب </p>
+            </div>
+          </div>
         </div>
-      </main>
-<div className="sl-table-box">
-  <table className="sl-table">
-    <thead>
-      <tr>
-        <th>الطالب</th>
-        <th>الرقم الجامعي</th>
-        <th>الفترة التدريبية</th>
-        <th>التقارير</th>
-        <th>الاجراءات</th>
-      </tr>
-    </thead>
+      </div>
 
-    <tbody>
-      {students.length === 0 ? (
-        <tr>
-          <td colSpan="5" className="sl-empty">لا يوجد طلاب</td>
-        </tr>
-      ) : (
-        students.map((s) => (
-          <tr key={s.studentID}>
-            <td>{s.firstName} {s.lastName}</td>
-            <td>{s.studentID}</td>
-            <td>{s.periodName}</td>
-            <td>{s.reports || 0}</td>
-            <td>
-              <button
-                className="button"
-                onClick={() => navigate(`/supervisor/student/${s.studentID}`)}
-              >
-                <span className="label">عرض</span>
-                <span className="gradient"></span>
-                <span className="transition"></span>
-              </button>
+      <div className="search-card reports-search-card">
+        <div className="results-count">
+          عدد النتائج: {students.length} طالب
+        </div>
 
-            </td>
-          </tr>
-        ))
-      )}
-    </tbody>
-  </table>
-</div>
+        <div className="group">
+          <input
+            className="input"
+            type="text"
+            placeholder="ابحث بإسم الطالب..."
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+
+           <FaSearch className="icon" />
+        </div>
+      </div>
+
+      <div className="reports-list-box">
+        <div className="reports-list-header">
+          <h2>الطلاب تحت الاشراف</h2>
+        </div>
+
+          <div className="reports-table">
+            <div
+              className="table-head"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1.6fr 1.4fr 1fr 1fr 0.7fr',
+                gap: '16px',
+                alignItems: 'center',
+              }}
+            >
+              <span>الطالب</span>
+              <span>الرقم الجامعي</span>
+              <span>الفترة التدريبية</span>
+              <span>التقارير</span>
+              <span>الإجراء</span>
+            </div>
+
+            <div className="table-body">
+              {students.length === 0 ? (
+                <div className="table-row">
+                  <span className="sl-empty">لا يوجد طلاب</span>
+                </div>
+              ) : (
+                students.map((s) => {
+                  const studentName = `${s.firstName || ""} ${s.lastName || ""}`.trim();
+
+                  return (
+                    <div
+                      className="table-row"
+                      key={s.studentID}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1.6fr 1.4fr 1fr 1fr 0.7fr',
+                        gap: '16px',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <div className="student-cell">
+                        <span className="student-avatar">
+                          {getStudentInitials(s)}
+                        </span>
+                        <span>{studentName || "غير محدد"}</span>
+                      </div>
+
+                      <span>{s.studentID}</span>
+
+                      <span>{s.periodName || "غير محددة"}</span>
+
+                      <div className="report-title-cell">
+                        <span className="row-file-icon">📄</span>
+                        <span>{s.reports ?? 0}</span>
+                      </div>
+
+                      <button
+                        className="view-report-btn"
+                        onClick={() => navigate(`/supervisor/student/${s.studentID}`)}
+                      >
+                        عرض
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+      </div>
     </div>
   );
 }
