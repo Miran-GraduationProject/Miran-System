@@ -10,7 +10,8 @@ import {
   addFieldController,
   updateFieldController,
   deleteFieldController ,
-  createTemplateController
+  createTemplateController,
+  deleteTemplateController
 } from "../controllers/SupervisorControllers/reportTemplate.js";
 import {
   getReportController,
@@ -47,5 +48,7 @@ router.get('/report/view/:reportID', getReportController);
 router.post('/cases', verifyToken, verifyRole('AcademicSupervisor'), createCase);
 router.put('/cases/:caseID', verifyToken, verifyRole('AcademicSupervisor'), updateCase);
 router.delete('/cases/:caseID', verifyToken, verifyRole('AcademicSupervisor'), deleteCase);
+
+router.delete('/templates/:templateID', deleteTemplateController);
 
 export default router;

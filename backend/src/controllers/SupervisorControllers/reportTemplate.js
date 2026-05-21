@@ -5,7 +5,8 @@ import {
   getTemplateFields,
   addReportField,
   updateReportField,
-  deleteReportField
+  deleteReportField,
+  deleteTemplateAndFields
 } from "../../models/supervisorModel/reportTemplateModel.js";
 
 //====== تعديل بعد ماشفت الفرونت
@@ -148,3 +149,19 @@ export const deleteFieldController = async (req, res) => {
   }
 };
 
+//----------------------  ---------------
+
+export const deleteTemplateController = async (req, res) => {
+  try {
+    const { templateID } = req.params;
+
+    await deleteTemplateAndFields(templateID);
+
+    res.status(200).json({ message: "Template and its fields deleted successfully" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting template",
+      error: error.message,
+    });
+  }
+};
