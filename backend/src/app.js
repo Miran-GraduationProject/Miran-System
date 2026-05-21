@@ -84,10 +84,14 @@ app.get("/api/logbook/download/:studentId", (req, res) => {
 });
 
 
-
-
-app.listen(port,()=>{
-    console.log("server is running")
-})
+// بدء السيرفر فقط إذا لم يكن في وضع الاختبار
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => {
+    console.log("server is running");
+  });
+}
+//app.listen(port,()=>{
+//    console.log("server is running")
+//})
 
 export default app;
