@@ -15,6 +15,12 @@ import ConfirmedAllocationsPage from './pages/ConfirmedAllocationsPage';
 import StudentPreferencesPage from './pages/StudentPreferencesPage';
 import StudentDetails from './pages/StudentDetails';
 
+import Reports from "./pages/Reports";
+import ReportCreate from "./pages/ReportCreate";
+import Templates from "./pages/Templates";
+
+// import StudentReports from "./pages/StudentReports";
+// import StudentReportFill from "./pages/StudentReportFill";
 
 import Navbar from "./components/navbar";
 //import { Children } from "react";
@@ -143,7 +149,7 @@ function App() {
           path="/confirmed-allocations"
           element={
             <Layout>
-              <ProtectedRoute Role="UniversityCoordinator">
+<ProtectedRoute Role="UniversityCoordinator">
                 <ConfirmedAllocationsPage />
               </ProtectedRoute>
             </Layout>
@@ -161,7 +167,60 @@ function App() {
           }
         />
 
+<Route
+  path="/reports"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <Reports />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
 
+<Route
+  path="/reports/create"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <ReportCreate />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
+<Route
+  path="/templates"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <Templates />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
+<Route
+  path="/student/reports"
+  element={
+    <Layout>
+      <ProtectedRoute Role="Student">
+        {/* <StudentReports /> */}
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
+<Route
+  path="/student/reports/fill/:reportID"
+  element={
+    <Layout>
+      <ProtectedRoute Role="Student">
+        {/* <StudentReportFill /> */}
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
       </Routes>
 
     </BrowserRouter>

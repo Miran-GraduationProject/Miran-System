@@ -11,7 +11,7 @@ import { FaArrowRight } from "react-icons/fa";
 
 // تنسيق معلومات الطالب من مكتبة styled-components مباشرة
 const Card = styled.div`
-  background: #ffffff;
+  // background: #ffffff;
   padding: 25px;
   border-radius: 14px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);

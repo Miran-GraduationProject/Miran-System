@@ -1,110 +1,206 @@
-import React, { useState } from "react";
-import {Link,useNavigate} from "react-router-dom"
+import React, { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/nav.css";
-import logo from "../assets/logo3.png";
+import logo from "../assets/logo.png";
 import { FaUserCircle } from "react-icons/fa";
-
-
+import menu from "../assets/menu.png";
+import cancel from "../assets/cancel.png";
+import { NavLink } from "react-router-dom";
+import user from "../assets/user.png";
+import { FaChevronDown, FaChevronUp,FaUserCog } from "react-icons/fa";
+import background from "../assets/background.jpg";
+import userNameIcon from "../assets/userName.png";
+import email from "../assets/email.png";
+import {MdManageAccounts} from "react-icons/md";
+import logout from "../assets/logout.png";
 function Navbar() {
-  const [open, setOpen] = useState(false);  
-  const navigate=useNavigate()
-  const handleLogout=()=>{
-    localStorage.clear()
-    setOpen(false)
-    navigate("/login")
-  }
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.clear();
+    setOpen(false);
+    navigate("/login");
+  };
 
-  const userRole=localStorage.getItem("role") || ""
-  const userName=`${localStorage.getItem("firstName") || ""} ${localStorage.getItem("secondName") || ""} ${localStorage.getItem("lastName") || ""}`
-  const userEmail=localStorage.getItem("email") || ""
-  console.log(userRole,userName,userEmail)
-  
-  const navLink={
-            AcademicSupervisor: [
-        { name: "  الرئيسية للمشرف", path: "/supervisor" },
-        { name: " الطلاب", path: "/students" },
-        { name: "التقارير", path: "/" },
-        ],
-        Student: [
-        { name: "الرئيسية للطالب", path: "/" },
-        { name: "نتائجي", path: "/" },
-        { name: "ملفي", path: "/" },
-        ],
-          UniversityCoordinator: [
-        { name: "الرئيسية للمنسقة", path: "/" },
-        { name: "إدارة المستخدمين", path: "/" },
-        { name: "الطلبات", path: "/" },
-        ],
-          Administrator: [
-        { name: "الرئيسية للادمن", path: "/" },
-        { name: "إدارة المستخدمين", path: "/" },
-        { name: "الطلبات", path: "/" },
-        ],
-        
-  }
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const userRole = localStorage.getItem("role") || "";
 
-  const currentLink=navLink[userRole] 
+  const userName = `${localStorage.getItem("firstName") || ""} ${
+    localStorage.getItem("secondName") || ""
+  } ${localStorage.getItem("lastName") || ""}`;
+
+  const userEmail = localStorage.getItem("email") || "";
+  console.log(userRole, userName, userEmail);
+
+  const navLink = {
+    AcademicSupervisor: [
+      { name: "  الرئيسية للمشرف", path: "/supervisor" },
+      { name: " الطلاب", path: "/students" },
+      { name: "التقارير", path: "/reports" },
+    ],
+    Student: [
+      { name: "الرئيسية للطالب", path: "/student" },
+      { name: "نتائجي", path: "/results" },
+      { name: "ملفي", path: "/profile" },
+    ],
+    UniversityCoordinator: [
+      { name: "الرئيسية للمنسقة", path: "/" },
+      { name: "إدارة المستخدمين", path: "/" },
+      { name: "الطلبات", path: "/" },
+    ],
+    Administrator: [
+      { name: "الرئيسية للادمن", path: "/" },
+      { name: "إدارة المستخدمين", path: "/" },
+      { name: "الطلبات", path: "/" },
+    ],
+  };
+
+  const currentLink = navLink[userRole];
+  const [menOpen, setMenOpen] = useState(false);
+
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [pillStyle, setPillStyle] = useState({});
+  const navRef = useRef(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const handleMouseEnter = (e, index) => {
+    setHoveredIndex(index);
+    const itemRect = e.currentTarget.getBoundingClientRect();
+    const navRect = navRef.current.getBoundingClientRect();
+    setPillStyle({
+      width: itemRect.width + 20 + "px",
+      left: itemRect.left - navRect.left - 10 + "px",
+    });
+  };
+
+  {
+    hoveredIndex !== null && <span className="nav-pill" style={pillStyle} />;
+  }
 
   return (
-    <nav dir="rtl" className="nav">
-      <div
-        className="bg-emerald-700 shadow-emerald-200 fixed 
-       top-0 left-0 w-full navbar  "
-      >
-        <Link to="/">
-          <img src={logo} />
-        </Link>
-
-    <div className="link">
-            {currentLink && currentLink.map((item, index) => (
-                <Link key={index} to={item.path}>
-                    {item.name}
-                </Link>
-            ))}
-       </div>
-
-        <div>
-          <FaUserCircle
-            size={30}
-            color="white"
-            className="icon"
-            onClick={() => setOpen(!open)}
-          />
-          {open && (
-            <div className="card">
-              <div className="nameANDrolr">
-                <div className="circle">{userName .trim().charAt(0)}</div>
-                <div>
-                  <p className="Name">{userName} </p>
-                  <p className="Role">{userRole}</p>
-                </div>
-              </div>
-              <hr className="line"></hr>
-              <div className="details">
-                  <div className="detailsItem">
-                        <p className="detailsLabel">البريد الالكتروني</p>
-                        <p className="detailsVales">{userEmail}</p>
-                    </div>
-
-                    <div className="detailsItem">
-                        <p className="detailsLabel"> الدور</p>
-                        <p className="detailsVales">{userRole}</p>
-                    </div>
-
-                    <div className="detailsItem">
-                        <p className="detailsLabel"> الجهة</p>
-                        <p className="detailsVales">ام القرى</p>
-                    </div>
-              </div>
-              <hr className="line"></hr>
-              <button className="logout" onClick={handleLogout}>
-                تسجيل الخروج
-              </button>
-            </div>
-          )}
+    <>
+      <nav dir="rtl" className="nav">
+        <div className="nav-right">
+          <div
+            className="nav-links"
+            ref={navRef}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            {hoveredIndex !== null && (
+              <span className="nav-pill" style={pillStyle} />
+            )}
+            {currentLink &&
+              currentLink.map((item, index) => (
+                <NavLink
+                  key={index}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    isActive ? "nav-link-item active" : "nav-link"
+                  }
+                  onMouseEnter={(e) => handleMouseEnter(e, index)}
+                >
+                  {item.name}
+                </NavLink>
+              ))}
+          </div>
         </div>
-      </div>
-    </nav>
+
+        <button className="menu-toggle" onClick={() => setMenOpen(!menOpen)}>
+          <img src={menu} alt="Menu" className="menu-icon" />
+        </button>
+
+        {menOpen && (
+          <div className="mobile-overlay" onClick={() => setMenOpen(false)}>
+            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+              <button
+                className="mobile-menu-close"
+                onClick={() => setMenOpen(false)}
+              >
+                <img src={cancel} alt="Cancel" className="close-icon" />
+              </button>
+              {currentLink &&
+                currentLink.map((item, index) => (
+                  <Link
+                    key={index}
+                    to={item.path}
+                    className="mobile-menu-item"
+                    onClick={() => setMenOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+            </div>
+          </div>
+        )}
+
+        <div className="nav-line"></div>
+        <div className="nav-logo">
+          <img src={logo} alt="Logo" className="nav-logo-Miran" />
+        </div>
+
+        <div className="nav-left">
+          <div className="user-badge" onClick={(e) => {e.stopPropagation() ;setProfileOpen(!profileOpen)}}>
+            <img src={user} alt="User" className="user-icon-card" />
+            <div className="user-text">
+              <span className="welcom-word">مرحباً </span>
+              <span className="user-name">
+                {localStorage.getItem("firstName")}{" "}
+                {localStorage.getItem("lastName")}
+              </span>
+              {profileOpen ? <FaChevronUp className="dropUp-icon" /> : <FaChevronDown className="dropdown-icon" />}
+            </div>
+          </div>
+            {profileOpen && (
+                <div className="card-profil">
+            
+                     <div className="card-header">
+                          <img src={background} alt="Background" className="card-image-background" />
+                         <div className="card-image-user">
+
+                              <img src={user} alt="User" className="card-user-icon" />
+
+                         </div>
+                     </div>
+
+                     <div className="card-info">
+                          <div className="info-item">
+                               <span className="info-value">{userName}</span>
+                               <img src={userNameIcon} alt="User Name" className="card-img-info" />
+                          </div>
+
+                           <hr className="card-line" />
+
+                          <div className="info-item">
+                               <span className="info-value">{userEmail}</span>
+                               <img src={email} alt="User Name" className="card-img-info" />
+                          </div>
+                           
+                           <hr className="card-line" />
+
+                          <div className="info-item">
+                               <span className="info-value">{userRole}</span>
+                               <FaUserCog className="card-img-info" />
+                          </div>
+                           
+                           <hr className="card-line" />
+
+                          <div className="info-item logout-mobile">
+                               <span className="info-value">تسجيل الخروج</span>
+                               <img src={logout}  alt="Logout" className="card-img-info" />
+                          </div>
+
+                     </div>
+
+
+                </div>
+            )}
+
+            <img src={logout}  alt="Logout" className="logout" onClick={handleLogout} />
+        </div>
+
+        <div className="nav-line"></div>
+      </nav>
+    </>
   );
 }
 

@@ -1,12 +1,58 @@
 import {
+  getAllTemplates, // تعديل بعد الفرونت
   getTemplateById,
+  createTemplate ,
   getTemplateFields,
   addReportField,
   updateReportField,
-  deleteReportField
+  deleteReportField,
+  deleteTemplateAndFields
 } from "../../models/supervisorModel/reportTemplateModel.js";
 
+//====== تعديل بعد ماشفت الفرونت
+// ================= جلب كل القوالب =================
+
+export const getAllTemplatesController = async (req, res) => {
+  try {
+    const data = await getAllTemplates();
+
+    res.status(200).json(data);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching templates",
+      error: error.message,
+    });
+  }
+};
+//======
+
+// ================= إنشاء تمبلت =================
+
+export const createTemplateController = async (req, res) => {
+  try {
+    const { reportTitle } = req.body;
+
+    const result = await createTemplate(
+      req.user.id,
+      reportTitle
+    );
+
+    res.status(201).json({
+      message: "Template created successfully",
+      templateID: result.insertId,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error creating template",
+      error: error.message,
+    });
+  }
+};
+
 /* ================= التمبلت ================= */
+
 export const getTemplateByIdController = async (req, res) => {
   try {
     const { templateID } = req.params;
@@ -99,6 +145,23 @@ export const deleteFieldController = async (req, res) => {
     res.status(500).json({
       message: "Error deleting field",
       error: error.message
+    });
+  }
+};
+
+//----------------------  ---------------
+
+export const deleteTemplateController = async (req, res) => {
+  try {
+    const { templateID } = req.params;
+
+    await deleteTemplateAndFields(templateID);
+
+    res.status(200).json({ message: "Template and its fields deleted successfully" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting template",
+      error: error.message,
     });
   }
 };

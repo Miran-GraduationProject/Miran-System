@@ -4,6 +4,16 @@ import {verifyToken,verifyRole} from '../middlewares/atuhMiddleware.js';
 
 const router=express.Router();
 
+
+/**
+ * Role-based protected routes
+ *
+ * all routes here are protected using:
+ * - verifyToken (authentication)
+ * - verifyRole (authorization based on user role)
+ *
+ * each route returns a simple message based on role access
+ */
 router.get("/student",verifyToken,verifyRole("Student"),(req,res)=>{
     res.send("student route")
 })
