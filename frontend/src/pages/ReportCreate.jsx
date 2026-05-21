@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/reportCreate.css";
-
+import { FiFileText } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
 export default function ReportCreate() {
   const navigate = useNavigate();
 
@@ -16,11 +17,14 @@ export default function ReportCreate() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:3000/api/supervisor/templates", {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        "http://localhost:3000/api/supervisor/templates",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       const data = await res.json();
 
@@ -50,6 +54,42 @@ export default function ReportCreate() {
   const editAsCopy = (templateID) => {
     navigate(`/templates?templateID=${templateID}&copy=true`);
   };
+
+  //---------------------------------------------------------------------------------------------
+
+  const handleDeleteTemplate = async (templateID) => {
+    const confirmDelete = window.confirm(
+      "هل أنت متأكد من رغبتك في حذف هذا القالب نهائياً؟",
+    );
+
+    if (confirmDelete) {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(
+          `http://localhost:3000/api/supervisor/templates/${templateID}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (res.ok) {
+          const updatedTemplates = templates.filter(
+            (t) => t.templateID !== templateID,
+          );
+          setTemplates(updatedTemplates);
+        } else {
+          alert("فشل الحذف");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+  //----------------------------------------------------------------------------------------------
 
   return (
     <div className="create-report-page">
@@ -91,8 +131,8 @@ export default function ReportCreate() {
           <h2>إنشاء من الصفر</h2>
 
           <p>
-              صمم تقرير جديد واضف الحقول المطلوبة للطلاب، ثم احفظه
-            كقالب أو انشره مباشرة.
+            صمم تقرير جديد واضف الحقول المطلوبة للطلاب، ثم احفظه كقالب أو انشره
+            مباشرة.
           </p>
 
           <button onClick={startFromScratch}>ابدأ الآن</button>
@@ -114,8 +154,17 @@ export default function ReportCreate() {
             {templates.map((template) => (
               <div className="template-card" key={template.templateID}>
                 <div className="template-top">
-                  <span className="template-badge">قالب</span>
-                  <span className="template-icon">📄</span>
+                  <span
+                    className="template-badge"
+                    onClick={() => handleDeleteTemplate(template.templateID)}
+                    style={{ cursor: "pointer" }}
+                    title="حذف القالب"
+                  >
+                    <FiTrash2 size={18} />
+                  </span>
+                  <span className="template-icon">
+                    <FiFileText />
+                  </span>
                 </div>
 
                 <h3>{template.reportTitle || "بدون عنوان"}</h3>

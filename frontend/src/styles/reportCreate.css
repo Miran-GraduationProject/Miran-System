@@ -242,10 +242,10 @@
 }
 
 .template-badge {
-  background: #dbeae2;
-  color: #15916f;
-  padding: 7px 15px;
-  border-radius: 999px;
+  background: #feb4b4;
+  color: #c81111;
+  padding: 12px 12px;
+  border-radius: 12px;
   font-weight: 600;
   font-size: 13px;
 }
