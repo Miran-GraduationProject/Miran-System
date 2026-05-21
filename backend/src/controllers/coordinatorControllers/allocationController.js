@@ -21,6 +21,15 @@ import { runAllocationAlgorithm } from '../../services/allocationService.js';
 
 
 //  تسوي التوزيع الأولي
+/**
+ * Runs the greedy allocation algorithm for a closed training period
+ * and stores the result as a preview for coordinator review.
+ * Fails if registration is still open or no students submitted preferences.
+ *
+ * @route POST /:periodID/generate-allocation
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const generatePreview = async (req, res) => {
     try {
         const { periodID } = req.params;
@@ -63,7 +72,7 @@ const generatePreview = async (req, res) => {
         const preview = await getAllocationPreview(periodID);
 
         res.status(200).json({
-            message: "Allocation preview generated successfully",
+            message: "Allocation preview generated successfully. Any previous manual edits have been overwritten.",
             periodID,
             totalStudents: students.length,
             assignedCount: allocations.filter(a => a.status === 'Assigned').length,
@@ -80,6 +89,15 @@ const generatePreview = async (req, res) => {
 
 
 // تعديل التوزيع  يدوياً
+/**
+ * Overrides a single student's allocation entry in the preview.
+ * Status must be "Assigned" or "Unassigned" — opportunityID is required
+ * only when assigning to a hospital.
+ *
+ * @route PUT /:periodID/adjust-allocation/:previewID
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const updatePreviewManually = async (req, res) => {
     try {
         const { periodID, previewID } = req.params;
@@ -100,10 +118,15 @@ const updatePreviewManually = async (req, res) => {
             return res.status(404).json({ message: "Training period not found" });
         }
 
-        // نتحقق ان في توزيع أولي موجود
+        // نتحقق ان في توزيع أولي موجود وان الـ previewID ينتمي لنفس الفترة
         const preview = await getAllocationPreview(periodID);
         if (preview.length === 0) {
             return res.status(400).json({ message: "No allocation preview found, generate allocation first" });
+        }
+
+        const entryBelongsToPeriod = preview.some(p => String(p.previewID) === String(previewID));
+        if (!entryBelongsToPeriod) {
+            return res.status(404).json({ message: "Preview entry not found in this period" });
         }
 
         const result = await updateAllocation(previewID, opportunityID, status);
@@ -122,6 +145,14 @@ const updatePreviewManually = async (req, res) => {
 
 
 // المنسق يعتمد التوزيع النهائي
+/**
+ * Promotes the allocation preview to final, locking all student assignments.
+ * Rejects if any student appears more than once in the assigned entries.
+ *
+ * @route POST /:periodID/confirm-allocation
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const confirmAllocationFinal = async (req, res) => {
     try {
         const { periodID } = req.params;
@@ -130,6 +161,11 @@ const confirmAllocationFinal = async (req, res) => {
         const period = await getPeriodByID(periodID);
         if (!period) {
             return res.status(404).json({ message: "Training period not found" });
+        }
+
+        // نمنع تأكيد التوزيع أكثر من مرة
+        if (period.status === 'ALLOCATED') {
+            return res.status(400).json({ message: "Allocation has already been confirmed for this period" });
         }
 
         // نتحقق ان في توزيع أولي موجود
@@ -173,6 +209,13 @@ const confirmAllocationFinal = async (req, res) => {
 
 
 // بس يشوف التوزيع الحالي
+/**
+ * Returns the current allocation preview for coordinator inspection before confirming.
+ *
+ * @route GET /:periodID/allocation-preview
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const getAllocationPreviewController = async (req, res) => {
     try {
         const { periodID } = req.params;
@@ -188,6 +231,13 @@ const getAllocationPreviewController = async (req, res) => {
 
 
 // يجيب كل الفترات  الي اكدناها
+/**
+ * Returns all periods with status ALLOCATED (confirmed distributions only).
+ *
+ * @route GET /allocated-periods
+ * @param {express.Request} _req
+ * @param {express.Response} res
+ */
 const getAllocatedPeriodsController = async (_req, res) => {
     try {
         const periods = await getAllocatedPeriods();
@@ -202,6 +252,13 @@ const getAllocatedPeriodsController = async (_req, res) => {
 
 //بتجيب لي معلومات من خلال الفترة معينة اكدناها
 // المستشفيات وتحتها طلابها
+/**
+ * Returns confirmed student assignments grouped by hospital for a specific period.
+ *
+ * @route GET /:periodID/confirmed-allocations
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const getConfirmedAllocationsController = async (req, res) => {
     try {
         const { periodID } = req.params;
