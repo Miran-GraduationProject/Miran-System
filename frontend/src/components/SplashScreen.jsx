@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Activity, Stethoscope } from 'lucide-react';
 import logo from "../assets/logo3.png";
 
-export function SplashScreen() {
+ function SplashScreen() {
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900 flex items-center justify-center overflow-hidden">
       {/* Animated medical circle */}
@@ -142,3 +142,5 @@ export function SplashScreen() {
     </div>
   );
 }
+
+export default SplashScreen;
