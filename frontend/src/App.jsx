@@ -1,7 +1,7 @@
 import Log from "./pages/auth";
 import ProtectedRoute from "./components/protectedRoute";
 import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
-
+import { useState,useEffect } from "react";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import CoordinatorDashboard from "./pages/CoordinatorDashboard";
@@ -18,7 +18,7 @@ import StudentDetails from './pages/StudentDetails';
 import Reports from "./pages/Reports";
 import ReportCreate from "./pages/ReportCreate";
 import Templates from "./pages/Templates";
-
+import SplashScreen from "./components/SplashScreen"
 // import StudentReports from "./pages/StudentReports";
 // import StudentReportFill from "./pages/StudentReportFill";
 
@@ -38,7 +38,21 @@ const Layout=({children})=>{
   )
 }
 function App() {
+    const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, []);
   return (
+    <>
+
+      {showSplash ? (
+        <SplashScreen />
+      ) : (
     <BrowserRouter>
 
       <Routes>
@@ -143,9 +157,8 @@ function App() {
               </ProtectedRoute>
             </Layout>
           }
-        />
-
-        <Route
+        />  
+<Route
           path="/confirmed-allocations"
           element={
             <Layout>
@@ -224,7 +237,14 @@ function App() {
       </Routes>
 
     </BrowserRouter>
+
+     )}
+    </>
   );
+
+  
 }
+
+
 
 export default App;
