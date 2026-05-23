@@ -11,11 +11,19 @@ import {
     getStudentLevel
 } from '../../models/studentModel/studentPreference.js';
 
-import { checkOpenPeriodByLevel } from '../../models/coordinatorModel/openTrainingPeriod.js';
+import { checkOpenPeriodByLevel, syncStatuses } from '../../models/coordinatorModel/openTrainingPeriod.js';
 
 
 // تجيب مستوى الطالب وتشوف هل له فترة مفتوحة ولالا
+/**
+ * Resolves the open training period that matches the student's academic level.
+ * Syncs period statuses before checking to ensure fresh state.
+ *
+ * @param {number} studentID
+ * @returns {Promise<object|null>}
+ */
 const getPeriodForStudent = async (studentID) => {
+    await syncStatuses();
     const level = await getStudentLevel(studentID);
     if (!level) return null;
     return await checkOpenPeriodByLevel(level);
@@ -23,6 +31,12 @@ const getPeriodForStudent = async (studentID) => {
 
 
 //  نتحقق فيه ان التسجيل مفتوح ولا انتهى
+/**
+ * Checks whether the registration window is currently active.
+ *
+ * @param {{ registrationOpen: string, registrationClose: string }} period
+ * @returns {{ open: boolean, message?: string }}
+ */
 const checkRegistrationOpen = (period) => {
     const now = new Date();
     if (now < new Date(period.registrationOpen)) {
@@ -37,6 +51,14 @@ const checkRegistrationOpen = (period) => {
 
 
 //تعرض للطالب المستشفيات الي مسجلة بالفترة
+/**
+ * Returns available hospitals for the student's open training period.
+ * Each student only sees hospitals assigned to their academic level.
+ *
+ * @route GET /hospitals
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const getHospitals = async (req, res) => {
     try {
         const studentID = req.user.id;
@@ -62,37 +84,50 @@ const getHospitals = async (req, res) => {
 };
 
 
-// تحفظ ترتيب الطالب  كامل وتتحقق من كلشي بعدهااا تحفظ 
+// تحفظ ترتيب الطالب  كامل وتتحقق من كلشي بعدهااا تحفظ
+/**
+ * Saves the student's full ranked preference list.
+ * Requires all hospitals to be ranked with no duplicate ranks,
+ * and the registration window must still be open.
+ *
+ * @route POST /preferences
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const submitPreferences = async (req, res) => {
     try {
         const studentID = req.user.id;
         const { preferences } = req.body;
 
-        //  نتحقق من البيانات يعني هل فبه بيانات اصلا ؟؟
-        if (!preferences || preferences.length === 0) {
+        // نتحقق من البيانات — هل أرسل الطالب قائمة فعلاً؟
+        if (!Array.isArray(preferences) || preferences.length === 0) {
             return res.status(400).json({ message: "Preferences list is required" });
         }
 
-        // تشبك على كل رغبة وتمر على كل عنصر وتتاكد من البيانات
+        // نتحقق من كل رغبة أن فيها opportunityID ورقم ترتيب صحيح
         for (const pref of preferences) {
-            if (!pref.opportunityID || !pref.preferenceRank || pref.preferenceRank < 1) {
+            if (
+                !pref.opportunityID ||
+                !Number.isInteger(Number(pref.preferenceRank)) ||
+                Number(pref.preferenceRank) < 1
+            ) {
                 return res.status(400).json({ message: "Invalid preference data" });
             }
         }
 
-        // نتحقق من التسجيل هل فيه فتره مسجله لمستوى الطالب
+        // نتحقق من التسجيل هل فيه فترة مسجلة لمستوى الطالب
         const period = await getPeriodForStudent(studentID);
         if (!period) {
             return res.status(404).json({ message: "No open training period found for your level" });
         }
-        // ممكن تكون فيه فتره لكن مغلقه او ماتم فتحها بعد فا احنا هنا نتاكد انها اوبن مفتوحه
+
+        // ممكن تكون فيه فترة لكن مغلقة أو ما تم فتحها بعد
         const check = checkRegistrationOpen(period);
         if (!check.open) {
             return res.status(400).json({ message: check.message });
         }
 
-        // نتحقق ان الطالب رتب كل المستشفيات
-        // يعني نشوف كم عدد المستشفيات المتاحه في هذي الفترة ونقارنها مع عدد الرغبات الي ارسلها اطالب ماينفع يسيب مستشفى مارتبه
+        // نتحقق ان الطالب رتّب كل المستشفيات المتاحة بالضبط
         const availableHospitals = await getAvailableHospitals(period.periodID);
         if (preferences.length !== availableHospitals.length) {
             return res.status(400).json({
@@ -100,14 +135,20 @@ const submitPreferences = async (req, res) => {
             });
         }
 
-        // التحقق ان الأرقام ما تتكرر
-        // بخصوص الماب اخذته من ذا الموقع https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
-        const ranks = preferences.map(p => p.preferenceRank);
+        // نتحقق أن كل مستشفى اختاره الطالب موجود فعلاً في قائمة الفترة
+        const availableIDs = availableHospitals.map(h => Number(h.opportunityID));
+        for (const pref of preferences) {
+            if (!availableIDs.includes(Number(pref.opportunityID))) {
+                return res.status(400).json({
+                    message: "One or more hospitals are not available for this period"
+                });
+            }
+        }
+
+        // نتحقق أن أرقام الترتيب ما تتكرر
+        const ranks = preferences.map(p => Number(p.preferenceRank));
         const uniqueRanks = new Set(ranks);
-        // set يابنات يحفظ القيم بدون تكرار تقدروا تشوفوه من الموقع الي تحت
-        //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set او من ذا w3schools
         if (uniqueRanks.size !== ranks.length) {
-            // يقارن بين القيمة الي بدون تكرار (uniqueRank) وبين الي فيها تكرار اسمها رانك 
             return res.status(400).json({ message: "Preference ranks must be unique" });
         }
 
@@ -131,7 +172,14 @@ const submitPreferences = async (req, res) => {
 
 
 // الطالب يشوف ترتيبه الحالي
-// يعني لو حفظ ترتيبه من قبل يقدر يشوفه 
+// يعني لو حفظ ترتيبه من قبل يقدر يشوفه
+/**
+ * Returns the student's currently saved preference rankings for the open period.
+ *
+ * @route GET /preferences
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const getMyPreferences = async (req, res) => {
     try {
         const studentID = req.user.id;

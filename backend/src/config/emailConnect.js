@@ -21,9 +21,6 @@ export const sendActivationEmail = async (email, activationToken, role, userName
     // تخصيص محتوى البريد حسب الدور الوظيفي
     let roleArabic = '';
     switch(role) {
-      case 'Secretary':
-        roleArabic = 'سكرتير مستشفى';
-        break;
       case 'Supervisor':
         roleArabic = 'مشرف مستشفى';
         break;

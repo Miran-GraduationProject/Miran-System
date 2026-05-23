@@ -4,6 +4,8 @@
 
 
 
+// توزع الطلاب حسب ترتيب الأولوية: المعدل الأعلى أولاً، ثم الأسبق تسجيلاً.
+// كل طالب يأخذ أول رغبة متاحة حسب سعة الجنس.
 const runAllocationAlgorithm = (students, preferencesMap, capacityMap) => {
 
     // نسوي نسخة من السعة عشان نعدل عليها بدون ما نأثر على الاصلية
@@ -17,9 +19,20 @@ const runAllocationAlgorithm = (students, preferencesMap, capacityMap) => {
 
     const allocations = [];
 
-    // نمشي على كل طالب بالترتيب (الأعلى معدل أولاً، وعند التساوي الأسبق تسجيلاً)
+    // نمشي على كل طالب بالترتيب (الأعلى معدل أولاً، وعند التساوي الي سجل اول يعني الاسبق تسجيلاً)
     for (const student of students) {
 
+        // نتحقق أن الجندر صحيح قبل نبدأ التوزيع
+        if (!['Male', 'Female'].includes(student.gender)) {
+            allocations.push({
+                studentID: student.studentID,
+                opportunityID: null,
+                status: 'Unassigned'
+            });
+            continue;
+        }
+
+        const genderKey = student.gender === 'Male' ? 'male' : 'female';
         const preferences = preferencesMap[student.studentID] || [];
         let assigned = false;
 
@@ -29,26 +42,14 @@ const runAllocationAlgorithm = (students, preferencesMap, capacityMap) => {
 
             if (!capacity) continue;
 
-            // نشوف السعة حسب جنس الطالب
-            const availableSlots = student.gender === 'Male'
-                ? capacity.male
-                : capacity.female;
-
-            if (availableSlots > 0) {
-                // نخصص الطالب لهذي الفرصة
+            if (capacity[genderKey] > 0) {
                 allocations.push({
                     studentID: student.studentID,
                     opportunityID: pref.opportunityID,
                     status: 'Assigned'
                 });
 
-                // ننقص السعة
-                if (student.gender === 'Male') {
-                    remainingCapacity[pref.opportunityID].male--;
-                } else {
-                    remainingCapacity[pref.opportunityID].female--;
-                }
-
+                capacity[genderKey]--;
                 assigned = true;
                 break;
             }

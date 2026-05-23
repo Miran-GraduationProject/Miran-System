@@ -7,7 +7,7 @@
 import {
     openTrainingPeriod,
     checkOpenPeriodByLevel,
-    getAllOpenPeriods,
+    getAllPeriods as fetchAllPeriods,
     getPeriodByID,
     updateTrainingPeriod,
     addHospitalToPeriod,
@@ -18,6 +18,15 @@ import {
 
 
 // فتح فترة تدريبية جديدة
+/**
+ * Creates a new training period linked to the given hospitals.
+ * Blocks creation if another period for the same level is already open,
+ * or if date ranges are invalid or hospitals are duplicated.
+ *
+ * @route POST /open
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const openPeriod = async (req, res) => {
     try {
         const { name, level, startDate, endDate, registrationOpen, registrationClose, activatedBy, hospitals } = req.body;
@@ -38,7 +47,7 @@ const openPeriod = async (req, res) => {
 
         // يمر على كل مستشفى ويتاكد ان ذي المعلومات موجودة 
         for (const h of hospitals) {
-            if (!h.hospitalID || !h.secretaryID || h.maleCapacity < 0 || h.femaleCapacity < 0) {
+            if (!h.hospitalID || h.maleCapacity < 0 || h.femaleCapacity < 0) {
                 return res.status(400).json({ message: "Invalid hospital data, please check and try again" });
             }
         }
@@ -68,8 +77,8 @@ const openPeriod = async (req, res) => {
         });
 
     } catch (error) {
-        // لو صار ايرور بالتاري يجي هنا 
-        // يا اما البيانات مش موجودة بالداتاس او غلط زي سكيورتي اي دي 
+        // لو صار ايرور بالتاريخ يجي هنا 
+        // يا اما البيانات مش موجودة بالداتا او غلط زي سكيورتي اي دي 
         // يا اما في تكرار في قيمه يونيك
         console.error('openPeriod error:', error);
 
@@ -88,7 +97,15 @@ const openPeriod = async (req, res) => {
 };
 
 
-//  تعديل بيانات الفترة لما نجي نعدل ونضيف مستشفى حتكون بالميثود الي بعدها    
+//  تعديل بيانات الفترة لما نجي نعدل ونضيف مستشفى حتكون بالميثود الي بعدها
+/**
+ * Updates an existing training period's details.
+ * Locked once registration opens — any attempt after that returns 400.
+ *
+ * @route PUT /:periodID
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const editPeriod = async (req, res) => {
     try {
       
@@ -133,37 +150,46 @@ const editPeriod = async (req, res) => {
 
 
 //  اضافة مستشفى لفترة اوريدي موجودة  بنفس الشرط الي قبل
+/**
+ * Adds a hospital to an existing period before registration opens.
+ * Returns 400 if the hospital is already linked to this period.
+ *
+ * @route POST /:periodID/hospitals
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const addHospital = async (req, res) => {
     try {
         const { periodID } = req.params;
-        const { hospitalID, maleCapacity, femaleCapacity, secretaryID } = req.body;
+        const hospital = req.body;
 
         const period = await getPeriodByID(periodID);
         if (!period) {
             return res.status(404).json({ message: "Training period not found" });
         }
 
+        // نمنع تعديل المستشفيات بعد فتح التسجيل حتى لا تتغير الخيارات على الطلاب.
         const now = new Date();
         if (now >= new Date(period.registrationOpen)) {
             return res.status(400).json({ message: "Cannot add hospitals after registration has opened" });
         }
 
-        if (!hospitalID || !secretaryID || maleCapacity < 0 || femaleCapacity < 0) {
+        const { hospitalID, maleCapacity, femaleCapacity } = hospital;
+        if (!hospitalID || maleCapacity < 0 || femaleCapacity < 0) {
             return res.status(400).json({ message: "Invalid hospital data" });
         }
 
-        const result = await addHospitalToPeriod(periodID, { hospitalID, maleCapacity, femaleCapacity, secretaryID });
+        const result = await addHospitalToPeriod(periodID, hospital);
 
-        res.status(201).json({
+        return res.status(201).json({
             message: "Hospital added successfully",
             periodID: result.periodID,
             hospitalID: result.hospitalID
         });
-
     } catch (error) {
-        console.error('addHospital error:', error);
+        console.error("addHospital error:", error);
 
-        if (error.code === 'ER_DUP_ENTRY') {
+        if (error.code === "ER_DUP_ENTRY") {
             return res.status(400).json({ message: "This hospital is already added to this period" });
         }
 
@@ -173,6 +199,13 @@ const addHospital = async (req, res) => {
 
 
 // نحذف  مستشفى  يتاكد من  الفترة والتواريخ
+/**
+ * Removes a hospital from a period before registration opens.
+ *
+ * @route DELETE /:periodID/hospitals/:hospitalID
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const removeHospital = async (req, res) => {
     try {
         const { periodID, hospitalID } = req.params;
@@ -187,7 +220,11 @@ const removeHospital = async (req, res) => {
             return res.status(400).json({ message: "Cannot remove hospitals after registration has opened" });
         }
 
-        await removeHospitalFromPeriod(periodID, hospitalID);
+        const removed = await removeHospitalFromPeriod(periodID, hospitalID);
+
+        if (!removed) {
+            return res.status(404).json({ message: "Hospital not found in this period" });
+        }
 
         res.status(200).json({
             message: "Hospital removed successfully"
@@ -201,6 +238,14 @@ const removeHospital = async (req, res) => {
 
 
 // هنا بنستخدم كويري علشان نجيب احصائيات كم طالب سجل وكم بقي لكل مستشفى  لكل فترة محددة
+/**
+ * Returns per-hospital registration counts for a given period.
+ * If no periodID is passed in the query, defaults to the currently open period.
+ *
+ * @route GET /registration-stats?periodID=
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const getRegistrationStatsController = async (req, res) => {
     try {
         const { periodID } = req.query;
@@ -216,6 +261,14 @@ const getRegistrationStatsController = async (req, res) => {
 };
 
 // حذف الفترة التدريبية
+/**
+ * Permanently deletes a training period.
+ * Blocked once registration opens to protect already-submitted preferences.
+ *
+ * @route DELETE /:periodID
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const deletePeriod = async (req, res) => {
     try {
         const { periodID } = req.params;
@@ -242,10 +295,17 @@ const deletePeriod = async (req, res) => {
 };
 
 
-//هنا يعرض بصفحة ادارة المستشفيات كل الفترات باختصار 
+//هنا يعرض بصفحة ادارة المستشفيات كل الفترات باختصار
+/**
+ * Returns a summary list of all training periods regardless of status.
+ *
+ * @route GET /all-periods
+ * @param {express.Request} _req
+ * @param {express.Response} res
+ */
 const getAllPeriods = async (_req, res) => {
     try {
-        const periods = await getAllOpenPeriods();
+        const periods = await fetchAllPeriods();
         res.status(200).json({ periods });
     } catch (error) {
         console.error('getAllPeriods error:', error);
