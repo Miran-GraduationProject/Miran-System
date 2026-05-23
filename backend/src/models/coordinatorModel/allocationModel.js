@@ -131,12 +131,18 @@ const confirmAllocation = async (periodID) => {
             [periodID]
         );
 
-        // نحفظ كل واحدة في STUDENT_ENROLLMENT
+        // نحفظ كل واحدة في STUDENT_ENROLLMENT ونحدّث periodID في جدول STUDENT
         for (const allocation of allocations) {
             await connection.execute(
-                `INSERT INTO STUDENT_ENROLLMENT (studentID, opportunityID, status, enrolledAt)
-                 VALUES (?, ?, 'Enrolled', NOW())`,
-                [allocation.studentID, allocation.opportunityID]
+                `INSERT INTO STUDENT_ENROLLMENT (studentID, periodID, opportunityID, status, enrolledAt)
+                 VALUES (?, ?, ?, 'APPROVED', NOW())`,
+                [allocation.studentID, periodID, allocation.opportunityID]
+            );
+
+            // نربط الطالب بالفترة الحالية في جدول STUDENT
+            await connection.execute(
+                `UPDATE STUDENT SET periodID = ? WHERE studentID = ?`,
+                [periodID, allocation.studentID]
             );
         }
 
@@ -194,7 +200,7 @@ const getConfirmedAllocations = async (periodID) => {
     const hospitalsMap = {};
    // بعدها بدينا نمر على كل صف بيانات رجع من الداتا 
     for (const row of rows) {
-        // راح نبدا نجمع اسامي الطلاب بناء علىاي دي الفرصه غلشان كل فرصه مرتبطة باسم مستشفى وبالسعة 
+        // راح نبدا نجمع اسامي الطلاب بناء على اي دي الفرصه غلشان كل فرصه مرتبطة باسم مستشفى وبالسعة 
         const key = row.opportunityID;
         // ! اذا مثلا مستشفى الزاهر ماله قائمة فا هنا ننشي وحده جديدة فاضية
         if (!hospitalsMap[key]) {

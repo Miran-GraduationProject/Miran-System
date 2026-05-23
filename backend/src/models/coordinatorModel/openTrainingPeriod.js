@@ -27,9 +27,9 @@ const openTrainingPeriod = async (data) => {
  
         for (const h of hospitals) {
             await connection.execute(
-                `INSERT INTO TRAINING_OPPORTUNITY (hospitalID, periodID, maleCapacity, femaleCapacity, status, secretaryID, createdAt)
-                 VALUES (?, ?, ?, ?, 'ACTIVE', ?, NOW())`,
-                [h.hospitalID, newPeriodID, h.maleCapacity, h.femaleCapacity, h.secretaryID]
+                `INSERT INTO TRAINING_OPPORTUNITY (hospitalID, periodID, maleCapacity, femaleCapacity, status, createdAt)
+                 VALUES (?, ?, ?, ?, 'ACTIVE', NOW())`,
+                [h.hospitalID, newPeriodID, h.maleCapacity, h.femaleCapacity]
             );
         }
  
@@ -56,10 +56,36 @@ const checkOpenPeriodByLevel = async (level) => {
 };
 
 
-// تجيب كل الفترات المفتوحة باختصار ايش ماكان مستواها
-const getAllOpenPeriods = async () => {
+// تحدّث الحالات تلقائياً بناءً على التواريخ
+// OPEN → CLOSED إذا انتهى وقت التسجيل
+// ACTIVE → INACTIVE إذا انتهى تاريخ الفترة
+const syncStatuses = async () => {
+    const now = new Date();
+
+    // الفترات المفتوحة اللي انتهى تسجيلها تصبح CLOSED
+    await dbConnect.promise().execute(
+        `UPDATE TRAINING_PERIOD
+         SET status = 'CLOSED'
+         WHERE status = 'OPEN' AND registrationClose < ?`,
+        [now]
+    );
+
+    // الفرص المرتبطة بفترات انتهى تدريبها تصبح INACTIVE
+    await dbConnect.promise().execute(
+        `UPDATE TRAINING_OPPORTUNITY op
+         JOIN TRAINING_PERIOD p ON p.periodID = op.periodID
+         SET op.status = 'INACTIVE'
+         WHERE op.status = 'ACTIVE' AND p.endDate < ?`,
+        [now]
+    );
+};
+
+
+// تجيب كل الفترات باختصار ايش ماكان مستواها
+const getAllPeriods = async () => {
+    await syncStatuses();
     const [rows] = await dbConnect.promise().execute(
-        `SELECT * FROM TRAINING_PERIOD WHERE status = 'OPEN' ORDER BY level ASC, createdAt DESC`
+        `SELECT * FROM TRAINING_PERIOD ORDER BY level ASC, createdAt DESC`
     );
     return rows;
 };
@@ -80,39 +106,39 @@ const getPeriodByID = async (periodID) => {
 const updateTrainingPeriod = async (periodID, data) => {
     const { name, level, startDate, endDate, registrationOpen, registrationClose } = data;
 
-    await dbConnect.promise().execute(
+    const [result] = await dbConnect.promise().execute(
         `UPDATE TRAINING_PERIOD
          SET name = ?, level = ?, startDate = ?, endDate = ?, registrationOpen = ?, registrationClose = ?
          WHERE periodID = ?`,
         [name, level, startDate, endDate, registrationOpen, registrationClose, periodID]
     );
 
-    return { periodID, name, level, status: "OPEN" };
+    return { periodID, name, level, changed: result.changedRows > 0 };
 };
  
  
 // اذا جينا نعدل الفترة نقدر نضيف مستشفيات جديدة وسعاتها
-    const addHospitalToPeriod = async (periodID, hospitalData) => {
-    const { hospitalID, maleCapacity, femaleCapacity, secretaryID } = hospitalData;
+const addHospitalToPeriod = async (periodID, hospitalData) => {
+    const { hospitalID, maleCapacity, femaleCapacity } = hospitalData;
 
     await dbConnect.promise().execute(
-        `INSERT INTO TRAINING_OPPORTUNITY (hospitalID, periodID, maleCapacity, femaleCapacity, status, secretaryID, createdAt)
-         VALUES (?, ?, ?, ?, 'ACTIVE', ?, NOW())`,
-        [hospitalID, periodID, maleCapacity, femaleCapacity, secretaryID]
+        `INSERT INTO TRAINING_OPPORTUNITY (hospitalID, periodID, maleCapacity, femaleCapacity, status, createdAt)
+         VALUES (?, ?, ?, ?, 'ACTIVE', NOW())`,
+        [hospitalID, periodID, maleCapacity, femaleCapacity]
     );
 
     return { periodID, hospitalID, status: "OPEN" };
 };
  
  
-//ونقدر نحذفها 
+//ونقدر نحذفها
 const removeHospitalFromPeriod = async (periodID, hospitalID) => {
-    await dbConnect.promise().execute(
+    const [result] = await dbConnect.promise().execute(
         `DELETE FROM TRAINING_OPPORTUNITY
          WHERE periodID = ? AND hospitalID = ?`,
         [periodID, hospitalID]
     );
-    return { periodID, hospitalID };
+    return result.affectedRows > 0;
 };
  
  
@@ -212,9 +238,10 @@ const deleteTrainingPeriod = async (periodID) => {
 
 
 export {
+    syncStatuses,
     openTrainingPeriod,
     checkOpenPeriodByLevel,
-    getAllOpenPeriods,
+    getAllPeriods,
     getPeriodByID,
     updateTrainingPeriod,
     addHospitalToPeriod,

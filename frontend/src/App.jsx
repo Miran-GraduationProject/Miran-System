@@ -3,17 +3,17 @@ import ProtectedRoute from "./components/protectedRoute";
 import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { useState,useEffect } from "react";
 import AdminDashboard from "./pages/AdminDashboard";
-import StudentDashboard from "./pages/StudentDashboard";
-import CoordinatorDashboard from "./pages/CoordinatorDashboard";
+import StudentDashboard from "./pages/student/StudentDashboard";
+import CoordinatorDashboard from "./pages/coordinatorPage/CoordinatorDashboard";
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 
-import TrainingPeriodsPage from './pages/TrainingPeriodsPage';
-import HospitalsPage from './pages/HospitalsPage';
-import RegistrationMonitorPage from './pages/RegistrationMonitorPage';
-import StudentListPage from './pages/StudentListPage';
-import ConfirmedAllocationsPage from './pages/ConfirmedAllocationsPage';
-import StudentPreferencesPage from './pages/StudentPreferencesPage';
-import StudentDetails from './pages/StudentDetails';
+import TrainingPeriodsPage from './pages/coordinatorPage/TrainingPeriodsPage';
+import HospitalsPage from './pages/coordinatorPage/HospitalsPage';
+import RegistrationMonitorPage from './pages/coordinatorPage/RegistrationMonitorPage';
+import StudentListPage from './pages/coordinatorPage/StudentListPage';
+import ConfirmedAllocationsPage from './pages/coordinatorPage/ConfirmedAllocationsPage';
+import StudentPreferencesPage from './pages/student/StudentPreferencesPage';
+import StudentDetails from './pages/coordinatorPage/StudentDetails';
 
 import Reports from "./pages/Reports";
 import ReportCreate from "./pages/ReportCreate";

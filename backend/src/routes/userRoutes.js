@@ -36,8 +36,4 @@ router.get("/hospitalSupervisor",verifyToken,verifyRole("HospitalSupervisor"),(r
     res.send("hospital supervisor route")
 })
 
-router.get("/hospitalSecretary",verifyToken,verifyRole("HospitalSecretary"),(req,res)=>{
-    res.send("hospital secretary route")
-})
-
 export default router;

@@ -4,7 +4,10 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testTimeout=30000",
+    "test:req4": "node --experimental-vm-modules node_modules/jest/bin/jest.js test/coordinator/openPeriodController.unit.test.js --testTimeout=30000",
+    "test:req5": "node --experimental-vm-modules node_modules/jest/bin/jest.js test/student/preferenceController.unit.test.js --testTimeout=30000",
+    "test:req6": "node --experimental-vm-modules node_modules/jest/bin/jest.js test/coordinator/allocationService.unit.test.js --testTimeout=30000",
     "start": "node src/app.js"
   },
   
@@ -13,6 +16,7 @@
     "testEnvironment": "node",
     "transform": {}
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
