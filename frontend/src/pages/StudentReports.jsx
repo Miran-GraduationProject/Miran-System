@@ -4,30 +4,26 @@ import "../styles/reports.css";
 import "../styles/search.css";
 import { FaSearch } from "react-icons/fa";
 
-export default function Reports() {
+export default function StudentReports() {
   const navigate = useNavigate();
 
   const [reports, setReports] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
-
   useEffect(() => {
-    fetchPublishedReports();
+    fetchStudentReports();
   }, []);
 
-  // يجيب التقارير المنشورة بالنظام الجديد
-  const fetchPublishedReports = async () => {
+  const fetchStudentReports = async () => {
     try {
-      const res = await fetch(
-        "http://localhost:3000/api/supervisor/reports",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const token = localStorage.getItem("token");
+
+      const res = await fetch("http://localhost:3000/api/student/reports", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await res.json();
 
@@ -46,15 +42,34 @@ export default function Reports() {
     }
   };
 
-  // البحث في اسم التقرير أو اسم الفترة
+  const getStatusText = (report) => {
+    if (!report.submissionID) return "لم يتم التسليم";
+
+    if (report.approvalStatus === "APPROVED") {
+      return "تمت الموافقة";
+    }
+
+    return "تم التسليم";
+  };
+
+  const getStatusClass = (report) => {
+    if (!report.submissionID) return "unknown";
+
+    if (report.approvalStatus === "APPROVED") {
+      return "completed";
+    }
+
+    return "submitted";
+  };
+
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
       const title = report.reportTitle || "";
-      const periodName = report.periodName || "";
+      const statusText = getStatusText(report);
 
       return (
         title.toLowerCase().includes(search.toLowerCase()) ||
-        periodName.toLowerCase().includes(search.toLowerCase())
+        statusText.toLowerCase().includes(search.toLowerCase())
       );
     });
   }, [reports, search]);
@@ -62,37 +77,25 @@ export default function Reports() {
   const stats = useMemo(() => {
     const totalReports = reports.length;
 
-    const activeReports = reports.filter(
-      (report) => report.reportStatus === "PUBLISHED"
+    const submittedCount = reports.filter(
+      (report) => report.submissionID
     ).length;
 
-    const closedReports = reports.filter(
-      (report) => report.reportStatus === "CLOSED"
+    const approvedCount = reports.filter(
+      (report) => report.approvalStatus === "APPROVED"
     ).length;
 
-    const totalSubmitted = reports.reduce((sum, report) => {
-      return sum + Number(report.submittedStudents || 0);
-    }, 0);
+    const notSubmittedCount = reports.filter(
+      (report) => !report.submissionID
+    ).length;
 
     return {
       totalReports,
-      activeReports,
-      closedReports,
-      totalSubmitted,
+      submittedCount,
+      approvedCount,
+      notSubmittedCount,
     };
   }, [reports]);
-
-  const getReportStatusText = (status) => {
-    if (status === "PUBLISHED") return "نشط";
-    if (status === "CLOSED") return "مغلق";
-    return "غير محدد";
-  };
-
-  const getReportStatusClass = (status) => {
-    if (status === "PUBLISHED") return "submitted";
-    if (status === "CLOSED") return "completed";
-    return "unknown";
-  };
 
   const formatDate = (date) => {
     if (!date) return "غير محدد";
@@ -104,18 +107,13 @@ export default function Reports() {
     }
   };
 
-  const getPeriodText = (report) => {
-    const periodName = report.periodName || "فترة غير محددة";
-    const periodLevel = report.periodLevel ? ` - ${report.periodLevel}` : "";
-
-    return `${periodName}${periodLevel}`;
+  const handleOpenReport = (report) => {
+    navigate(`/student/reports/fill/${report.reportID}`);
   };
 
-  const getStudentsText = (report) => {
-    const totalStudents = Number(report.totalStudents || 0);
-    const submittedStudents = Number(report.submittedStudents || 0);
-
-    return `${submittedStudents} / ${totalStudents} سلموا`;
+  const getActionText = (report) => {
+    if (report.submissionID) return "عرض التقرير";
+    return "تعبئة التقرير";
   };
 
   return (
@@ -126,20 +124,10 @@ export default function Reports() {
             <div className="page-icon">📄</div>
 
             <div>
-              <h1>التقارير</h1>
-              <p>إدارة التقارير المنشورة ومتابعة تسليم الطلاب</p>
+              <h1>تقاريري</h1>
+              <p>التقارير المطلوبة منك خلال فترة التدريب</p>
             </div>
           </div>
-        </div>
-
-        <div className="create-report-wrapper">
-          <button
-            className="create-report-btn"
-            onClick={() => navigate("/reports/create")}
-          >
-            <span className="btn-icon">+</span>
-            إنشاء تقرير
-          </button>
         </div>
       </div>
 
@@ -148,36 +136,36 @@ export default function Reports() {
           <div className="stat-content">
             <span>إجمالي التقارير</span>
             <strong>{stats.totalReports || 0}</strong>
-            <p>كل التقارير المنشورة</p>
+            <p>كل التقارير المرتبطة بك</p>
           </div>
           <div className="stat-icon">📄</div>
         </div>
 
         <div className="stat-card">
           <div className="stat-content">
-            <span>التقارير النشطة</span>
-            <strong>{stats.activeReports || 0}</strong>
-            <p>تقارير متاحة للطلاب</p>
+            <span>تم التسليم</span>
+            <strong>{stats.submittedCount || 0}</strong>
+            <p>تقارير تم إرسالها</p>
           </div>
           <div className="stat-icon">✅</div>
         </div>
 
         <div className="stat-card">
           <div className="stat-content">
-            <span>التقارير المغلقة</span>
-            <strong>{stats.closedReports || 0}</strong>
-            <p>تقارير غير متاحة حاليًا</p>
+            <span>تمت الموافقة</span>
+            <strong>{stats.approvedCount || 0}</strong>
+            <p>تقارير وافق عليها المشرف</p>
           </div>
-          <div className="stat-icon">🔒</div>
+          <div className="stat-icon">🟢</div>
         </div>
 
         <div className="stat-card">
           <div className="stat-content">
-            <span>إجمالي التسليمات</span>
-            <strong>{stats.totalSubmitted || 0}</strong>
-            <p>عدد تسليمات الطلاب</p>
+            <span>لم يتم التسليم</span>
+            <strong>{stats.notSubmittedCount || 0}</strong>
+            <p>تقارير تحتاج إلى تعبئة</p>
           </div>
-          <div className="stat-icon">📥</div>
+          <div className="stat-icon">⏳</div>
         </div>
       </div>
 
@@ -190,7 +178,7 @@ export default function Reports() {
           <input
             className="input"
             type="text"
-            placeholder="ابحث باسم التقرير أو الفترة..."
+            placeholder="ابحث باسم التقرير أو الحالة..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -201,7 +189,7 @@ export default function Reports() {
 
       <div className="reports-list-box">
         <div className="reports-list-header">
-          <h2>التقارير المنشورة</h2>
+          <h2>قائمة التقارير</h2>
         </div>
 
         {loading ? (
@@ -209,15 +197,15 @@ export default function Reports() {
         ) : filteredReports.length === 0 ? (
           <div className="empty-reports">
             <h3>لا توجد تقارير</h3>
-            <p>لم يتم العثور على تقارير منشورة.</p>
+            <p>لا توجد تقارير مرتبطة بحسابك حاليًا.</p>
           </div>
         ) : (
           <div className="reports-table">
             <div className="table-head">
-              <span>اسم التقرير</span>
-              <span>الفترة المرتبطة</span>
-              <span>عدد الطلاب</span>
-              <span>حالة التقرير</span>
+              <span>عنوان التقرير</span>
+              <span>تاريخ التسليم</span>
+              <span>الوقت</span>
+              <span>الحالة</span>
               <span>الإجراء</span>
             </div>
 
@@ -225,6 +213,7 @@ export default function Reports() {
               <div className="table-row" key={report.reportID}>
                 <div className="report-title-cell">
                   <span className="row-file-icon">📄</span>
+
                   <div>
                     <span>{report.reportTitle || "بدون عنوان"}</span>
                     <small className="date-cell">
@@ -233,26 +222,20 @@ export default function Reports() {
                   </div>
                 </div>
 
-                <span>{getPeriodText(report)}</span>
+                <span>{formatDate(report.submissionDate)}</span>
 
-                <span>{getStudentsText(report)}</span>
+                <span>{report.submissionTime || "غير محدد"}</span>
 
-                <span
-                  className={`status-badge ${getReportStatusClass(
-                    report.reportStatus
-                  )}`}
-                >
-                  {getReportStatusText(report.reportStatus)}
+                <span className={`status-badge ${getStatusClass(report)}`}>
+                  {getStatusText(report)}
                   <span className="status-check">✓</span>
                 </span>
 
                 <button
                   className="view-report-btn"
-                  onClick={() =>
-                    navigate(`/reports/${report.reportID}/students`)
-                  }
+                  onClick={() => handleOpenReport(report)}
                 >
-                  عرض
+                  {getActionText(report)}
                 </button>
               </div>
             ))}

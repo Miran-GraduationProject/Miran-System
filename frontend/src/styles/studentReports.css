@@ -1,0 +1,336 @@
+.student-reports-page {
+  direction: rtl;
+  min-height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    #ecfdf5 0%,
+    #f7fcf9 100%
+  );
+  padding: 32px;
+  color: #203820;
+  font-family: sans-serif;
+}
+
+/* ================= Header ================= */
+
+.student-reports-header {
+  background: #ffffff;
+  border: 1px solid #e4eadf;
+  border-radius: 18px;
+  padding: 28px;
+  margin-bottom: 26px;
+  box-shadow: 0 8px 24px rgba(32, 56, 32, 0.07);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.student-reports-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.student-reports-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: #dbeae2;
+  color: #15916f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  border: 1px solid #cbdcd2;
+}
+
+.student-reports-header h1 {
+  margin: 0 0 8px;
+  font-size: 30px;
+  color: #203820;
+  font-weight: 800;
+}
+
+.student-reports-header p {
+  margin: 0;
+  color: #6b756b;
+  font-size: 15px;
+}
+
+/* ================= Stats Cards مثل المشرف ================= */
+
+.student-reports-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 26px;
+}
+
+.student-stat-card {
+  background: #ffffff;
+  border: 1px solid #e4eadf;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(32, 56, 32, 0.07);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 120px;
+}
+
+.student-stat-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: #dbeae2;
+  color: #15916f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.student-stat-info {
+  text-align: right;
+}
+
+.student-stat-info span {
+  display: block;
+  color: #203820;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.student-stat-info strong {
+  color: #15916f;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+/* ================= Search Card ================= */
+
+.student-reports-search-card {
+  background: #ffffff;
+  border: 1px solid #e4eadf;
+  border-radius: 18px;
+  padding: 22px 24px;
+  margin-bottom: 26px;
+  box-shadow: 0 8px 24px rgba(32, 56, 32, 0.07);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.student-results-count {
+  color: #203820;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.student-search-group {
+  flex: 1;
+  position: relative;
+}
+
+.student-search-input {
+  width: 100%;
+  height: 52px;
+  border: none;
+  outline: none;
+  background: #f4f5f4;
+  border-radius: 12px;
+  padding: 0 48px 0 16px;
+  font-size: 15px;
+  color: #203820;
+  box-sizing: border-box;
+}
+
+.student-search-input::placeholder {
+  color: #8d968d;
+}
+
+.student-search-icon {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8d968d;
+  font-size: 18px;
+}
+
+/* ================= Reports Box ================= */
+
+.student-reports-list-box {
+  background: #ffffff;
+  border: 1px solid #e4eadf;
+  border-radius: 18px;
+  padding: 26px;
+  box-shadow: 0 8px 24px rgba(32, 56, 32, 0.07);
+}
+
+.student-reports-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.student-reports-list-header h2 {
+  margin: 0;
+  color: #203820;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+/* ================= Report Cards ================= */
+
+.student-report-card {
+  background: #ffffff;
+  border-bottom: 1px solid #edf1ea;
+  padding: 20px 0;
+
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 0.8fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.student-report-card:last-child {
+  border-bottom: none;
+}
+
+.student-report-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-report-file-icon {
+  min-width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #dbeae2;
+  color: #15916f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.student-report-info h3 {
+  margin: 0 0 6px;
+  color: #203820;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.student-report-info p {
+  margin: 0;
+  color: #6b756b;
+  font-size: 14px;
+}
+
+.student-report-date {
+  color: #203820;
+  font-size: 14px;
+}
+
+.student-report-status {
+  width: fit-content;
+  background: #dbeae2;
+  color: #15916f;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.student-report-status.pending {
+  background: #fff4dc;
+  color: #b77900;
+}
+
+.student-report-status.not-submitted {
+  background: #f1f3f1;
+  color: #6b756b;
+}
+
+.student-report-btn {
+  border: none;
+  min-width: 95px;
+  height: 44px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #15916f;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 6px 14px rgba(21, 145, 111, 0.22);
+}
+
+.student-report-btn:hover {
+  background: #107a5d;
+}
+
+.student-report-btn.secondary {
+  background: #ffffff;
+  color: #15916f;
+  border: 1px solid #15916f;
+  box-shadow: none;
+}
+
+.student-report-btn.secondary:hover {
+  background: #eef4eb;
+}
+
+/* ================= Empty ================= */
+
+.student-reports-empty {
+  text-align: center;
+  color: #7b877b;
+  padding: 38px;
+  background: #fbfcfa;
+  border: 1px dashed #dce5d7;
+  border-radius: 16px;
+}
+
+/* ================= Responsive ================= */
+
+@media (max-width: 1000px) {
+  .student-reports-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .student-report-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .student-reports-page {
+    padding: 22px;
+  }
+
+  .student-reports-header {
+    align-items: flex-start;
+  }
+
+  .student-reports-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .student-reports-search-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-report-btn {
+    width: 100%;
+  }
+}

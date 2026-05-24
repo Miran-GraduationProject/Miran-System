@@ -33,9 +33,27 @@ function StudentDashboard() {
             <p>ترتيب ومتابعة رغبات التدريب</p>
           </div>
         </button>
+
+        {/* كارد التقارير */}
+        <button
+          className="student-main-card"
+          onClick={() => navigate("/student/reports")}
+        >
+          <span className="student-card-arrow">›</span>
+
+          <div className="student-card-content">
+            <div className="student-card-icon-wrap">
+              <span className="student-card-icon">📄</span>
+            </div>
+
+            <h4>التقارير</h4>
+            <p>عرض وتعبئة تقارير التدريب</p>
+          </div>
+        </button>
       </div>
     </div>
   );
 }
 
 export default StudentDashboard;
+      

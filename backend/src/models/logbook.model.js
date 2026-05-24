@@ -38,15 +38,22 @@ export const getMandatoryCases = () => {
 export const getReportsByStudentId = (studentId) => {
     return new Promise((resolve, reject) => {
         const query = `
-            SELECT CR.reportID, CR.status, CR.submissionDate, CR.submissionTime,
-                   T.reportTitle, RF.fieldLabel, RA.answer
-            FROM CASE_REPORT CR
-            JOIN TEMPLATE T ON CR.templateID = T.templateID
-            JOIN REPORT_ANSWER RA ON CR.reportID = RA.reportID
-            JOIN ReportField RF ON RA.fieldID = RF.fieldID
-            WHERE CR.studentID = ?
-            ORDER BY CR.reportID, RF.fieldID
+            SELECT 
+                cr.reportID,
+                cr.reportTitle,
+                cr.reportStatus,
+                rs.submissionDate,
+                rs.submissionTime,
+                rf.fieldLabel,
+                ra.answer
+            FROM REPORT_SUBMISSION rs
+            JOIN CASE_REPORT cr ON cr.reportID = rs.reportID
+            JOIN REPORT_ANSWER ra ON ra.submissionID = rs.submissionID
+            JOIN ReportField rf ON rf.fieldID = ra.fieldID
+            WHERE rs.studentID = ?
+            ORDER BY cr.reportID, rf.fieldID
         `;
+
         db.query(query, [studentId], (err, results) => {
             if (err) return reject(err);
             resolve(results);

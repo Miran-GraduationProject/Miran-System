@@ -15,12 +15,14 @@ import ConfirmedAllocationsPage from './pages/ConfirmedAllocationsPage';
 import StudentPreferencesPage from './pages/StudentPreferencesPage';
 import StudentDetails from './pages/StudentDetails';
 
+//import ReportSubmissionView from "./pages/ReportSubmissionView";
 import Reports from "./pages/Reports";
+import ReportStudents from "./pages/ReportStudents";
 import ReportCreate from "./pages/ReportCreate";
 import Templates from "./pages/Templates";
 import SplashScreen from "./components/SplashScreen"
-// import StudentReports from "./pages/StudentReports";
-// import StudentReportFill from "./pages/StudentReportFill";
+import StudentReports from "./pages/StudentReports";
+import StudentReportFill from "./pages/StudentReportFill";
 
 import Navbar from "./components/navbar";
 //import { Children } from "react";
@@ -218,7 +220,7 @@ function App() {
   element={
     <Layout>
       <ProtectedRoute Role="Student">
-        {/* <StudentReports /> */}
+        <StudentReports />
       </ProtectedRoute>
     </Layout>
   }
@@ -229,7 +231,18 @@ function App() {
   element={
     <Layout>
       <ProtectedRoute Role="Student">
-        {/* <StudentReportFill /> */}
+        <StudentReportFill />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
+<Route
+  path="/reports/:reportID/students"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <ReportStudents />
       </ProtectedRoute>
     </Layout>
   }
@@ -244,7 +257,6 @@ function App() {
 
   
 }
-
 
 
 export default App;
