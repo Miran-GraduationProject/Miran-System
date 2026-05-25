@@ -1,6 +1,6 @@
 import request from "supertest";
-import app from "../../src/app.js";
-import db from "../../src/config/dbConnect.js";
+import app from "../../../src/app.js";
+import db from "../../../src/config/dbConnect.js";
 
 describe("POST /api/supervisor/cases", () => {
     const supervisorToken  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTExMjIyMzMzLCJyb2xlIjoiQWNhZGVtaWNTdXBlcnZpc29yIiwiZmlyc3ROYW1lIjoiQWhtZWQiLCJzZWNvbmROYW1lIjoiQWxpIiwibGFzdE5hbWUiOiJNYW5zb3VyIiwiZW1haWwiOiJDMTExMjIyMzMzQHVxdS5lZHUuc2EiLCJpYXQiOjE3NzkyNTc4NTksImV4cCI6MTc3OTI2MTQ1OX0.XnRImaTKzHWY0WuvoQauUKd_OVF3gbtOzNYxig52l4I"; // تأكد من وضع توكن المشرف الصحيح هنا

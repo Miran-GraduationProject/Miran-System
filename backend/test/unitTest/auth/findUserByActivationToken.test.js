@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 
 const mockExecute = jest.fn();
 
-jest.unstable_mockModule("../../src/config/dbConnect.js", () => ({
+jest.unstable_mockModule("../../../src/config/dbConnect.js", () => ({
   default: {
     promise: () => ({
       execute: mockExecute
@@ -11,7 +11,7 @@ jest.unstable_mockModule("../../src/config/dbConnect.js", () => ({
   }
 }));
 
-const { findUserByActivationToken } = await import("../../src/models/userModel.js");
+const { findUserByActivationToken } = await import("../../../src/models/userModel.js");
 
 describe("findUserByActivationToken", () => {
 
