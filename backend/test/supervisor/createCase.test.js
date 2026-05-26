@@ -1,151 +1,352 @@
-import request from "supertest";
-import app from "../../src/app.js";
-import db from "../../src/config/dbConnect.js";
+import {jest } from "@jest/globals";
+const mockQuery = jest.fn();
 
-describe("POST /api/supervisor/cases", () => {
-    const supervisorToken  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTExMjIyMzMzLCJyb2xlIjoiQWNhZGVtaWNTdXBlcnZpc29yIiwiZmlyc3ROYW1lIjoiQWhtZWQiLCJzZWNvbmROYW1lIjoiQWxpIiwibGFzdE5hbWUiOiJNYW5zb3VyIiwiZW1haWwiOiJDMTExMjIyMzMzQHVxdS5lZHUuc2EiLCJpYXQiOjE3NzkyNTc4NTksImV4cCI6MTc3OTI2MTQ1OX0.XnRImaTKzHWY0WuvoQauUKd_OVF3gbtOzNYxig52l4I"; // تأكد من وضع توكن المشرف الصحيح هنا
-    const studentToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDQ0NTAwNDU2LCJyb2xlIjoiU3R1ZGVudCIsImZpcnN0TmFtZSI6IkZhaXNhbCIsInNlY29uZE5hbWUiOiJOYXNzZXIiLCJsYXN0TmFtZSI6IkFsLU90YWliaSIsImVtYWlsIjoiUzQ0NDUwMDQ1NkB1cXUuZWR1LnNhIiwiaWF0IjoxNzc5MjU3ODA3LCJleHAiOjE3NzkyNjE0MDd9.w5puUV_gaTzfRzNo_xXhjBo1skaVV1KRP9tcDvG7Z0k";
-    
-    test("TC1: Should create a new case and return 200", async () => { 
-        const res = await request(app) 
-            .post("/api/supervisor/cases")
-            .set("Authorization", `Bearer ${supervisorToken}`)
-            .send({
-                
-                caseName: "test test ",
-                description_text: "abcde",
-                notes: "Test notes"
-
-            });
-    
-        expect(res.statusCode).toBe(200);
-        expect(res.body).toHaveProperty("message", "Case created successfully");
-
-    expect(res.body.case).toEqual(
-        expect.objectContaining({
-            caseID: expect.any(Number),
-            caseName: expect.any(String),
-            description_text: expect.any(String),
-            notes: expect.any(String),
-            templateID: expect.any(Number),
-            periodID: expect.any(Number),
-            createdBy: expect.any(Number),
+jest.unstable_mockModule('../../src/config/dbConnect.js', () => ({
+    default: {
+        promise: () => ({
+            query: mockQuery
         })
-    );
+    }
+}));
 
-    expect(typeof res.body.case.caseID).toBe("number");
-    expect(typeof res.body.case.caseName).toBe("string");
-    expect(typeof res.body.case.description_text).toBe("string");
-     });
+const { createCase } = await import("../../src/controllers/SupervisorControllers/cases.js");
+const mockResponse = () => {
+    const res = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.json = jest.fn().mockReturnValue(res);
+    return res;
+};
 
-    test("TC2: Should return 400 if case name is missing", async () => {
-        const res = await request(app)
-            .post("/api/supervisor/cases")
-            .set("Authorization", `Bearer ${supervisorToken}`)
-            .send({
-                caseName: "",
-                description_text: "Test description"
-            });
+describe("createCase", () => {
+    beforeEach(() => {
+        mockQuery.mockReset();
+    });
 
-        expect(res.statusCode).toBe(400);    
-        expect(res.body).toHaveProperty("message", "Case Name is required");
-     });
- 
- test("TC3: Should return 400 if description_text is missing", async () => {
+    test("TC1: should create a case successfully", async () => {
+        mockQuery.mockResolvedValueOnce([[{ templateID: 1 }]])
+        mockQuery.mockResolvedValueOnce([[{ periodID: 5 }]])
+        mockQuery.mockResolvedValueOnce([{ insertId: 100 }])
 
-        const res = await request(app)
-            .post("/api/supervisor/cases")
-            .set("Authorization", `Bearer ${supervisorToken}`)
-            .send({
-                caseName: "Test Case"
-            });
-
-        expect(res.statusCode).toBe(400);
-        expect(res.body).toHaveProperty("message", "description_text is required");
-     });
-
-     test("TC4: Should return 403 if user is not a supervisor", async () => { 
-        const res = await request(app)
-            .post("/api/supervisor/cases")
-            .set("Authorization", `Bearer ${studentToken}`)
-            .send({
+        const req = {
+            user: { id: 1 },
+            body: {
                 caseName: "Test Case",
-                description_text: "Test description"
-            });
+                description_text: "This is a test case",
+                notes: "Some notes",
+                reportTitle: "Report A",
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };
+        const res = mockResponse();
+        await createCase(req, res);
 
-        expect(res.statusCode).toBe(403);
-        expect(res.body).toHaveProperty("message", "you don't have permission");
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Case created successfully",
+            caseID: 100
+        });
+    });
 
-     });
+    test("TC2: should return 400 if case name is missing", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {}
+        };
 
-        test("TC5: should return 403 if token is missing", async () => {
-        const res = await request(app)
-            .post("/api/supervisor/cases")
-            .send({
-                caseName: "Test Case",
-                description_text: "Test description"
-            });
+        const res = mockResponse();
 
-        expect(res.statusCode).toBe(403);
-        expect(res.body).toHaveProperty("message", " no token provided");
-     });
+        await createCase(req, res);
 
- test("TC6: Should return 400 for invalid data types", async () => {
-        const res = await request(app)
-            .post("/api/supervisor/cases")
-            .set("Authorization", `Bearer ${supervisorToken}`)
-            .send({
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "case name is required" });
+    });
+
+    test("TC3: should return 400 if case name is not a string", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {
                 caseName: 123,
-                description_text: true,
-                notes: ["Invalid", "notes"]
-            });
+                description_text: "This is also a test case",
+                reportTitle: "Report B",
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };
 
-        expect(res.statusCode).toBe(400);
-        expect(res.body).toHaveProperty("message", "invalid data types for case name, description_text, or notes");
-     });
- 
-//  test("TC7: Should return error if template not found", async () => {
-//         const res = await request(app)
-//             .post("/api/supervisor/cases")
-//             .set("Authorization", `Bearer ${supervisorToken}`)
-//             .send({
-//                 caseName: "Test Case",
-//                 description_text: "Test description"
-//             });
+        const res = mockResponse();
 
-//         expect(res.statusCode).toBeGreaterThanOrEqual(400);
-//         expect(res.body).toHaveProperty("message", "Invalid templateID");
-//      });
- 
-//  test("TC8: Should return error if period not found", async () => {
-//         const res = await request(app)
-//             .post("/api/supervisor/cases")
-//             .set("Authorization", `Bearer ${supervisorToken}`)
-//             .send({
-//                 caseName: "Test Case",
-//                 description_text: "Test description"
-//             });
+        await createCase(req, res);
 
-//         expect(res.statusCode).toBeGreaterThanOrEqual(400);
-//         expect(res.body).toHaveProperty("message", "Invalid periodID");
-//      });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "case name must be a non-empty string" });
+    });
 
-test("TC9: Should create case without notes", async () => {
-        const res = await request(app)
-            .post("/api/supervisor/cases")
-            .set("Authorization", `Bearer ${supervisorToken}`)
-            .send({
+    test("TC4: shuld return 400 if description_text is missing", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {
                 caseName: "Test Case",
-                description_text: "Test description"
-            });
+                reportTitle: "Report C",
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };
 
-        expect(res.statusCode).toBe(200);
-        expect(res.body).toHaveProperty("message", "Case created successfully");
+        const res = mockResponse();
+
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "description text is required" });
+    });
+
+    test("TC5: should return 400 if description_text is not a string", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: true,
+                reportTitle: "Report D",
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };
+
+        const res = mockResponse();
+
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "description text must be a non-empty string" });
+    });
+
+    test("TC6: should return 400 if notes is not a string", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                notes: 123,
+                reportTitle: "Report E",
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };
+
+        const res = mockResponse();
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "notes must be a string" });
+    });
+
+    test("TC7: should return 400 if reportTitle is missing", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };
+
+        const res = mockResponse();
+
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "report title is required" });
      });
 
-});
+     test("TC8: should return 400 if reportTitle is not a string", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                reportTitle: 123,
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };  
 
-// بعد الانتهاء من جميع الاختبارات، قم بإغلاق اتصال قاعدة البيانات
-afterAll(async () => {
-  await db.end();
+        const res = mockResponse();
+
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "report title must be a non-empty string" });
+     });
+
+     test("TC9: should return 400 if reportTitle not found ", async () => {
+
+        mockQuery.mockResolvedValueOnce([[]]);// Mock template query with empty result
+
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                reportTitle: "unknown",
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };
+
+        const res = mockResponse();
+        await createCase(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "Template not found" });
+     });
+
+     test("TC10: should return 400 if start Date is missing", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                reportTitle: "Report F",
+                endDate: "2024-02-01"
+            }
+        };
+
+        const res = mockResponse();
+
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "start date is required" });
+     });
+
+        test("TC11: should return 400 if end Date is missing", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                reportTitle: "Report F",
+                startDate: "2024-01-01"
+            }
+        };
+
+        const res = mockResponse();
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "end date is required" });
+     });
+
+        test("TC12: should return 400 if start Date or end Date is not a valid date string", async () => {
+
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                reportTitle: "Report G",
+                startDate: "invalid date",
+                endDate: "2024-02-01"
+            }
+        };  
+
+        const res = mockResponse();
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "start date and end date must be valid date strings" });
+     });
+
+     test("TC13: should return 400 if start Date is after end Date", async () => {
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                reportTitle: "Report H",
+                startDate: "2024-03-01",
+                endDate: "2024-02-01"
+            }
+        };
+
+        const res = mockResponse();
+
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "start date must be before end date" });
+     });    
+
+     test("TC14: should return 400 if no open period is found", async () => {
+
+        mockQuery.mockResolvedValueOnce([[{ templateID: 1 }]])// Mock template query with valid result
+        mockQuery.mockResolvedValueOnce([[]]);
+
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                reportTitle: "Report I",
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };
+        const res = mockResponse();
+
+        await createCase(req, res);
+        
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "No OPEN training period found for the given dates" });
+     });
+
+     test("TC15: should return 500 if there is a database error", async () => { 
+        mockQuery.mockImplementationOnce(() => {
+            throw new Error("Database error");
+        });
+
+        const req = {
+            user: { id: 1 },
+            body: {
+                caseName: "Test Case",
+                description_text: "This is a test case",
+                reportTitle: "Report J",
+                startDate: "2024-01-01",
+                endDate: "2024-02-01"
+            }
+        };
+        const res = mockResponse();
+        await createCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ message: "Internal server error while creating case" });
+         });
+
+         test("TC16: should return 201 if case is created successfully without notes", async () => {
+            mockQuery.mockResolvedValueOnce([[{ templateID: 1 }]])
+            mockQuery.mockResolvedValueOnce([[{ periodID: 5 }]])
+            mockQuery.mockResolvedValueOnce([{ insertId: 101 }])
+
+            const req = {
+                user: { id: 1 },
+                body: {
+                    caseName: "Test Case",
+                    description_text: "This is a test case",
+                    reportTitle: "Report K",
+                    startDate: "2024-01-01",
+                    endDate: "2024-02-01",
+                    
+                }
+            };
+            const res = mockResponse();
+            await createCase(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(201);
+            expect(res.json).toHaveBeenCalledWith({
+                message: "Case created successfully",
+                caseID: 101
+            });
+         });
+
 });

@@ -1,47 +1,113 @@
-import request from "supertest";
-import app from "../../src/app.js";
-import db from "../../src/config/dbConnect.js";
+import {expect, jest, test} from "@jest/globals";
 
-const studentToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDQ0NTAwNDU2LCJyb2xlIjoiU3R1ZGVudCIsImZpcnN0TmFtZSI6IkZhaXNhbCIsInNlY29uZE5hbWUiOiJOYXNzZXIiLCJsYXN0TmFtZSI6IkFsLU90YWliaSIsImVtYWlsIjoiUzQ0NDUwMDQ1NkB1cXUuZWR1LnNhIiwiaWF0IjoxNzc5Mzc0ODY1LCJleHAiOjE3NzkzNzg0NjV9.y-f0mRBsREg0HVV64ELz3oJ-hdl1HGK1h---LjyUK2Q"; // تأكد من وضع توكن الطالب الصحيح هنا
-const supervisorToken  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTExMjIyMzMzLCJyb2xlIjoiQWNhZGVtaWNTdXBlcnZpc29yIiwiZmlyc3ROYW1lIjoiQWhtZWQiLCJzZWNvbmROYW1lIjoiQWxpIiwibGFzdE5hbWUiOiJNYW5zb3VyIiwiZW1haWwiOiJDMTExMjIyMzMzQHVxdS5lZHUuc2EiLCJpYXQiOjE3NzkzNzQ5NTQsImV4cCI6MTc3OTM3ODU1NH0.0KIYt4nVVfhYzQipGGrhxpmE0X8mALQmWDz3AvyJfDo"; // تأكد من وضع توكن المشرف الصحيح هنا
+const mockQuery = jest.fn();
 
-describe("DELETE /api/supervisor/cases/:caseID", () => {
+jest.unstable_mockModule('../../src/config/dbConnect.js', () => ({
+    default: {
+        promise: () => ({
+            query: mockQuery
+        })
+    }
+}));
 
-    test("TC1: Should delete the case and return 200", async () => {
-        const res = await request(app)
-            .delete("/api/supervisor/cases/15") // تأكد من وجود caseID 1 في قاعدة البيانات
-            .set("Authorization", `Bearer ${supervisorToken}`);
+const { deleteCase } = await import("../../src/controllers/SupervisorControllers/cases.js");
+const mockResponse = () => {
+    const res = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.json = jest.fn().mockReturnValue(res);
+    return res;
+};
 
-        expect(res.status).toBe(200);
-        expect(res.body.message).toBe("Case deleted successfully");
+describe("deleteCase", () => {
+    beforeEach(() => {
+        mockQuery.mockReset();
     });
 
-    test("TC2: should return 404 if casenot found", async () => {
-        const res = await request(app)
-            .delete("/api/supervisor/cases/9999") // تأكد من أن caseID 9999 غير موجود في قاعدة البيانات     
-            .set("Authorization", `Bearer ${supervisorToken}`);
+    test("TC1: Should delete the case successfully", async () => {
+    
+        mockQuery.mockResolvedValueOnce([{ affectedRows: 1 }]);
+        const req = {
+            params: {caseID: 1}
+        };
 
-        expect(res.status).toBe(404);
-        expect(res.body.message).toBe("Case not found");
+        const res = mockResponse();
+
+        await deleteCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Case deleted successfully"
+        });
     });
 
-    test("TC3: should return 403 if no token is provided", async () => {
-        const res = await request(app)
-            .delete("/api/supervisor/cases/15"); // تأكد من وجود caseID 15 في قاعدة البيانات    
-        expect(res.status).toBe(403);
-        expect(res.body.message).toBe(" no token provided");
-     });
+    test("TC2: should return 400 if caseID invalid", async () => {
+          
+        const req = {
+            params: {caseID: "abc"}
+        };
+
+        const res = mockResponse();
+
+        await deleteCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Invalid case ID"
+        });
+    });
+
+    test("TC3: should return 400 if case ID is missing", async () => {
+        const req = {
+            params: {}
+        };
+
+        const res = mockResponse();
+
+        await deleteCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            message: "case ID is required"
+        });
+    });
    
 
-    test("TC4: Should return 403 if user is not a supervisor", async () => {
-        const res = await request(app)
-            .delete("/api/supervisor/cases/15")
-            .set("Authorization", `Bearer ${studentToken}`);
-        expect(res.status).toBe(403);
-        expect(res.body.message).toBe("you don't have permission");
+    test("TC4: Should return 404 if case not found", async () => {
+        
+        mockQuery.mockResolvedValueOnce([{ affectedRows: 0 }]);
+
+        const req = {
+            params: {caseID: 999}
+        };
+
+        const res = mockResponse();
+
+        await deleteCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Case not found"
+        });
     });
-});
-    
-afterAll(async () => {
-  await db.end();
+
+     test("TC5: Should return 500 if database error occurs", async () => {
+       
+         mockQuery.mockImplementationOnce(() => {
+            throw new Error("Database error");
+        });
+
+
+        const req = {
+            params: {caseID: 1}
+        };
+
+        const res = mockResponse();
+
+        await deleteCase(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Internal server error while deleting case"
+        });
+    });
 });
