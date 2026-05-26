@@ -1,6 +1,6 @@
 import request from "supertest";
-import app from "../../src/app.js";
-import db from "../../src/config/dbConnect.js";
+import app from "../../../src/app.js";
+import db from "../../../src/config/dbConnect.js";
 
 describe("PUT /api/supervisor/cases/:caseID", () => {
 

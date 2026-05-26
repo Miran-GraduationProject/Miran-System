@@ -33,9 +33,9 @@ export const FindUserByEmail= async (email) =>{
  * @returns {Object} user object if found, undefined if not
  */
 export const findUserByActivationToken = async (token) => {
-  const query = `SELECT * FROM User WHERE activationToken = '${token}' AND status = 'PendingActivation'`;
-    const result = await dbConnect.execute(query);
-    return result[0][0];
+    const query = "SELECT * FROM User WHERE activationToken = ? AND status = 'PendingActivation'";
+    const [rows] = await dbConnect.promise().execute(query, [token]);
+    return rows[0];
 };
 
 // export default  {FindUserByEmail, findUserByActivationToken};
