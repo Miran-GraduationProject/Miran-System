@@ -13,6 +13,34 @@
   cursor: pointer;
 }
 
+/*log book*/
+
+.logbook-cell {
+  display: flex;
+  justify-content: center;
+}
+
+.download-btn {
+  background-color: #1f3728;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.download-btn:hover {
+  background-color: #174b2a;
+}
+
+.download-btn:hover {
+  background-color: #174b2a; /* درجة أغمق عند المرور */
+}
+
+
 .gradient {
   position: absolute;
   width: 100%;
