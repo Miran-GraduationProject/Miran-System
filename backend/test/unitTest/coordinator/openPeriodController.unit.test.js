@@ -1,23 +1,25 @@
 import { jest } from '@jest/globals';
 
-jest.unstable_mockModule('../../src/models/coordinatorModel/openTrainingPeriod.js', () => ({
+jest.unstable_mockModule('../../../src/models/coordinatorModel/openTrainingPeriod.js', () => ({
+    syncStatuses: jest.fn(),
     openTrainingPeriod: jest.fn(),
     checkOpenPeriodByLevel: jest.fn(),
+    getPeriodByLevelOpenOrClosed: jest.fn(),
     getAllPeriods: jest.fn(),
     getPeriodByID: jest.fn(),
-    updateTrainingPeriod: jest.fn(),
+    getLinkedHospitalIDs: jest.fn(),
+    updatePeriodWithCapacities: jest.fn(),
     addHospitalToPeriod: jest.fn(),
     removeHospitalFromPeriod: jest.fn(),
     getRegistrationStats: jest.fn(),
-    deleteTrainingPeriod: jest.fn(),
-    syncStatuses: jest.fn()
+    deleteTrainingPeriod: jest.fn()
 }));
 
 const { openPeriod, editPeriod, addHospital, removeHospital } =
-    await import('../../src/controllers/coordinatorControllers/openPeriodController.js');
+    await import('../../../src/controllers/coordinatorControllers/openPeriodController.js');
 
-const { getPeriodByID, removeHospitalFromPeriod } =
-    await import('../../src/models/coordinatorModel/openTrainingPeriod.js');
+const { getPeriodByID, removeHospitalFromPeriod, getLinkedHospitalIDs, updatePeriodWithCapacities } =
+    await import('../../../src/models/coordinatorModel/openTrainingPeriod.js');
 
 const mockRes = () => {
     const res = {};
@@ -140,6 +142,41 @@ describe("Unit Test — Req 1: openPeriodController", () => {
             await editPeriod(req, res);
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({ message: "Cannot modify period after registration has opened" });
+        });
+
+    });
+
+
+    // ─── editPeriod — successful capacity update ─────────────────────────────────
+
+    describe("editPeriod — successful update", () => {
+
+        test("valid period + linked hospital → 200 and updatePeriodWithCapacities called correctly", async () => {
+            getPeriodByID.mockResolvedValue({ registrationOpen: "2099-01-01" });
+            getLinkedHospitalIDs.mockResolvedValue([2]);
+            updatePeriodWithCapacities.mockResolvedValue({ periodID: 1, name: "Updated Period", level: "5" });
+
+            const req = {
+                params: { periodID: 1 },
+                body: {
+                    name: "Updated Period",
+                    level: "5",
+                    startDate: "2027-09-01",
+                    endDate: "2027-12-01",
+                    registrationOpen: "2027-07-01",
+                    registrationClose: "2027-08-01",
+                    hospitals: [{ hospitalID: 2, maleCapacity: 10, femaleCapacity: 8 }]
+                }
+            };
+            const res = mockRes();
+            await editPeriod(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(updatePeriodWithCapacities).toHaveBeenCalledWith(
+                1,
+                { name: "Updated Period", level: "5", startDate: "2027-09-01", endDate: "2027-12-01", registrationOpen: "2027-07-01", registrationClose: "2027-08-01" },
+                [{ hospitalID: 2, maleCapacity: 10, femaleCapacity: 8 }]
+            );
         });
 
     });

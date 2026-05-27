@@ -1,26 +1,27 @@
 import { jest } from '@jest/globals';
 // علشان ما نحتاج نعدل الكود الأصلي، بنستخدم الموكات عشان نتحكم بالردود ونختبر السيناريوهات المختلفة بدون ما نعتمد على قاعدة بيانات حقيقية.
 // احنا نعطيه البيانات 
-jest.unstable_mockModule('../../src/models/studentModel/studentPreference.js', () => ({
+jest.unstable_mockModule('../../../src/models/studentModel/studentPreference.js', () => ({
     getAvailableHospitals: jest.fn(),
     getStudentPreferences: jest.fn(),
     savePreferences: jest.fn(),
     getStudentLevel: jest.fn()
 }));
 
-jest.unstable_mockModule('../../src/models/coordinatorModel/openTrainingPeriod.js', () => ({
+jest.unstable_mockModule('../../../src/models/coordinatorModel/openTrainingPeriod.js', () => ({
     checkOpenPeriodByLevel: jest.fn(),
+    getPeriodByLevelOpenOrClosed: jest.fn(),
     syncStatuses: jest.fn()
 }));
 
 const { submitPreferences } =
-    await import('../../src/controllers/studentControllers/preferenceController.js');
+    await import('../../../src/controllers/studentControllers/preferenceController.js');
 
 const { getStudentLevel, getAvailableHospitals, savePreferences } =
-    await import('../../src/models/studentModel/studentPreference.js');
+    await import('../../../src/models/studentModel/studentPreference.js');
 
 const { checkOpenPeriodByLevel, syncStatuses } =
-    await import('../../src/models/coordinatorModel/openTrainingPeriod.js');
+    await import('../../../src/models/coordinatorModel/openTrainingPeriod.js');
 
 const mockRes = () => {
     const res = {};

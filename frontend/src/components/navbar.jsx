@@ -44,9 +44,12 @@ function Navbar() {
       { name: "ملفي", path: "/profile" },
     ],
     UniversityCoordinator: [
-      { name: "الرئيسية للمنسقة", path: "/" },
-      { name: "إدارة المستخدمين", path: "/" },
-      { name: "الطلبات", path: "/" },
+      { name: "لوحة التحكم",       path: "/coordinator"           },
+      { name: "المستشفيات",         path: "/hospitals"             },
+      { name: "الفترات التدريبية", path: "/training-periods"      },
+      { name: "متابعة التسجيل",   path: "/registration-monitor"  },
+      { name: "قوائم الطلاب",     path: "/student-list"          },
+      { name: "الفرص المؤكدة",    path: "/confirmed-allocations" },
     ],
     Administrator: [
       { name: "الرئيسية للادمن", path: "/" },

@@ -10,6 +10,9 @@ import {
     getOpportunitiesCapacity,
     saveAllocationPreview,
     getAllocationPreview,
+    checkOpportunityInPeriod,
+    getPreviewEntryInfo,
+    getRemainingCapacity,
     updateAllocation,
     confirmAllocation,
     getAllocatedPeriods,
@@ -38,6 +41,11 @@ const generatePreview = async (req, res) => {
         const period = await getPeriodByID(periodID);
         if (!period) {
             return res.status(404).json({ message: "Training period not found" });
+        }
+
+        // هل الفترة مؤكدة نهائياً؟
+        if (period.status === 'ALLOCATED') {
+            return res.status(400).json({ message: "Allocation has already been confirmed for this period" });
         }
 
         // هل فترة التسجيل مغلقه؟
@@ -118,6 +126,11 @@ const updatePreviewManually = async (req, res) => {
             return res.status(404).json({ message: "Training period not found" });
         }
 
+        // نمنع التعديل إذا تم تأكيد التوزيع نهائياً
+        if (period.status === 'ALLOCATED') {
+            return res.status(400).json({ message: "Cannot modify allocation after it has been confirmed" });
+        }
+
         // نتحقق ان في توزيع أولي موجود وان الـ previewID ينتمي لنفس الفترة
         const preview = await getAllocationPreview(periodID);
         if (preview.length === 0) {
@@ -127,6 +140,29 @@ const updatePreviewManually = async (req, res) => {
         const entryBelongsToPeriod = preview.some(p => String(p.previewID) === String(previewID));
         if (!entryBelongsToPeriod) {
             return res.status(404).json({ message: "Preview entry not found in this period" });
+        }
+
+        // التحقق من السعة عند التعيين اليدوي
+        if (status === 'Assigned') {
+            // نتحقق من TRAINING_OPPORTUNITY مباشرة — وليس من الـ preview — لأن الفرصة قد تكون موجودة دون أي طالب مسجّل فيها
+            const opportunityInPeriod = await checkOpportunityInPeriod(opportunityID, periodID);
+            if (!opportunityInPeriod) {
+                return res.status(400).json({ message: "This opportunity does not belong to this period" });
+            }
+
+            // نجيب جنس الطالب ونتحقق من السعة المتبقية
+            const entry = await getPreviewEntryInfo(previewID);
+            if (entry) {
+                const remaining = await getRemainingCapacity(periodID, opportunityID, entry.gender, previewID);
+                if (remaining === null) {
+                    return res.status(400).json({ message: "Opportunity not found in this period" });
+                }
+                if (remaining <= 0) {
+                    return res.status(400).json({
+                        message: `No remaining capacity for ${entry.gender === 'Male' ? 'male' : 'female'} students in this hospital`
+                    });
+                }
+            }
         }
 
         const result = await updateAllocation(previewID, opportunityID, status);

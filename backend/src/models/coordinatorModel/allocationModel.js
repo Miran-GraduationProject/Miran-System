@@ -105,6 +105,56 @@ const getAllocationPreview = async (periodID) => {
 };
 
 
+// تتحقق أن فرصة معينة تنتمي لفترة معينة مباشرة من TRAINING_OPPORTUNITY
+const checkOpportunityInPeriod = async (opportunityID, periodID) => {
+    const [rows] = await dbConnect.promise().execute(
+        `SELECT opportunityID FROM TRAINING_OPPORTUNITY
+         WHERE opportunityID = ? AND periodID = ? LIMIT 1`,
+        [opportunityID, periodID]
+    );
+    return rows.length > 0;
+};
+
+
+// تجيب جنس الطالب من الـ preview entry
+const getPreviewEntryInfo = async (previewID) => {
+    const [rows] = await dbConnect.promise().execute(
+        `SELECT ap.studentID, ap.periodID, ap.opportunityID, ap.status, u.gender
+         FROM ALLOCATION_PREVIEW ap
+         JOIN \`User\` u ON u.userID = ap.studentID
+         WHERE ap.previewID = ? LIMIT 1`,
+        [previewID]
+    );
+    return rows[0] || null;
+};
+
+
+// تحقق من السعة المتبقية لجنس معين في فرصة معينة (تستثني الـ previewID الحالي من العد)
+const getRemainingCapacity = async (periodID, opportunityID, gender, excludePreviewID) => {
+    const [capRows] = await dbConnect.promise().execute(
+        `SELECT maleCapacity, femaleCapacity FROM TRAINING_OPPORTUNITY
+         WHERE opportunityID = ? AND periodID = ? LIMIT 1`,
+        [opportunityID, periodID]
+    );
+    if (!capRows[0]) return null; // الفرصة مو في هذي الفترة
+
+    const capacity = gender === 'Male' ? capRows[0].maleCapacity : capRows[0].femaleCapacity;
+
+    const [countRows] = await dbConnect.promise().execute(
+        `SELECT COUNT(*) AS cnt
+         FROM ALLOCATION_PREVIEW ap
+         JOIN \`User\` u ON u.userID = ap.studentID
+         WHERE ap.periodID = ? AND ap.opportunityID = ?
+           AND ap.status = 'Assigned' AND u.gender = ?
+           AND ap.previewID != ?`,
+        [periodID, opportunityID, gender, excludePreviewID]
+    );
+
+    const used = countRows[0].cnt;
+    return capacity - used;
+};
+
+
 // المنسق يعدل توزيع طالب يدوياًاذا حاب
 const updateAllocation = async (previewID, opportunityID, status) => {
     await dbConnect.promise().execute(
@@ -233,6 +283,9 @@ export {
     getOpportunitiesCapacity,
     saveAllocationPreview,
     getAllocationPreview,
+    checkOpportunityInPeriod,
+    getPreviewEntryInfo,
+    getRemainingCapacity,
     updateAllocation,
     confirmAllocation,
     getAllocatedPeriods,

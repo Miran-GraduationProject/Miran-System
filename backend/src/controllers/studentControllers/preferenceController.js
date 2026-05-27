@@ -11,22 +11,23 @@ import {
     getStudentLevel
 } from '../../models/studentModel/studentPreference.js';
 
-import { checkOpenPeriodByLevel, syncStatuses } from '../../models/coordinatorModel/openTrainingPeriod.js';
+import { checkOpenPeriodByLevel, getPeriodByLevelOpenOrClosed, syncStatuses } from '../../models/coordinatorModel/openTrainingPeriod.js';
 
 
-// تجيب مستوى الطالب وتشوف هل له فترة مفتوحة ولالا
-/**
- * Resolves the open training period that matches the student's academic level.
- * Syncs period statuses before checking to ensure fresh state.
- *
- * @param {number} studentID
- * @returns {Promise<object|null>}
- */
+// للإرسال فقط: فترة OPEN حصراً
 const getPeriodForStudent = async (studentID) => {
     await syncStatuses();
     const level = await getStudentLevel(studentID);
     if (!level) return null;
     return await checkOpenPeriodByLevel(level);
+};
+
+// للعرض: فترة OPEN أو CLOSED (الطالب يشوف رغباته حتى بعد الإغلاق)
+const getPeriodForStudentView = async (studentID) => {
+    await syncStatuses();
+    const level = await getStudentLevel(studentID);
+    if (!level) return null;
+    return await getPeriodByLevelOpenOrClosed(level);
 };
 
 
@@ -62,7 +63,7 @@ const checkRegistrationOpen = (period) => {
 const getHospitals = async (req, res) => {
     try {
         const studentID = req.user.id;
-        const period = await getPeriodForStudent(studentID);
+        const period = await getPeriodForStudentView(studentID);
         if (!period) {
             return res.status(404).json({ message: "No open training period found for your level" });
         }
@@ -184,7 +185,7 @@ const getMyPreferences = async (req, res) => {
     try {
         const studentID = req.user.id;
 
-        const period = await getPeriodForStudent(studentID);
+        const period = await getPeriodForStudentView(studentID);
         if (!period) {
             return res.status(404).json({ message: "No open training period found for your level" });
         }

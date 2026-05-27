@@ -5,11 +5,13 @@
 
 
 import {
+    syncStatuses,
     openTrainingPeriod,
     checkOpenPeriodByLevel,
     getAllPeriods as fetchAllPeriods,
     getPeriodByID,
-    updateTrainingPeriod,
+    getLinkedHospitalIDs,
+    updatePeriodWithCapacities,
     addHospitalToPeriod,
     removeHospitalFromPeriod,
     getRegistrationStats,
@@ -45,7 +47,11 @@ const openPeriod = async (req, res) => {
             return res.status(400).json({ message: "Registration close date must be after open date" });
         }
 
-        // يمر على كل مستشفى ويتاكد ان ذي المعلومات موجودة 
+        if (new Date(registrationClose) >= new Date(startDate)) {
+            return res.status(400).json({ message: "Registration must close before training starts" });
+        }
+
+        // يمر على كل مستشفى ويتاكد ان ذي المعلومات موجودة
         for (const h of hospitals) {
             if (!h.hospitalID || h.maleCapacity < 0 || h.femaleCapacity < 0) {
                 return res.status(400).json({ message: "Invalid hospital data, please check and try again" });
@@ -58,6 +64,9 @@ const openPeriod = async (req, res) => {
         if (new Set(hospitalIDs).size !== hospitalIDs.length) {
             return res.status(400).json({ message: "Duplicate hospitals are not allowed" });
         }
+
+        // نغلق الفترات المنتهية تلقائياً قبل التحقق — يمنع تعارض الفترات المنتهية مع الجديدة
+        await syncStatuses();
 
         // هنا يشوف هل لنفس المستوى اكثر من فترة ؟ لان ممنوع فالازم يشيك
         const alreadyOpen = await checkOpenPeriodByLevel(level);
@@ -108,18 +117,15 @@ const openPeriod = async (req, res) => {
  */
 const editPeriod = async (req, res) => {
     try {
-      
-        const { periodID } = req.params;
-        const { name, level, startDate, endDate, registrationOpen, registrationClose } = req.body;
 
-        //  قبل نعدل نتاكد ان الفترة موجوده اصلا لو مو موجوده يطلع ايرور    
+        const { periodID } = req.params;
+        const { name, level, startDate, endDate, registrationOpen, registrationClose, hospitals } = req.body;
+        //  قبل نعدل نتاكد ان الفترة موجوده اصلا لو مو موجوده يطلع ايرور
         const period = await getPeriodByID(periodID);
         if (!period) {
             return res.status(404).json({ message: "Training period not found" });
         }
 
-        // يتاكد ان التسجيل مافتح قبل يسمح بالتعديل علشان مايصير يعدل والطلاب قد بداو يسجلوا
-        // يعني يشيك على التواريخ وكذا
         const now = new Date();
         if (now >= new Date(period.registrationOpen)) {
             return res.status(400).json({ message: "Cannot modify period after registration has opened" });
@@ -133,8 +139,45 @@ const editPeriod = async (req, res) => {
             return res.status(400).json({ message: "Registration close date must be after open date" });
         }
 
-        // لو كلشي كويس تحقق ذي وتطلع له رساله لو غلط بيدخل بالكاش
-        const updated = await updateTrainingPeriod(periodID, { name, level, startDate, endDate, registrationOpen, registrationClose });
+        if (new Date(registrationClose) >= new Date(startDate)) {
+            return res.status(400).json({ message: "Registration must close before training starts" });
+        }
+
+        // التحقق من صحة بيانات المستشفيات لو تم إرسالها
+        let validatedHospitals = [];
+        if (hospitals !== undefined) {
+            if (!Array.isArray(hospitals)) {
+                return res.status(400).json({ message: "Hospitals must be an array" });
+            }
+            for (const h of hospitals) {
+                if (!h.hospitalID) {
+                    return res.status(400).json({ message: "Each hospital must have a hospitalID" });
+                }
+                const mc = Number(h.maleCapacity);
+                const fc = Number(h.femaleCapacity);
+                if (isNaN(mc) || isNaN(fc) || mc < 0 || fc < 0) {
+                    return res.status(400).json({ message: "Hospital capacities must be valid numbers >= 0" });
+                }
+                validatedHospitals.push({ hospitalID: h.hospitalID, maleCapacity: mc, femaleCapacity: fc });
+            }
+
+            // نتأكد أن كل hospitalID ينتمي لهذي الفترة قبل أي تعديل
+            if (validatedHospitals.length > 0) {
+                const linkedIDs = await getLinkedHospitalIDs(periodID);
+                for (const h of validatedHospitals) {
+                    if (!linkedIDs.includes(Number(h.hospitalID))) {
+                        return res.status(400).json({ message: `Hospital ${h.hospitalID} is not linked to this period` });
+                    }
+                }
+            }
+        }
+
+        // تحديث الفترة وسعات المستشفيات في معاملة واحدة
+        const updated = await updatePeriodWithCapacities(
+            periodID,
+            { name, level, startDate, endDate, registrationOpen, registrationClose },
+            validatedHospitals
+        );
 
         res.status(200).json({
             message: "Training period updated successfully",
@@ -144,6 +187,9 @@ const editPeriod = async (req, res) => {
 
     } catch (error) {
         console.error('editPeriod error:', error);
+        if (error.code === 'NO_ROWS_MATCHED') {
+            return res.status(400).json({ message: "One or more hospitals could not be updated — hospital may not be linked to this period" });
+        }
         return res.status(500).json({ message: "Something went wrong, please try again" });
     }
 };
@@ -168,10 +214,9 @@ const addHospital = async (req, res) => {
             return res.status(404).json({ message: "Training period not found" });
         }
 
-        // نمنع تعديل المستشفيات بعد فتح التسجيل حتى لا تتغير الخيارات على الطلاب.
         const now = new Date();
         if (now >= new Date(period.registrationOpen)) {
-            return res.status(400).json({ message: "Cannot add hospitals after registration has opened" });
+            return res.status(400).json({ message: "Cannot modify hospitals after registration has opened" });
         }
 
         const { hospitalID, maleCapacity, femaleCapacity } = hospital;
@@ -217,7 +262,7 @@ const removeHospital = async (req, res) => {
 
         const now = new Date();
         if (now >= new Date(period.registrationOpen)) {
-            return res.status(400).json({ message: "Cannot remove hospitals after registration has opened" });
+            return res.status(400).json({ message: "Cannot modify hospitals after registration has opened" });
         }
 
         const removed = await removeHospitalFromPeriod(periodID, hospitalID);

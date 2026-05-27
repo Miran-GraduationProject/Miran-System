@@ -56,6 +56,18 @@ const checkOpenPeriodByLevel = async (level) => {
 };
 
 
+// تجيب أحدث فترة للطالب سواء OPEN أو CLOSED — للعرض فقط (الطالب يشوف رغباته بعد الإغلاق)
+const getPeriodByLevelOpenOrClosed = async (level) => {
+    const [rows] = await dbConnect.promise().execute(
+        `SELECT * FROM TRAINING_PERIOD
+         WHERE status IN ('OPEN', 'CLOSED') AND level = ?
+         ORDER BY createdAt DESC LIMIT 1`,
+        [level]
+    );
+    return rows[0] || null;
+};
+
+
 // تحدّث الحالات تلقائياً بناءً على التواريخ
 // OPEN → CLOSED إذا انتهى وقت التسجيل
 // ACTIVE → INACTIVE إذا انتهى تاريخ الفترة
@@ -100,23 +112,8 @@ const getPeriodByID = async (periodID) => {
     );
     return rows[0] || null;
 };
- 
- 
-//    تعديل
-const updateTrainingPeriod = async (periodID, data) => {
-    const { name, level, startDate, endDate, registrationOpen, registrationClose } = data;
 
-    const [result] = await dbConnect.promise().execute(
-        `UPDATE TRAINING_PERIOD
-         SET name = ?, level = ?, startDate = ?, endDate = ?, registrationOpen = ?, registrationClose = ?
-         WHERE periodID = ?`,
-        [name, level, startDate, endDate, registrationOpen, registrationClose, periodID]
-    );
 
-    return { periodID, name, level, changed: result.changedRows > 0 };
-};
- 
- 
 // اذا جينا نعدل الفترة نقدر نضيف مستشفيات جديدة وسعاتها
 const addHospitalToPeriod = async (periodID, hospitalData) => {
     const { hospitalID, maleCapacity, femaleCapacity } = hospitalData;
@@ -142,9 +139,12 @@ const removeHospitalFromPeriod = async (periodID, hospitalID) => {
 };
  
  
-// بصراحة مني متاكدة منه لانها حاجة اضافية 
+// بصراحة مني متاكدة منه لانها حاجة اضافية
 // الي هي يجيب احصائيات التسجيل
 const getRegistrationStats = async (periodID) => {
+    // نحدّث الحالات أولاً لضمان أن الإحصائيات تعكس الوضع الحالي
+    await syncStatuses();
+
     let period;
 // اول شي تجيب الفترة عن طريق الاي دي حقها او الي حاليا مفتوحه
     if (periodID) {
@@ -165,7 +165,7 @@ const getRegistrationStats = async (periodID) => {
 // هنا بيجيب لكل مستشفى كم عندهم ذكور واناث 
 // ومن خلال جدول الفرص بيشوف مين الي منجد سجلو 
     const [hospitals] = await dbConnect.promise().execute(
-        `SELECT op.opportunityID, h.name AS hospitalName,
+        `SELECT op.opportunityID, op.hospitalID, h.name AS hospitalName,
                 op.maleCapacity, op.femaleCapacity,
                 COUNT(DISTINCT CASE WHEN u.gender = 'Male' THEN sp.studentID END) AS maleRegistered,
                 COUNT(DISTINCT CASE WHEN u.gender = 'Female' THEN sp.studentID END) AS femaleRegistered
@@ -174,7 +174,7 @@ const getRegistrationStats = async (periodID) => {
          LEFT JOIN STUDENT_PREFERENCE sp ON sp.opportunityID = op.opportunityID
          LEFT JOIN \`User\` u ON u.userID = sp.studentID
          WHERE op.periodID = ?
-         GROUP BY op.opportunityID, h.name, op.maleCapacity, op.femaleCapacity
+         GROUP BY op.opportunityID, op.hospitalID, h.name, op.maleCapacity, op.femaleCapacity
          ORDER BY h.name ASC`,
         [period.periodID]
     );
@@ -183,14 +183,68 @@ const getRegistrationStats = async (periodID) => {
     // الي فوق هي هو عدد الذكور وعدد الاناث واجمالي الطلاب
     const [totals] = await dbConnect.promise().execute(
         `SELECT
-            (SELECT COUNT(*) FROM \`User\` WHERE role = 'Student') AS totalStudents,
+            (SELECT COUNT(*) FROM \`User\` u JOIN STUDENT s ON s.studentID = u.userID WHERE u.role = 'Student' AND s.level = ?) AS totalStudents,
+            (SELECT COUNT(*) FROM \`User\` u JOIN STUDENT s ON s.studentID = u.userID WHERE u.role = 'Student' AND u.gender = 'Male' AND s.level = ?) AS totalMaleStudents,
+            (SELECT COUNT(*) FROM \`User\` u JOIN STUDENT s ON s.studentID = u.userID WHERE u.role = 'Student' AND u.gender = 'Female' AND s.level = ?) AS totalFemaleStudents,
             (SELECT COUNT(DISTINCT sp.studentID) FROM STUDENT_PREFERENCE sp WHERE sp.periodID = ?) AS totalRegistered,
             (SELECT COUNT(DISTINCT sp.studentID) FROM STUDENT_PREFERENCE sp JOIN \`User\` u ON u.userID = sp.studentID WHERE sp.periodID = ? AND u.gender = 'Male') AS totalMaleRegistered,
             (SELECT COUNT(DISTINCT sp.studentID) FROM STUDENT_PREFERENCE sp JOIN \`User\` u ON u.userID = sp.studentID WHERE sp.periodID = ? AND u.gender = 'Female') AS totalFemaleRegistered`,
-        [period.periodID, period.periodID, period.periodID]
+        [period.level, period.level, period.level, period.periodID, period.periodID, period.periodID]
     );
 
     return { period, hospitals, ...totals[0] };
+};
+
+
+// تجيب كل hospitalIDs المرتبطة بفترة معينة — للتحقق قبل التعديل
+const getLinkedHospitalIDs = async (periodID) => {
+    const [rows] = await dbConnect.promise().execute(
+        `SELECT hospitalID FROM TRAINING_OPPORTUNITY WHERE periodID = ?`,
+        [periodID]
+    );
+    return rows.map(r => Number(r.hospitalID));
+};
+
+
+// تحديث بيانات الفترة وسعات مستشفياتها في معاملة واحدة — للحفاظ على الاتساق
+const updatePeriodWithCapacities = async (periodID, data, hospitals) => {
+    const { name, level, startDate, endDate, registrationOpen, registrationClose } = data;
+    const connection = await dbConnect.promise().getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const [result] = await connection.execute(
+            `UPDATE TRAINING_PERIOD
+             SET name = ?, level = ?, startDate = ?, endDate = ?,
+                 registrationOpen = ?, registrationClose = ?
+             WHERE periodID = ?`,
+            [name, level, startDate, endDate, registrationOpen, registrationClose, periodID]
+        );
+
+        for (const h of hospitals) {
+            const [opResult] = await connection.execute(
+                `UPDATE TRAINING_OPPORTUNITY
+                 SET maleCapacity = ?, femaleCapacity = ?
+                 WHERE periodID = ? AND hospitalID = ?`,
+                [h.maleCapacity, h.femaleCapacity, periodID, h.hospitalID]
+            );
+            if (opResult.affectedRows === 0) {
+                const err = new Error(`No TRAINING_OPPORTUNITY row matched periodID=${periodID} and hospitalID=${h.hospitalID}`);
+                err.code = 'NO_ROWS_MATCHED';
+                throw err;
+            }
+        }
+
+        await connection.commit();
+        return { periodID, name, level, changed: result.changedRows > 0 };
+
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
 };
 
 
@@ -241,9 +295,11 @@ export {
     syncStatuses,
     openTrainingPeriod,
     checkOpenPeriodByLevel,
+    getPeriodByLevelOpenOrClosed,
     getAllPeriods,
     getPeriodByID,
-    updateTrainingPeriod,
+    getLinkedHospitalIDs,
+    updatePeriodWithCapacities,
     addHospitalToPeriod,
     removeHospitalFromPeriod,
     getRegistrationStats,

@@ -54,6 +54,7 @@ router.post('/:periodID/confirm-allocation', verifyToken, verifyRole('University
 
 
 // بيانات الطلاب ورغباتهم ومستشفياتهم لفترة معينة
+// NOTE: هذا الـ endpoint غير مستخدم حالياً من الفرونت — محفوظ للاستخدام المستقبلي أو للتقارير
 router.get('/:periodID/student-preferences-data', verifyToken, verifyRole('UniversityCoordinator'), getStudentPreferencesData);
 
 

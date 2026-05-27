@@ -1,4 +1,4 @@
-import { runAllocationAlgorithm } from "../../src/services/allocationService.js";
+import { runAllocationAlgorithm } from "../../../src/services/allocationService.js";
 
 describe("Unit Test — Req 3: runAllocationAlgorithm", () => {
 
