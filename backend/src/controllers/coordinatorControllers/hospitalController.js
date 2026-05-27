@@ -1,4 +1,4 @@
-import { getAllHospitals, createHospital, updateHospital, deleteHospital } from '../../models/coordinatorModel/hospitalModel.js';
+import { getAllHospitals, getAcademicSupervisors, createHospital, updateHospital, deleteHospital } from '../../models/coordinatorModel/hospitalModel.js';
 // شرحت فكرتها بالمودل
 
 // يجيب  كل المستشفيات
@@ -13,16 +13,28 @@ const getHospitals = async (_req, res) => {
 };
 
 
+// يجيب المشرفين الأكاديميين
+const getSupervisors = async (_req, res) => {
+    try {
+        const supervisors = await getAcademicSupervisors();
+        res.status(200).json(supervisors);
+    } catch (error) {
+        console.error('getSupervisors error:', error);
+        res.status(500).json({ message: "Something went wrong, please try again" });
+    }
+};
+
+
 // يضيف مستشفى جديد
 const addHospital = async (req, res) => {
     try {
-        const { name, location } = req.body;
+        const { name, location, supervisorID } = req.body;
 
         if (!name || !location) {
             return res.status(400).json({ message: "Hospital name and location are required" });
         }
 
-        const hospital = await createHospital({ name, location });
+        const hospital = await createHospital({ name, location, supervisorID });
 
         res.status(201).json({
             message: "Hospital added successfully",
@@ -44,13 +56,13 @@ const addHospital = async (req, res) => {
 const editHospital = async (req, res) => {
     try {
         const { hospitalID } = req.params;
-        const { name, location } = req.body;
+        const { name, location, supervisorID } = req.body;
 
         if (!name || !location) {
             return res.status(400).json({ message: "Hospital name and location are required" });
         }
 
-        const result = await updateHospital(hospitalID, { name, location });
+        const result = await updateHospital(hospitalID, { name, location, supervisorID });
 
         if (!result.exists) {
             return res.status(404).json({ message: "Hospital not found" });
@@ -92,4 +104,4 @@ const removeHospital = async (req, res) => {
 };
 
 
-export { getHospitals, addHospital, editHospital, removeHospital };
+export { getHospitals, getSupervisors, addHospital, editHospital, removeHospital };

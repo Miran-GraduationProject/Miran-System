@@ -7,7 +7,25 @@ import dbConnect from "../../config/dbConnect.js";
 // يجيب  كل المستشفيات من الداتا
 const getAllHospitals = async () => {
     const [rows] = await dbConnect.promise().execute(
-        `SELECT hospitalID, name, location, createdAt FROM HOSPITAL ORDER BY hospitalID ASC`,
+        `SELECT h.hospitalID, h.name, h.location, h.createdAt, h.supervisorID,
+                u.firstName AS supervisorFirstName,
+                u.lastName  AS supervisorLastName
+         FROM HOSPITAL h
+         LEFT JOIN \`User\` u ON u.userID = h.supervisorID
+         ORDER BY h.hospitalID ASC`,
+        []
+    );
+    return rows;
+};
+
+
+// يجيب كل المشرفين الأكاديميين
+const getAcademicSupervisors = async () => {
+    const [rows] = await dbConnect.promise().execute(
+        `SELECT userID, firstName, secondName, lastName, email
+         FROM \`User\`
+         WHERE role = 'AcademicSupervisor'
+         ORDER BY firstName ASC, lastName ASC`,
         []
     );
     return rows;
@@ -15,17 +33,17 @@ const getAllHospitals = async () => {
 
 
 //  يضيف مستشفى جديد
-const createHospital = async ({ name, location }) => {
+const createHospital = async ({ name, location, supervisorID }) => {
     const [result] = await dbConnect.promise().execute(
-        `INSERT INTO HOSPITAL (name, location, createdAt) VALUES (?, ?, NOW())`,
-        [name, location]
+        `INSERT INTO HOSPITAL (name, location, supervisorID, createdAt) VALUES (?, ?, ?, NOW())`,
+        [name, location, supervisorID || null]
     );
-    return { hospitalID: result.insertId, name, location };
+    return { hospitalID: result.insertId, name, location, supervisorID: supervisorID || null };
 };
 
 
 // يعديل مستشفى
-const updateHospital = async (hospitalID, { name, location }) => {
+const updateHospital = async (hospitalID, { name, location, supervisorID }) => {
     // أولاً نتحقق ان المستشفى موجود
     const [rows] = await dbConnect.promise().execute(
         `SELECT hospitalID FROM HOSPITAL WHERE hospitalID = ?`,
@@ -34,8 +52,8 @@ const updateHospital = async (hospitalID, { name, location }) => {
     if (!rows[0]) return { exists: false, changed: false };
 
     const [result] = await dbConnect.promise().execute(
-        `UPDATE HOSPITAL SET name = ?, location = ? WHERE hospitalID = ?`,
-        [name, location, hospitalID]
+        `UPDATE HOSPITAL SET name = ?, location = ?, supervisorID = ? WHERE hospitalID = ?`,
+        [name, location, supervisorID || null, hospitalID]
     );
     return { exists: true, changed: result.changedRows > 0 };
 };
@@ -51,4 +69,4 @@ const deleteHospital = async (hospitalID) => {
 };
 
 
-export { getAllHospitals, createHospital, updateHospital, deleteHospital };
+export { getAllHospitals, getAcademicSupervisors, createHospital, updateHospital, deleteHospital };
