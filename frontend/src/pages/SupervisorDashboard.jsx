@@ -110,7 +110,7 @@ function SupervisorDashboard() {
               <span>الفترة التدريبية</span>
               <span>التقارير</span>
               <span>الإجراء</span>
-              <span>اللوق بوك</span>
+              <span>Log book</span>
             </div>
 
             <div className="table-body">
