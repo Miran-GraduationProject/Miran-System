@@ -54,7 +54,7 @@ dotenv.config();
 //   console.log("Connected!");
 // });
 
-const poolwithPromise = dbConnect.promise();
+// const poolwithPromise = dbConnect.promise();
 export default dbConnect;
 
 // const Connection = mysql.createConnection ({

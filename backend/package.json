@@ -4,13 +4,10 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --coverage",
     "start": "node src/app.js"
   },
   
-"jest": {
-  "testEnvironment": "node"
-},
   "keywords": [],
   "jest": {
     "testEnvironment": "node",

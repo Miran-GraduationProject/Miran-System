@@ -105,3 +105,32 @@ export const getAllTemplates = async () => {
 
   return rows;
 };
+
+
+
+//----------------حطيت الحذف هنا ي رزان----------------
+export const deleteTemplateAndFields = async (templateID) => {
+  await db.execute(
+    "DELETE FROM REPORT_ANSWER WHERE reportID IN (SELECT reportID FROM CASE_REPORT WHERE templateID = ?)",
+    [templateID]
+  );
+
+  await db.execute(
+    "DELETE FROM CASE_REPORT WHERE templateID = ?",
+    [templateID]
+  );
+
+  await db.execute(
+    "DELETE FROM ReportField WHERE templateID = ?",
+    [templateID]
+  );
+
+  const [result] = await db.execute(
+    "DELETE FROM TEMPLATE WHERE templateID = ?",
+    [templateID]
+  );
+
+  return result;
+};
+
+
