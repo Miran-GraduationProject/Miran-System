@@ -6,52 +6,60 @@ export const getStudentCases = async (req, res) => {
     const studentId = req.user.id; // الحصول على معرف الطالب من التوكن  
     // جلب الحالات الإلزامية للطالب
     const [cases] = await db.promise().query('SELECT caseID, caseName, notes, templateID  FROM Mandatory_Cases');
-    // جلب التقارير المرتبطة بالطالب
-    const [reports] = await db.promise().query(`SELECT templateID, decision FROM CASE_REPORT WHERE studentID = ?`, [studentId]);
-    // دمج الحالات مع التقارير لتحديد الحالة النهائية لكل حالة
-   const result = cases.map(c => {
-    // البحث عن التقرير المرتبط بالحالة الحالية
-   const report = reports.find(r => r.templateID === c.templateID);      
-        let status = "pending";
-    // تحديد الحالة النهائية بناءً على قرار التقرير
-  if (report) {
-    const decision = report.decision?.toLowerCase().trim();
-
-    if (decision === "accept") {
-      status = "accepted";
-    } else if (decision === "reject") {
-      status = "rejected";
-    } else if (decision === "needs revision") {
-      status = "needs revision";
-    } else {
-      status = "completed";
+   
+    if (cases.length === 0) {
+      return res.status(200).json({ message: "No cases found", data: [] });
     }
-  }
-  return {
-    caseID: c.caseID,
-    caseName: c.caseName,
-    notes: c.notes,
-    status
-  };
-});
+// جلب تقارير الحالات الخاصة بالطالب  
+    const [reports] = await db.promise().query(
+      'SELECT templateID, decision FROM CASE_REPORT WHERE studentID = ?',
+      [studentId]
+    );
+//   لتسهيل الوصول إلى تقارير الحالات بناءً على templateID 
+    const reportMap = new Map();
+    reports.map(r => [r.templateID, r]);
 
-// التحقق من وجود حالات في النتيجة وإرسال الرد المناسب  
-if (result.length === 0) {
-      return res.status(200).json({
-        message: "No cases found",
-        data: []
-      });
-    }
+  const result = cases.map((c) => {
+  const report = reports.find(
+    (r) => Number(r.templateID) === Number(c.templateID)
+  );
 
-    return res.status(200).json({
-      message: "Cases retrieved successfully",
-      data: result
+      let status = "pending";
+      if (report) {
+        switch (report.decision) {
+          case "Accept":
+            status = "accepted";
+            break;
+
+          case "Reject":
+            status = "rejected";
+            break;
+
+          case "Needs Revision":
+              status = "needs revision";
+              break;
+
+          case "Pending":
+                status = "pending";
+                break;
+
+          default:
+            status = "pending";
+         }
+      }
+      
+      return {
+        caseID: c.caseID,
+        caseName: c.caseName,
+        notes: c.notes,
+        status
+      };
     });
 
-    res.json(result);
-// إرسال النتيجة إلى الواجهة
+    return res.status(200).json({ message: "Cases retrieved successfully", data: result });
+
   } catch (error) {
- // طباعة الخطأ في الكونسول للتصحيح  
-console.error("Error:", error);
-    res.status(500).json({ error: "Error fetching cases" });
-  }};
+    console.error("Get Student Cases Error:", error);
+    return res.status(500).json({ message: "Error fetching cases" });
+  }
+};
