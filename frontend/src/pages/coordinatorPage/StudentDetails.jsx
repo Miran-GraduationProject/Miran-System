@@ -1,17 +1,17 @@
-// صفحة خاصة بالمشرف، لعرض تفاصيل احد الطلاب
+﻿// صفحة خاصة بالمشرف، لعرض تفاصيل احد الطلاب
 
 import { Component, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import '../styles/Button.css';
-import '../styles/page.css';
-import '../styles/BackButton.css'
+import '../../styles/Button.css';
+import '../../styles/page.css';
+import '../../styles/BackButton.css'
 import { styled } from "styled-components";
 import { FaArrowRight } from "react-icons/fa";
 
 
 // تنسيق معلومات الطالب من مكتبة styled-components مباشرة
 const Card = styled.div`
-  // background: #ffffff;
+  background: #ffffff;
   padding: 25px;
   border-radius: 14px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);

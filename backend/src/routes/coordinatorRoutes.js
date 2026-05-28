@@ -2,6 +2,7 @@ import express from 'express';
 import { verifyToken, verifyRole } from '../middlewares/atuhMiddleware.js';
 import { openPeriod, editPeriod, addHospital, removeHospital, getRegistrationStatsController, deletePeriod, getAllPeriods } from '../controllers/coordinatorControllers/openPeriodController.js';
 import { generatePreview, updatePreviewManually, confirmAllocationFinal, getAllocationPreviewController, getAllocatedPeriodsController, getConfirmedAllocationsController } from '../controllers/coordinatorControllers/allocationController.js';
+import { getStudentPreferencesData } from '../controllers/coordinatorControllers/studentPreferencesController.js';
 
 
 const router = express.Router();
@@ -49,6 +50,12 @@ router.put('/:periodID/adjust-allocation/:previewID', verifyToken, verifyRole('U
 
 // نأكيد التوزيع النهائي ونحفظه
 router.post('/:periodID/confirm-allocation', verifyToken, verifyRole('UniversityCoordinator'), confirmAllocationFinal);
+
+
+
+// بيانات الطلاب ورغباتهم ومستشفياتهم لفترة معينة
+// NOTE: هذا الـ endpoint غير مستخدم حالياً من الفرونت — محفوظ للاستخدام المستقبلي أو للتقارير
+router.get('/:periodID/student-preferences-data', verifyToken, verifyRole('UniversityCoordinator'), getStudentPreferencesData);
 
 
 
