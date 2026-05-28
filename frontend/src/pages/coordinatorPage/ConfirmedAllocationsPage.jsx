@@ -53,13 +53,17 @@ function ConfirmedAllocationsPage() {
   const fetchData = async (id) => {
     setDataLoad(true);
     try {
-      const [confRes, prevRes] = await Promise.all([
-        axios.get(`${API_BASE}/${id}/confirmed-allocations`, { headers }),
-        axios.get(`${API_BASE}/${id}/allocation-preview`, { headers }),
-      ]);
+      const confRes = await axios.get(`${API_BASE}/${id}/confirmed-allocations`, { headers });
       setData(confRes.data);
-      const preview = prevRes.data.preview || [];
-      setUnassignedCount(preview.filter(r => r.status === 'Unassigned').length);
+
+      // نحسب غير المعيّنين من registration-stats (عدد الطلاب الكلي - عدد المعيّنين المؤكدين)
+      try {
+        const statsRes = await axios.get(`http://localhost:3000/api/coordinator/training-period/registration-stats?periodID=${id}`, { headers });
+        const totalRegistered = (statsRes.data.hospitals || []).reduce((sum, h) => sum + (h.maleRegistered || 0) + (h.femaleRegistered || 0), 0);
+        const totalConfirmed  = confRes.data?.hospitals?.reduce((sum, h) => sum + (h.students?.length || 0), 0) || 0;
+        setUnassignedCount(Math.max(0, totalRegistered - totalConfirmed));
+      } catch { setUnassignedCount(0); }
+
     } catch { setError('تعذر تحميل بيانات التوزيع'); setData(null); }
     finally { setDataLoad(false); }
   };
