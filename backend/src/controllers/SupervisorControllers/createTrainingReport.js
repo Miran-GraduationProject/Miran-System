@@ -1,4 +1,4 @@
-import {
+ import {
   createTrainingReport,
   getTrainingPeriods,
 } from "../../models/supervisorModel/createReportModel.js";
