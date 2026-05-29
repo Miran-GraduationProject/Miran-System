@@ -65,6 +65,8 @@ function Navbar() {
   const [pillStyle, setPillStyle] = useState({});
   const navRef = useRef(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const visibleLinks = currentLink?.slice(0, 2);
+  const hiddenLinks = currentLink?.slice(2);
 
   const handleMouseEnter = (e, index) => {
     setHoveredIndex(index);
@@ -92,8 +94,8 @@ function Navbar() {
             {hoveredIndex !== null && (
               <span className="nav-pill" style={pillStyle} />
             )}
-            {currentLink &&
-              currentLink.map((item, index) => (
+            {visibleLinks &&
+              visibleLinks.map((item, index) => (
                 <NavLink
                   key={index}
                   to={item.path}
@@ -105,6 +107,33 @@ function Navbar() {
                   {item.name}
                 </NavLink>
               ))}
+
+              {hiddenLinks?.length > 0 && (
+  <div
+    className="more-dropdown"
+    onMouseEnter={() => setDropdownOpen(true)}
+    onMouseLeave={() => setDropdownOpen(false)}
+  >
+    
+       <FaChevronDown />
+   
+
+    {dropdownOpen && (
+      <div className="dropdown-menu">
+        {hiddenLinks.map((item, index) => (
+          <NavLink
+            key={index}
+            to={item.path}
+            className="dropdown-item"
+          >
+            {item.name}
+          </NavLink>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
           </div>
         </div>
 
