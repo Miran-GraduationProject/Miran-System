@@ -1,9 +1,9 @@
-// صفحة الطالبة الرئيسية
+﻿// صفحة الطالبة الرئيسية
 // الي ماسكتها بعدي تزبطها
 
 
 import { useNavigate } from 'react-router-dom';
-import '../styles/student.css';
+import '../../styles/student.css';
 
 function StudentDashboard() {
   const navigate = useNavigate();

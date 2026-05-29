@@ -1,59 +1,84 @@
-
 import db from "../../config/dbConnect.js";
 
 export const getStudentCases = async (req, res) => {
   try {
-    const studentId = req.user.id; // الحصول على معرف الطالب من التوكن  
-   // جلب الحالات الإلزامية للطالب
-    const [cases] = await db.promise().query('SELECT caseID, caseName, notes, templateID  FROM Mandatory_Cases');
+    const studentId = req.user?.id || req.user?.userID || req.user?.studentID;
 
+    if (!studentId) {
+      return res.status(401).json({
+        message: "Student ID not found in token",
+      });
+    }
 
-// جلب التقارير المرتبطة بالطالب
-const [reports] = await db.promise().query(
-  `
-  SELECT 
-    cr.templateID,
-    rs.approvalStatus,
-    rs.submissionID
-  FROM REPORT_SUBMISSION rs
-  JOIN CASE_REPORT cr
-    ON rs.reportID = cr.reportID
-  WHERE rs.studentID = ?
-    AND cr.reportStatus = 'PUBLISHED'
-  `,
-  [studentId]
-);
+    // جلب الحالات الإلزامية
+    const [cases] = await db.promise().query(
+      `
+      SELECT
+        caseID,
+        caseName,
+        notes,
+        templateID
+      FROM Mandatory_Cases
+      `
+    );
 
-    // دمج الحالات مع التقارير لتحديد الحالة النهائية لكل حالة
-   const result = cases.map(c => {
-    // البحث عن التقرير المرتبط بالحالة الحالية
-const report = reports.find(r => r.templateID === c.templateID);      
-        let status = "pending";
+    if (cases.length === 0) {
+      return res.status(200).json({
+        message: "No cases found",
+        data: [],
+      });
+    }
 
-// تحديد الحالة النهائية بناءً على حالة موافقة المشرف
-if (report) {
-  if (report.approvalStatus === "APPROVED") {
-    status = "accepted";
-  } else {
-    status = "completed";
-  }
-}
+    // جلب تقارير الطالب المرتبطة بالتسليمات
+    const [reports] = await db.promise().query(
+      `
+      SELECT 
+        cr.templateID,
+        rs.approvalStatus,
+        rs.submissionID
+      FROM REPORT_SUBMISSION rs
+      JOIN CASE_REPORT cr
+        ON rs.reportID = cr.reportID
+      WHERE rs.studentID = ?
+        AND cr.reportStatus = 'PUBLISHED'
+      `,
+      [studentId]
+    );
 
-  return {
-    caseID: c.caseID,
-    caseName: c.caseName,
-    notes: c.notes,
-    status
-  };
-});
-// طباعة النتيجة في الكونسول للتأكد من صحتها
-    console.log("RESULT:", result);
-    res.json(result);
-// إرسال النتيجة إلى الواجهة
+    // دمج الحالات مع تقارير الطالب
+    const result = cases.map((c) => {
+      const report = reports.find(
+        (r) => Number(r.templateID) === Number(c.templateID)
+      );
+
+      let status = "pending";
+
+      if (report) {
+        if (report.approvalStatus === "APPROVED") {
+          status = "accepted";
+        } else {
+          status = "completed";
+        }
+      }
+
+      return {
+        caseID: c.caseID,
+        caseName: c.caseName,
+        notes: c.notes,
+        templateID: c.templateID,
+        status,
+      };
+    });
+
+    return res.status(200).json({
+      message: "Cases retrieved successfully",
+      data: result,
+    });
   } catch (error) {
- // طباعة الخطأ في الكونسول للتصحيح  
-console.error("Error:", error);
-    res.status(500).json({ error: "Error fetching cases" });
+    console.error("Get Student Cases Error:", error);
+
+    return res.status(500).json({
+      message: "Error fetching cases",
+    });
   }
 };
-

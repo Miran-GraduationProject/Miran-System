@@ -12,7 +12,7 @@ jest.unstable_mockModule("jsonwebtoken", () => ({
 
 const jwtModule = await import("jsonwebtoken");
 const jwt = jwtModule.default;
-const { verifyToken } = await import("../../src/middlewares/atuhMiddleware.js");
+const { verifyToken } = await import("../../../src/middlewares/atuhMiddleware.js");
 
 describe("verifyToken", () => {
 

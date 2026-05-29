@@ -14,7 +14,7 @@ const getAvailableHospitals = async (periodID) => {
                 op.maleCapacity, op.femaleCapacity
          FROM TRAINING_OPPORTUNITY op
          JOIN HOSPITAL h ON h.hospitalID = op.hospitalID
-         WHERE op.periodID = ?
+         WHERE op.periodID = ? AND op.status = 'ACTIVE'
          ORDER BY h.name ASC`,
         [periodID]
     );

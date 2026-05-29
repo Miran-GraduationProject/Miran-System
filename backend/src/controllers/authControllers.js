@@ -23,7 +23,7 @@ dotenv.config();
 
 const login = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
     const user = await FindUserByEmail(email);
 
     if (!user) {
