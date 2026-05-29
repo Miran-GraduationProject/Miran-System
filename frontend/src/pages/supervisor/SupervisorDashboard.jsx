@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react'; // يوز ايفيكت لتشغيل كود معين من الباك ايند
 import { useNavigate } from 'react-router-dom'; // عشان ينتقل بين الصفحات
-import '../styles/Button.css';
-import '../styles/page.css';
-import '../styles/search.css'
-import '../styles/studentList.css'
-import "../styles/reports.css";
+import '../../styles/Buttons.css';
+import '../../styles/page.css';
+import '../../styles/search.css'
+import '../../styles/studentList.css'
+import "../../styles/reports.css";
 import { FaSearch } from "react-icons/fa";
 
 function SupervisorDashboard() {
@@ -74,7 +74,7 @@ function SupervisorDashboard() {
 
       <div className="search-card reports-search-card">
         <div className="results-count">
-          عدد النتائج: {students.length} طالب
+          عدد النتائج: {students.length}
         </div>
 
         <div className="group">

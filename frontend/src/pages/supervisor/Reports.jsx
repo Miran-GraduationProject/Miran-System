@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"; // استتخدمت useMono  عشان البحث يكون في الفرونت اند لين ماتسوي لمى كود البحث عن التقارير 
 import { useNavigate } from "react-router-dom"; // الانتقال بين الصفحات
-import "../styles/reports.css";
-import "../styles/search.css";
+import "../../styles/reports.css";
+import "../../styles/search.css";
 import { FaSearch } from "react-icons/fa"; 
 
 export default function Reports() {
