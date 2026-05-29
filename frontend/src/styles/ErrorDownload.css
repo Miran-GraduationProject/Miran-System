@@ -1,0 +1,36 @@
+.error-page {
+  text-align: center;
+  margin-top: 140px; /* ينزل النص تحت الهيدر */
+}
+
+/* النص */
+.error-page h2 {
+  color: #c0392b;
+  margin-bottom: 10px;
+}
+
+.error-page p {
+  color: #000;
+  margin-bottom: 20px;
+}
+
+/* زر الرجوع */
+.back-btn {
+  background-color: #1f3728;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px; /* مربع ناعم */
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  position: absolute;
+  right: 20px;   /* يمين */
+  top: 140px;    /* تحت الهيدر */
+  transition: 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #174b2a;
+}
+

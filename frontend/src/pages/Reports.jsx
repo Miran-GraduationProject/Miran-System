@@ -13,26 +13,45 @@ export default function Reports() {
 
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    fetchPublishedReports();
-  }, []);
+  
+  // دالة البحث
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+      let url = "";
 
-  // يجيب التقارير المنشورة بالنظام الجديد
+      if (!isNaN(search)) {
+        url = `http://localhost:3000/api/reviewCase/${search}`;
+      } else {
+        url = `http://localhost:3000/api/reviewCase/student/${search}`;
+      }
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (res.ok) {
+        setReports(Array.isArray(data.data) ? data.data : [data.data]);
+      } else {
+        setReports([]);
+      }
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+ 
+  // جلب التقارير المنشورة
   const fetchPublishedReports = async () => {
     try {
-      const res = await fetch(
-        "http://localhost:3000/api/supervisor/reports",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch("http://localhost:3000/api/supervisor/reports", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        console.error("Error fetching reports:", data);
         setReports([]);
         return;
       }
@@ -46,7 +65,16 @@ export default function Reports() {
     }
   };
 
-  // البحث في اسم التقرير أو اسم الفترة
+  
+  // تشغيل جلب التقارير مرة واحدة
+ 
+  useEffect(() => {
+    fetchPublishedReports();
+  }, []);
+
+  
+  // الفلترة
+ 
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
       const title = report.reportTitle || "";
@@ -59,29 +87,9 @@ export default function Reports() {
     });
   }, [reports, search]);
 
-  const stats = useMemo(() => {
-    const totalReports = reports.length;
-
-    const activeReports = reports.filter(
-      (report) => report.reportStatus === "PUBLISHED"
-    ).length;
-
-    const closedReports = reports.filter(
-      (report) => report.reportStatus === "CLOSED"
-    ).length;
-
-    const totalSubmitted = reports.reduce((sum, report) => {
-      return sum + Number(report.submittedStudents || 0);
-    }, 0);
-
-    return {
-      totalReports,
-      activeReports,
-      closedReports,
-      totalSubmitted,
-    };
-  }, [reports]);
-
+  
+  // دوال مساعدة
+  
   const getReportStatusText = (status) => {
     if (status === "PUBLISHED") return "نشط";
     if (status === "CLOSED") return "مغلق";
@@ -96,7 +104,6 @@ export default function Reports() {
 
   const formatDate = (date) => {
     if (!date) return "غير محدد";
-
     try {
       return new Date(date).toLocaleDateString("ar-SA");
     } catch {
@@ -107,24 +114,24 @@ export default function Reports() {
   const getPeriodText = (report) => {
     const periodName = report.periodName || "فترة غير محددة";
     const periodLevel = report.periodLevel ? ` - ${report.periodLevel}` : "";
-
     return `${periodName}${periodLevel}`;
   };
 
   const getStudentsText = (report) => {
     const totalStudents = Number(report.totalStudents || 0);
     const submittedStudents = Number(report.submittedStudents || 0);
-
     return `${submittedStudents} / ${totalStudents} سلموا`;
   };
 
+ 
+  // JSX
+  
   return (
     <div className="reports-page">
       <div className="top-reports-section">
         <div className="reports-header">
           <div className="reports-title">
             <div className="page-icon">📄</div>
-
             <div>
               <h1>التقارير</h1>
               <p>إدارة التقارير المنشورة ومتابعة تسليم الطلاب</p>
@@ -143,44 +150,6 @@ export default function Reports() {
         </div>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-content">
-            <span>إجمالي التقارير</span>
-            <strong>{stats.totalReports || 0}</strong>
-            <p>كل التقارير المنشورة</p>
-          </div>
-          <div className="stat-icon">📄</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-content">
-            <span>التقارير النشطة</span>
-            <strong>{stats.activeReports || 0}</strong>
-            <p>تقارير متاحة للطلاب</p>
-          </div>
-          <div className="stat-icon">✅</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-content">
-            <span>التقارير المغلقة</span>
-            <strong>{stats.closedReports || 0}</strong>
-            <p>تقارير غير متاحة حاليًا</p>
-          </div>
-          <div className="stat-icon">🔒</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-content">
-            <span>إجمالي التسليمات</span>
-            <strong>{stats.totalSubmitted || 0}</strong>
-            <p>عدد تسليمات الطلاب</p>
-          </div>
-          <div className="stat-icon">📥</div>
-        </div>
-      </div>
-
       <div className="search-card reports-search-card">
         <div className="results-count">
           عدد النتائج: {filteredReports.length} تقرير
@@ -193,9 +162,9 @@ export default function Reports() {
             placeholder="ابحث باسم التقرير أو الفترة..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
-
-          <FaSearch className="icon" />
+          <FaSearch className="icon" onClick={handleSearch} />
         </div>
       </div>
 
@@ -221,41 +190,39 @@ export default function Reports() {
               <span>الإجراء</span>
             </div>
 
-            {filteredReports.map((report) => (
-              <div className="table-row" key={report.reportID}>
-                <div className="report-title-cell">
-                  <span className="row-file-icon">📄</span>
-                  <div>
+            {(filteredReports.length > 0 ? filteredReports : reports).map(
+              (report) => (
+                <div className="table-row" key={report.reportID}>
+                  <div className="report-title-cell">
+                    <span className="row-file-icon">📄</span>
                     <span>{report.reportTitle || "بدون عنوان"}</span>
                     <small className="date-cell">
                       تاريخ النشر: {formatDate(report.publishedAt)}
                     </small>
                   </div>
+
+                  <span>{getPeriodText(report)}</span>
+                  <span>{getStudentsText(report)}</span>
+
+                  <span
+                    className={`status-badge ${getReportStatusClass(
+                      report.reportStatus
+                    )}`}
+                  >
+                    {getReportStatusText(report.reportStatus)}
+                  </span>
+
+                  <button
+                    className="view-report-btn"
+                    onClick={() =>
+                      navigate(`/reports/${report.reportID}/students`)
+                    }
+                  >
+                    عرض
+                  </button>
                 </div>
-
-                <span>{getPeriodText(report)}</span>
-
-                <span>{getStudentsText(report)}</span>
-
-                <span
-                  className={`status-badge ${getReportStatusClass(
-                    report.reportStatus
-                  )}`}
-                >
-                  {getReportStatusText(report.reportStatus)}
-                  <span className="status-check">✓</span>
-                </span>
-
-                <button
-                  className="view-report-btn"
-                  onClick={() =>
-                    navigate(`/reports/${report.reportID}/students`)
-                  }
-                >
-                  عرض
-                </button>
-              </div>
-            ))}
+              )
+            )}
           </div>
         )}
       </div>

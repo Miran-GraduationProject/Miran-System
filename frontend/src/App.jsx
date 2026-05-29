@@ -26,6 +26,9 @@ import Reports from "./pages/Reports";
 import ReportStudents from "./pages/ReportStudents";
 import ReportCreate from "./pages/ReportCreate";
 import Templates from "./pages/Templates";
+import SplashScreen from "./components/SplashScreen";
+import ErrorDownload from "./pages/ErrorDownload";
+
 
 import StudentReports from "./pages/StudentReports";
 import StudentReportFill from "./pages/StudentReportFill";
@@ -250,6 +253,19 @@ function App() {
                 </Layout>
               }
             />
+            <Route
+             path="/error-download"
+             element={
+               <Layout>
+                   <ErrorDownload />
+               </Layout>
+             }
+
+      
+
+            />
+
+
           </Routes>
         </BrowserRouter>
       )}

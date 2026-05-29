@@ -13,6 +13,7 @@
   cursor: pointer;
 }
 
+
 /*log book*/
 
 .logbook-cell {
@@ -21,7 +22,7 @@
 }
 
 .download-btn {
-  background-color: #1f3728;
+  background-color: #139270;
   color: white;
   border: none;
   padding: 10px 18px;

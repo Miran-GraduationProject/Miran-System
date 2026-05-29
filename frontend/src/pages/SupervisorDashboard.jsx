@@ -160,9 +160,20 @@ function SupervisorDashboard() {
                        <div className="logbook-cell">
                       <button
                        className="download-btn"
-                       onClick={() =>
-                         window.open(`http://localhost:3000/api/logbook/download/${s.studentID}`, "_blank")
-                         }
+                       onClick={async () => {
+                        try {
+                           const res = await fetch(
+                                      `http://localhost:3000/api/logbook/download/${s.studentID}`
+                            );
+                         if (!res.ok) throw new Error("Download failed");
+                         const blob = await res.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          window.open(url, "_blank");
+                          } catch (error) {
+                             navigate("/error-download");
+                          }
+                        }
+                       }
                          >
                            تحميل PDF
                       </button>
