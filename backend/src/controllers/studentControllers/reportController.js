@@ -1,66 +1,136 @@
 import {
+  getStudentReports,
   getReport,
   getReportFields,
-  submitReportAnswers
+  getReportAnswers,
+  submitReportAnswers,
 } from "../../models/studentModel/reportModel.js";
 
-/* ================= يعرض التقرير لطالب ================= */
-export const getReportController = async (req, res) => {
+/* ================= استخراج رقم الطالب من التوكن ================= */
+
+const getStudentIDFromToken = (req) => {
+  return req.user?.id || req.user?.userID || req.user?.studentID;
+};
+
+/* ================= يعرض قائمة التقارير للطالب ================= */
+
+export const getStudentReportsController = async (req, res) => {
   try {
-    const { reportID } = req.params;
+    const studentID = getStudentIDFromToken(req);
 
-    // 1. يجيب التقرير من قاعدة البيانات
-    const report = await getReport(reportID);
-
-    // 2. في حال ماحصل التقرير
-    if (!report.length) {
-      return res.status(404).json({
-        message: "Report not found"
+    if (!studentID) {
+      return res.status(401).json({
+        message: "Student ID not found in token",
       });
     }
 
-    // 3. يجيب الأسئلةالمرتبطة بالتمبلت
-    const fields = await getReportFields(report[0].templateID);
+    const reports = await getStudentReports(studentID);
 
-    // 4. يرسلها لطالب
-    res.json({
-      report: report[0],
-      fields
+    return res.json({
+      reports,
     });
-
   } catch (error) {
-    res.status(500).json({
-      message: "Error fetching report",
-      error: error.message
+    return res.status(500).json({
+      message: "Error fetching student reports",
+      error: error.message,
     });
   }
 };
 
+/* ================= يعرض تقرير واحد للطالب ================= */
+/*
+  إذا التقرير غير مسلم:
+  يرجع report + fields + answers فاضية
+
+  إذا التقرير مسلم:
+  يرجع report + fields + answers
+*/
+
+export const getReportController = async (req, res) => {
+  try {
+    const { reportID } = req.params;
+
+    const studentID = getStudentIDFromToken(req);
+
+    if (!studentID) {
+      return res.status(401).json({
+        message: "Student ID not found in token",
+      });
+    }
+
+    if (!reportID) {
+      return res.status(400).json({
+        message: "reportID is required",
+      });
+    }
+
+    const report = await getReport(reportID, studentID);
+
+    if (!report.length) {
+      return res.status(404).json({
+        message: "Report not found or not available for this student",
+      });
+    }
+
+    const fields = await getReportFields(report[0].templateID);
+
+    const answers = await getReportAnswers(report[0].submissionID);
+
+    return res.json({
+      report: report[0],
+      fields,
+      answers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error fetching report",
+      error: error.message,
+    });
+  }
+};
 
 /* ================= حفظ اجابات الطالب ================= */
+
 export const submitReportController = async (req, res) => {
   try {
     const { reportID, answers } = req.body;
 
-    // 1. التحقق من البيانات الأساسية
-    if (!reportID || !answers) {
-      return res.status(400).json({
-        message: "reportID and answers are required"
+    const studentID = getStudentIDFromToken(req);
+
+    if (!studentID) {
+      return res.status(401).json({
+        message: "Student ID not found in token",
       });
     }
 
-    // 2. حفظ الإجابات في قاعدة البيانات
-    await submitReportAnswers(reportID, answers);
+    if (!reportID || !answers) {
+      return res.status(400).json({
+        message: "reportID and answers are required",
+      });
+    }
 
-    // 3. رسالة اتمام العملية
-    res.json({
-      message: "Report submitted successfully"
+    if (!Array.isArray(answers) || answers.length === 0) {
+      return res.status(400).json({
+        message: "answers are required",
+      });
+    }
+
+    const result = await submitReportAnswers(reportID, studentID, answers);
+
+    if (result.success === false) {
+      return res.status(400).json(result);
+    }
+
+    return res.json({
+      message: "Report submitted successfully",
+      submissionID: result.submissionID,
+      reportID: result.reportID,
+      totalAnswers: result.totalAnswers,
     });
-
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error submitting report",
-      error: error.message
+      error: error.message,
     });
   }
 };
