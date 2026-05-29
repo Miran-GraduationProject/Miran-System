@@ -1,29 +1,71 @@
-import express from 'express';
-import { verifyToken, verifyRole } from '../middlewares/atuhMiddleware.js';
-import { getHospitals, submitPreferences, getMyPreferences } from '../controllers/studentControllers/preferenceController.js';
- import { getReportController, submitReportController } from "../controllers/studentControllers/reportController.js";
-// جلب الحالات الإلزامية للطالب مع حالة كل حالة (معلقة، مقبولة، مرفوضة، تحتاج مراجعة)
-import { getStudentCases } from "../controllers/studentControllers/studentCases.controller.js";
+import express from "express";
+import { verifyToken, verifyRole } from "../middlewares/atuhMiddleware.js";
 
+import {
+  getHospitals,
+  submitPreferences,
+  getMyPreferences,
+} from "../controllers/studentControllers/preferenceController.js";
 
- const router = express.Router();
-//يجيب الفترة مع المستشفيات الي مسجلة جوتها
-router.get('/hospitals', verifyToken, verifyRole('Student'), getHospitals);
- 
+import {
+  getStudentReportsController,
+  getReportController,
+  submitReportController,
+} from "../controllers/studentControllers/reportController.js";
+
+// جلب الحالات الإلزامية للطالب مع حالة كل حالة
+import {
+  getStudentCases,
+} from "../controllers/studentControllers/studentCases.controller.js";
+
+const router = express.Router();
+
+//---------------------------------------------
+// الرغبات والمستشفيات
+
+// يجيب الفترة مع المستشفيات الي مسجلة جوتها
+router.get("/hospitals", verifyToken, verifyRole("Student"), getHospitals);
+
 // يحفظ ترتيب الرغبات
-router.post('/preferences', verifyToken, verifyRole('Student'), submitPreferences);
- 
+router.post("/preferences", verifyToken, verifyRole("Student"), submitPreferences);
 
 // يعرضها
-router.get('/preferences', verifyToken, verifyRole('Student'), getMyPreferences);
- 
-//---------------------------------------------
-router.get("/report/:reportID", getReportController);
+router.get("/preferences", verifyToken, verifyRole("Student"), getMyPreferences);
 
-router.post("/report/submit", submitReportController);
 //---------------------------------------------
-// جلب الحالات الإلزامية للطالب مع حالة كل حالة (معلقة، مقبولة، مرفوضة، تحتاج مراجعة)
-router.get("/cases", verifyToken, verifyRole('Student'), getStudentCases);
+// التقارير
+
+// يعرض كل التقارير المتاحة للطالب
+router.get(
+  "/reports",
+  verifyToken,
+  verifyRole("Student"),
+  getStudentReportsController
+);
+
+// يعرض تقرير واحد حسب رقم التقرير
+router.get(
+  "/report/:reportID",
+  verifyToken,
+  verifyRole("Student"),
+  getReportController
+);
+
+// تسليم التقرير
+router.post(
+  "/report/submit",
+  verifyToken,
+  verifyRole("Student"),
+  submitReportController
+);
+
+//---------------------------------------------
+// جلب الحالات الإلزامية للطالب مع حالة كل حالة
+router.get(
+  "/cases",
+  verifyToken,
+  verifyRole("Student"),
+  getStudentCases
+);
 
 export default router;
-

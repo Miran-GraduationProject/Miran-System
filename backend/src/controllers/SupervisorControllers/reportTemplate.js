@@ -1,165 +1,267 @@
 import {
-  getAllTemplates, // تعديل بعد الفرونت
+  getAllTemplates,
   getTemplateById,
-  createTemplate ,
+  createTemplate,
   getTemplateFields,
   addReportField,
   updateReportField,
   deleteReportField,
-  deleteTemplateAndFields
+  deleteTemplateAndFields,
 } from "../../models/supervisorModel/reportTemplateModel.js";
 
-//====== تعديل بعد ماشفت الفرونت
-// ================= جلب كل القوالب =================
+/* =====================================================
+   TEMPLATE CONTROLLER
+===================================================== */
 
 export const getAllTemplatesController = async (req, res) => {
   try {
-    const data = await getAllTemplates();
+    const templates = await getAllTemplates();
 
-    res.status(200).json(data);
-
+    return res.status(200).json(templates);
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error fetching templates",
       error: error.message,
     });
   }
 };
-//======
-
-// ================= إنشاء تمبلت =================
 
 export const createTemplateController = async (req, res) => {
   try {
-    const { reportTitle } = req.body;
+    const { reportTitle } = req.body || {};
+
+    const academicSupervisorID =
+      req.user?.id || req.user?.userID || req.user?.academicSupervisorID;
+
+    if (!academicSupervisorID) {
+      return res.status(401).json({
+        message: "Academic supervisor ID not found in token",
+      });
+    }
+
+    if (typeof reportTitle !== "string" || !reportTitle.trim()) {
+      return res.status(400).json({
+        message: "reportTitle is required",
+      });
+    }
 
     const result = await createTemplate(
-      req.user.id,
-      reportTitle
+      academicSupervisorID,
+      reportTitle.trim()
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Template created successfully",
       templateID: result.insertId,
     });
-
   } catch (error) {
-    res.status(500).json({
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        message: "Template title already exists for this supervisor",
+      });
+    }
+
+    return res.status(500).json({
       message: "Error creating template",
       error: error.message,
     });
   }
 };
 
-/* ================= التمبلت ================= */
-
 export const getTemplateByIdController = async (req, res) => {
   try {
     const { templateID } = req.params;
 
-    const data = await getTemplateById(templateID);
-//اذا ماحصل التمبلت يرجع رسالة الخطا 404
-    if (!data.length) {
-      return res.status(404).json({ message: "Template not found" });
+    if (!templateID) {
+      return res.status(400).json({
+        message: "templateID is required",
+      });
     }
 
-    res.json(data[0]);
+    const template = await getTemplateById(templateID);
 
+    if (!template.length) {
+      return res.status(404).json({
+        message: "Template not found",
+      });
+    }
+
+    return res.status(200).json(template[0]);
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error fetching template",
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-
-/* ================= حقول التمبلت ================= */
+/* =====================================================
+   ReportField CONTROLLER
+===================================================== */
 
 export const getTemplateFieldsController = async (req, res) => {
   try {
     const { templateID } = req.params;
-//يجيب حقول التمبلت 
-    const data = await getTemplateFields(templateID);
 
-    res.json({
+    if (!templateID) {
+      return res.status(400).json({
+        message: "templateID is required",
+      });
+    }
+
+    const fields = await getTemplateFields(templateID);
+
+    return res.status(200).json({
       templateID,
-      fields: data
+      fields,
     });
-
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error fetching fields",
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-
-// إضافة حقل
 export const addFieldController = async (req, res) => {
   try {
-    const { templateID, fieldLabel, fieldType, isRequired } = req.body;
+    const { templateID, fieldLabel, fieldType, isRequired } = req.body || {};
 
-    await addReportField(templateID, fieldLabel, fieldType, isRequired);
+    if (!templateID) {
+      return res.status(400).json({
+        message: "templateID is required",
+      });
+    }
 
-    res.json({ message: "Field added successfully" });
+    if (typeof fieldLabel !== "string" || !fieldLabel.trim()) {
+      return res.status(400).json({
+        message: "fieldLabel is required",
+      });
+    }
 
+    if (typeof fieldType !== "string" || !fieldType.trim()) {
+      return res.status(400).json({
+        message: "fieldType is required",
+      });
+    }
+
+    const result = await addReportField(
+      templateID,
+      fieldLabel.trim(),
+      fieldType.trim(),
+      isRequired ?? 0
+    );
+
+    return res.status(201).json({
+      message: "Field added successfully",
+      fieldID: result.insertId,
+    });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error adding field",
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-
-// تعديل حقل
 export const updateFieldController = async (req, res) => {
   try {
-    const { fieldID, fieldLabel, fieldType, isRequired } = req.body;
+    const { fieldID, fieldLabel, fieldType, isRequired } = req.body || {};
 
-    await updateReportField(fieldID, fieldLabel, fieldType, isRequired);
+    if (!fieldID) {
+      return res.status(400).json({
+        message: "fieldID is required",
+      });
+    }
 
-    res.json({ message: "Field updated successfully" });
+    if (typeof fieldLabel !== "string" || !fieldLabel.trim()) {
+      return res.status(400).json({
+        message: "fieldLabel is required",
+      });
+    }
 
+    if (typeof fieldType !== "string" || !fieldType.trim()) {
+      return res.status(400).json({
+        message: "fieldType is required",
+      });
+    }
+
+    const result = await updateReportField(
+      fieldID,
+      fieldLabel.trim(),
+      fieldType.trim(),
+      isRequired ?? 0
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Field not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Field updated successfully",
+    });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error updating field",
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-
-// حذف حقل
 export const deleteFieldController = async (req, res) => {
   try {
     const { fieldID } = req.params;
 
-    await deleteReportField(fieldID);
+    if (!fieldID) {
+      return res.status(400).json({
+        message: "fieldID is required",
+      });
+    }
 
-    res.json({ message: "Field deleted successfully" });
+    const result = await deleteReportField(fieldID);
 
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Field not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Field deleted successfully",
+    });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error deleting field",
-      error: error.message
+      error: error.message,
     });
   }
 };
-
-//----------------------  ---------------
 
 export const deleteTemplateController = async (req, res) => {
   try {
     const { templateID } = req.params;
 
-    await deleteTemplateAndFields(templateID);
+    if (!templateID) {
+      return res.status(400).json({
+        message: "templateID is required",
+      });
+    }
 
-    res.status(200).json({ message: "Template and its fields deleted successfully" });
+    const result = await deleteTemplateAndFields(templateID);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Template not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Template and its related data deleted successfully",
+    });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error deleting template",
       error: error.message,
     });

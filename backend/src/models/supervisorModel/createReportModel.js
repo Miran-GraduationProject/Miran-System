@@ -2,60 +2,108 @@ import dbConnect from "../../config/dbConnect.js";
 
 const db = dbConnect.promise();
 
-/* ================= انشاء تقرير ================= */
+/* =====================================================
+   إنشاء / نشر تقرير لفترة تدريبية
 
-export const createTrainingReport = async (templateID, periodID) => {
+   CASE_REPORT = تقرير عام منشور لفترة
+   REPORT_SUBMISSION = تسليم الطالب لاحقًا
+===================================================== */
 
-  // يجيب الطلاب حسب الفترة
-  const [students] = await db.execute(
-    "SELECT studentID FROM STUDENT WHERE periodID = ?",
-    [periodID]
-  );
-
-  if (!students.length) {
-    return { message: "No students found in this period" };
-  }
-
-  // التأكد من وجود التمبلت
+export const createTrainingReport = async (
+  templateID,
+  periodID,
+  academicSupervisorID,
+  reportTitle
+) => {
   const [template] = await db.execute(
-    "SELECT * FROM TEMPLATE WHERE templateID = ?",
+    `SELECT templateID, reportTitle
+     FROM TEMPLATE
+     WHERE templateID = ?`,
     [templateID]
   );
 
   if (!template.length) {
-    return { message: "Template not found" };
+    return {
+      success: false,
+      statusCode: 404,
+      message: "Template not found",
+    };
   }
 
-  // إنشاء تقرير لكل طالب
-  for (let student of students) {
-    await db.execute(
-      `INSERT INTO CASE_REPORT 
-      (status, templateID, studentID, periodID, submissionDate, submissionTime)
-      VALUES (?, ?, ?, ?, CURDATE(), CURTIME())`,
-      [
-        "Submitted",
-        templateID,
-        student.studentID,
-        periodID
-      ]
-    );
+  const [period] = await db.execute(
+    `SELECT periodID
+     FROM TRAINING_PERIOD
+     WHERE periodID = ?`,
+    [periodID]
+  );
+
+  if (!period.length) {
+    return {
+      success: false,
+      statusCode: 404,
+      message: "Training period not found",
+    };
   }
+
+  const finalReportTitle = reportTitle?.trim() || template[0].reportTitle;
+
+  const [existingReport] = await db.execute(
+    `SELECT reportID
+     FROM CASE_REPORT
+     WHERE periodID = ?
+       AND reportTitle = ?
+       AND academicSupervisorID = ?
+       AND reportStatus = 'PUBLISHED'`,
+    [periodID, finalReportTitle, academicSupervisorID]
+  );
+
+  if (existingReport.length) {
+    return {
+      success: false,
+      statusCode: 409,
+      message:
+        "A report with this title is already published for this training period",
+    };
+  }
+
+  const [result] = await db.execute(
+    `INSERT INTO CASE_REPORT
+     (
+       templateID,
+       periodID,
+       academicSupervisorID,
+       reportTitle,
+       reportStatus
+     )
+     VALUES (?, ?, ?, ?, 'PUBLISHED')`,
+    [templateID, periodID, academicSupervisorID, finalReportTitle]
+  );
 
   return {
-    message: "Training reports created successfully",
-    totalStudents: students.length
+    success: true,
+    statusCode: 201,
+    message: "Training report created successfully",
+    reportID: result.insertId,
+    reportTitle: finalReportTitle,
   };
 };
 
+/* =====================================================
+   جلب الفترات التدريبية
+===================================================== */
 
+export const getTrainingPeriods = async () => {
+  const [periods] = await db.execute(
+    `SELECT 
+       periodID,
+       name,
+       level,
+       startDate,
+       endDate,
+       status
+     FROM TRAINING_PERIOD
+     ORDER BY startDate DESC`
+  );
 
-/**
- * هذا الملف مسؤول عن إنشاء تقارير التدريب للطلاب
- * يستخدمه المشرف لإنشاء تقرير لكل طالب في فترة تدريب معينة
- * الفكرة:
- * عند اختيار Template + Period
- * يتم إنشاء تقرير لكل طالب داخل هذه الفترة
- *
- * الوظيفة الوحيدة:
- * 1. إنشاء تقارير تدريب لجميع الطلاب
- */
+  return periods;
+};
