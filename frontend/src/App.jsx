@@ -32,7 +32,7 @@ import StudentReportFill from "./pages/StudentReportFill";
 
 import SplashScreen from "./components/SplashScreen";
 import Navbar from "./components/navbar";
-
+import Footer from "./components/footer"
 const Layout = ({ children }) => {
   const location = useLocation();
   const hideNavbar = location.pathname === "/login";
@@ -41,6 +41,7 @@ const Layout = ({ children }) => {
     <>
       {!hideNavbar && <Navbar />}
       <div className="page-top">{children}</div>
+      <Footer />
     </>
   );
 };
