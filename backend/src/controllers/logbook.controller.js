@@ -20,12 +20,19 @@ class LogbookController {
 `;
 
 
-    // ✅ استعلام تقارير الطالب
-    const reportsQuery = `
-      SELECT reportID, status, submissionDate, submissionTime, periodID
-      FROM CASE_REPORT
-      WHERE studentID = ?
-    `;
+   // ✅ استعلام تقارير الطالب
+const reportsQuery = `
+  SELECT 
+    cr.reportID,
+    cr.reportStatus AS status,
+    rs.submissionDate,
+    rs.submissionTime,
+    cr.periodID
+  FROM REPORT_SUBMISSION rs
+  JOIN CASE_REPORT cr ON rs.reportID = cr.reportID
+  WHERE rs.studentID = ?
+  ORDER BY rs.submissionDate DESC, rs.submissionTime DESC
+`;
 
     db.query(studentQuery, [studentId], (err, studentResult) => {
       if (err) {

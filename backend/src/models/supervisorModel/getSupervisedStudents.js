@@ -22,9 +22,14 @@ const getSupervisedStudents = async (academicSupervisorID) => {
   // جيب كل التقارير للطالب
   for (let student of rows) {
     const [reportRows] = await dbConnect.promise().execute(
-      `SELECT COUNT(*) AS reports FROM CASE_REPORT WHERE studentID = ?`,
-      [student.studentID]
-    );
+  `SELECT COUNT(*) AS reports
+   FROM REPORT_SUBMISSION rs
+   JOIN CASE_REPORT cr ON rs.reportID = cr.reportID
+   WHERE rs.studentID = ?
+     AND cr.academicSupervisorID = ?
+     AND cr.reportStatus = 'PUBLISHED'`,
+  [student.studentID, academicSupervisorID]
+);
 
     // احسب عدد التقارير واضفها للطالب
     student.reports = reportRows[0].reports;
