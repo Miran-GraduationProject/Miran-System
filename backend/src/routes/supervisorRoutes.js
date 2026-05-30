@@ -73,6 +73,8 @@ router.put("/submission/:submissionID/approve", approveSubmissionController);
 
 router.post('/cases', verifyToken, verifyRole('AcademicSupervisor'), createCase);
 router.put('/cases/:caseID', verifyToken, verifyRole('AcademicSupervisor'), updateCase);
+router.delete('/cases', verifyToken, verifyRole('AcademicSupervisor'),(req, res) => {return res.status(400).json({ message: "case ID is required"});} );
+
 router.delete('/cases/:caseID', verifyToken, verifyRole('AcademicSupervisor'), deleteCase);
 
 router.delete('/templates/:templateID', deleteTemplateController);
