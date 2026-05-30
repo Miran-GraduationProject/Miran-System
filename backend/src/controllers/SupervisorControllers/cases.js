@@ -263,6 +263,7 @@ export const updateCase = async (req, res) => {
     return res.status(200).json({
       message: "Case updated successfully",
     });
+
   } catch (error) {
     console.error("Error updating case:", error);
 
