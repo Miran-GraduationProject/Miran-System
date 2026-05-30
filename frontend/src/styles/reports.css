@@ -372,3 +372,13 @@
     width: 100%;
   }
 }
+.status-badge.expired {
+  background: #fde2e2;
+  color: #b42318;
+}
+
+.status-badge.expired .status-check {
+  background: rgba(180, 35, 24, 0.12);
+  color: #b42318;
+}
+
