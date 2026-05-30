@@ -9,13 +9,35 @@ import {
   deleteTemplateAndFields,
 } from "../../models/supervisorModel/reportTemplateModel.js";
 
-/* =====================================================
-   TEMPLATE CONTROLLER
-===================================================== */
+/**
+ * Get the AcademicSupervisor ID from the logged-in user token.
+ * If the ID does not exist, it returns null.
+ * @param {Object} req - The request object.
+ * @returns {number|string|null} The AcademicSupervisor ID or null.
+ */
+
+const getAcademicSupervisorID = (req) => {
+ return req.user?.id ?? null;
+};
+
+/**
+ * Get all templates for the logged-in supervisor.
+ * @param {Object} req - Request object.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 
 export const getAllTemplatesController = async (req, res) => {
   try {
-    const templates = await getAllTemplates();
+    const academicSupervisorID = getAcademicSupervisorID(req);
+
+    if (!academicSupervisorID) {
+      return res.status(401).json({
+        message: "Academic supervisor ID not found in token",
+      });
+    }
+
+    const templates = await getAllTemplates(academicSupervisorID);
 
     return res.status(200).json(templates);
   } catch (error) {
@@ -26,12 +48,21 @@ export const getAllTemplatesController = async (req, res) => {
   }
 };
 
+/**
+ * Create a new report template for the supervisor.
+ * It checks the supervisor ID and report title before saving the template.
+ * @param {Object} req - Request object.
+ * @param {Object} req.body - Request body.
+ * @param {string} req.body.reportTitle - Template title.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
+
 export const createTemplateController = async (req, res) => {
   try {
     const { reportTitle } = req.body || {};
 
-    const academicSupervisorID =
-      req.user?.id || req.user?.userID || req.user?.academicSupervisorID;
+    const academicSupervisorID = getAcademicSupervisorID(req);
 
     if (!academicSupervisorID) {
       return res.status(401).json({
@@ -68,9 +99,26 @@ export const createTemplateController = async (req, res) => {
   }
 };
 
+/**
+ * Get one template by its ID.
+ * The template must belong to the logged-in supervisor.
+ * @param {Object} req - Request object.
+ * @param {Object} req.params - Route parameters.
+ * @param {number|string} req.params.templateID - Template ID.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 export const getTemplateByIdController = async (req, res) => {
   try {
     const { templateID } = req.params;
+
+    const academicSupervisorID = getAcademicSupervisorID(req);
+
+    if (!academicSupervisorID) {
+      return res.status(401).json({
+        message: "Academic supervisor ID not found in token",
+      });
+    }
 
     if (!templateID) {
       return res.status(400).json({
@@ -78,7 +126,7 @@ export const getTemplateByIdController = async (req, res) => {
       });
     }
 
-    const template = await getTemplateById(templateID);
+    const template = await getTemplateById(templateID, academicSupervisorID);
 
     if (!template.length) {
       return res.status(404).json({
@@ -95,17 +143,39 @@ export const getTemplateByIdController = async (req, res) => {
   }
 };
 
-/* =====================================================
-   ReportField CONTROLLER
-===================================================== */
+/**
+ * Get all fields for a specific template.
+ * The function first checks that the template belongs to the logged-in supervisor.
+ * @param {Object} req - Request object.
+ * @param {Object} req.params - Route parameters.
+ * @param {number|string} req.params.templateID - Template ID.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 
 export const getTemplateFieldsController = async (req, res) => {
   try {
     const { templateID } = req.params;
 
+    const academicSupervisorID = getAcademicSupervisorID(req);
+
+    if (!academicSupervisorID) {
+      return res.status(401).json({
+        message: "Academic supervisor ID not found in token",
+      });
+    }
+
     if (!templateID) {
       return res.status(400).json({
         message: "templateID is required",
+      });
+    }
+
+    const template = await getTemplateById(templateID, academicSupervisorID);
+
+    if (!template.length) {
+      return res.status(404).json({
+        message: "Template not found",
       });
     }
 
@@ -123,9 +193,29 @@ export const getTemplateFieldsController = async (req, res) => {
   }
 };
 
+/**
+ * Add a new field to a template.
+ * It checks the template ID, field label, and field type before adding the field.
+ * @param {Object} req - Request object.
+ * @param {Object} req.body - Request body.
+ * @param {number|string} req.body.templateID - Template ID.
+ * @param {string} req.body.fieldLabel - Field label.
+ * @param {string} req.body.fieldType - Field type.
+ * @param {number} req.body.isRequired - Shows if the field is required.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 export const addFieldController = async (req, res) => {
   try {
     const { templateID, fieldLabel, fieldType, isRequired } = req.body || {};
+
+    const academicSupervisorID = getAcademicSupervisorID(req);
+
+    if (!academicSupervisorID) {
+      return res.status(401).json({
+        message: "Academic supervisor ID not found in token",
+      });
+    }
 
     if (!templateID) {
       return res.status(400).json({
@@ -142,6 +232,14 @@ export const addFieldController = async (req, res) => {
     if (typeof fieldType !== "string" || !fieldType.trim()) {
       return res.status(400).json({
         message: "fieldType is required",
+      });
+    }
+
+    const template = await getTemplateById(templateID, academicSupervisorID);
+
+    if (!template.length) {
+      return res.status(404).json({
+        message: "Template not found",
       });
     }
 
@@ -163,10 +261,39 @@ export const addFieldController = async (req, res) => {
     });
   }
 };
+/**
+ * Update an existing field in a template.
+ * The function checks that the template belongs to the logged-in supervisor
+ * before updating the field.
+ * @param {Object} req - Request object.
+ * @param {Object} req.body - Request body.
+ * @param {number|string} req.body.fieldID - Field ID.
+ * @param {number|string} req.body.templateID - Template ID.
+ * @param {string} req.body.fieldLabel - Updated field label.
+ * @param {string} req.body.fieldType - Updated field type.
+ * @param {number} req.body.isRequired - Shows if the field is required.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 
 export const updateFieldController = async (req, res) => {
   try {
-    const { fieldID, fieldLabel, fieldType, isRequired } = req.body || {};
+    const { fieldID, templateID, fieldLabel, fieldType, isRequired } =
+      req.body || {};
+
+    const academicSupervisorID = getAcademicSupervisorID(req);
+
+    if (!academicSupervisorID) {
+      return res.status(401).json({
+        message: "Academic supervisor ID not found in token",
+      });
+    }
+
+    if (!templateID) {
+      return res.status(400).json({
+        message: "templateID is required",
+      });
+    }
 
     if (!fieldID) {
       return res.status(400).json({
@@ -183,6 +310,14 @@ export const updateFieldController = async (req, res) => {
     if (typeof fieldType !== "string" || !fieldType.trim()) {
       return res.status(400).json({
         message: "fieldType is required",
+      });
+    }
+
+    const template = await getTemplateById(templateID, academicSupervisorID);
+
+    if (!template.length) {
+      return res.status(404).json({
+        message: "Template not found",
       });
     }
 
@@ -209,14 +344,49 @@ export const updateFieldController = async (req, res) => {
     });
   }
 };
-
+ 
+/**
+ * Delete a field from a template.
+ * The function checks that the template belongs to the logged-in supervisor
+ * before deleting the field.
+ * @param {Object} req - Request object.
+ * @param {Object} req.params - Route parameters.
+ * @param {number|string} req.params.fieldID - Field ID.
+ * @param {Object} req.body - Request body.
+ * @param {number|string} req.body.templateID - Template ID.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 export const deleteFieldController = async (req, res) => {
   try {
     const { fieldID } = req.params;
+    const { templateID } = req.body || {};
+
+    const academicSupervisorID = getAcademicSupervisorID(req);
+
+    if (!academicSupervisorID) {
+      return res.status(401).json({
+        message: "Academic supervisor ID not found in token",
+      });
+    }
+
+    if (!templateID) {
+      return res.status(400).json({
+        message: "templateID is required",
+      });
+    }
 
     if (!fieldID) {
       return res.status(400).json({
         message: "fieldID is required",
+      });
+    }
+
+    const template = await getTemplateById(templateID, academicSupervisorID);
+
+    if (!template.length) {
+      return res.status(404).json({
+        message: "Template not found",
       });
     }
 
@@ -238,14 +408,39 @@ export const deleteFieldController = async (req, res) => {
     });
   }
 };
-
+/**
+ * Delete a template and its related data.
+ * The function checks that the template belongs to the logged-in supervisor
+ * before deleting it.
+ * @param {Object} req - Request object.
+ * @param {Object} req.params - Route parameters.
+ * @param {number|string} req.params.templateID - Template ID.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 export const deleteTemplateController = async (req, res) => {
   try {
     const { templateID } = req.params;
 
+    const academicSupervisorID = getAcademicSupervisorID(req);
+
+    if (!academicSupervisorID) {
+      return res.status(401).json({
+        message: "Academic supervisor ID not found in token",
+      });
+    }
+
     if (!templateID) {
       return res.status(400).json({
         message: "templateID is required",
+      });
+    }
+    
+    const template = await getTemplateById(templateID, academicSupervisorID);
+
+    if (!template.length) {
+      return res.status(404).json({
+        message: "Template not found",
       });
     }
 

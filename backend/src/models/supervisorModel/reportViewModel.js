@@ -2,30 +2,40 @@ import dbConnect from "../../config/dbConnect.js";
 
 const db = dbConnect.promise();
 
-/* =====================================================
-   REPORT VIEW MODEL
+/**
+ * Get the supervisor hospital from the User table.
+ *
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @returns {Promise<string|null>} Supervisor hospital or null.
+ */
+const getSupervisorHospital = async (academicSupervisorID) => {
+  const [rows] = await db.execute(
+    `
+    SELECT selectedHospital
+    FROM \`User\`
+    WHERE userID = ?
+    LIMIT 1
+    `,
+    [academicSupervisorID]
+  );
 
-   النظام النهائي:
-   CASE_REPORT = تقرير عام منشور لفترة تدريبية
-   REPORT_SUBMISSION = تسليم الطالب
-   REPORT_ANSWER = إجابات الطالب
+  return rows[0]?.selectedHospital || null;
+};
 
-   لا يعتمد على الأعمدة القديمة:
-   - CASE_REPORT.studentID
-   - CASE_REPORT.status
-   - CASE_REPORT.decision
-   - CASE_REPORT.submissionDate
-   - CASE_REPORT.submissionTime
-   - REPORT_ANSWER.reportID
-===================================================== */
+/**
+ * Get one published report for the supervisor.
+ *
+ * It returns the report details with its template fields.
+ *
+ * @param {number|string} reportID - Report ID.
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @returns {Promise<Object|null>} Report data with fields, or null if not found.
+ */
+export const getReport = async (reportID, academicSupervisorID) => {
+  const supervisorHospital = await getSupervisorHospital(academicSupervisorID);
 
+  if (!supervisorHospital) return null;
 
-/* =====================================================
-   1. عرض التقرير كقالب فارغ مع حقوله
-   GET /api/supervisor/report/view/:reportID
-===================================================== */
-
-export const getReport = async (reportID) => {
   const [reportRows] = await db.execute(
     `
     SELECT
@@ -53,9 +63,10 @@ export const getReport = async (reportID) => {
       ON cr.templateID = t.templateID
 
     WHERE cr.reportID = ?
+      AND cr.academicSupervisorID = ?
       AND cr.reportStatus = 'PUBLISHED'
     `,
-    [reportID]
+    [reportID, academicSupervisorID]
   );
 
   if (!reportRows.length) {
@@ -88,13 +99,19 @@ export const getReport = async (reportID) => {
   };
 };
 
-
-/* =====================================================
-   2. جلب التقارير المنشورة التي أنشأها المشرف الحالي فقط
-   GET /api/supervisor/reports
-===================================================== */
-
+/**
+ * Get all published reports created by the supervisor.
+ *
+ * It returns each report with the total students and submitted students.
+ *
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @returns {Promise<Array>} List of reports.
+ */
 export const getAllReports = async (academicSupervisorID) => {
+  const supervisorHospital = await getSupervisorHospital(academicSupervisorID);
+
+  if (!supervisorHospital) return [];
+
   const [rows] = await db.execute(
     `
     SELECT
@@ -122,12 +139,17 @@ export const getAllReports = async (academicSupervisorID) => {
     LEFT JOIN STUDENT s
       ON s.periodID = cr.periodID
 
+    LEFT JOIN \`User\` u
+      ON u.userID = s.studentID
+      AND u.selectedHospital = ?
+
     LEFT JOIN REPORT_SUBMISSION rs
       ON rs.reportID = cr.reportID
-     AND rs.studentID = s.studentID
+      AND rs.studentID = s.studentID
 
     WHERE cr.academicSupervisorID = ?
       AND cr.reportStatus = 'PUBLISHED'
+      AND u.userID IS NOT NULL
 
     GROUP BY
       cr.reportID,
@@ -144,18 +166,33 @@ export const getAllReports = async (academicSupervisorID) => {
 
     ORDER BY cr.publishedAt DESC, cr.reportID DESC
     `,
-    [academicSupervisorID]
+    [supervisorHospital, academicSupervisorID]
   );
 
   return rows;
 };
 
-
-/* =====================================================
-   3. إحصائيات التقارير والتسليمات للمشرف الحالي فقط
-===================================================== */
-
+/**
+ * Get report statistics for the supervisor.
+ *
+ * It returns total reports, pending reports, review reports,
+ * and completed reports.
+ *
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @returns {Promise<Object>} Report statistics.
+ */
 export const getReportsStats = async (academicSupervisorID) => {
+  const supervisorHospital = await getSupervisorHospital(academicSupervisorID);
+
+  if (!supervisorHospital) {
+    return {
+      totalReports: 0,
+      pendingReports: 0,
+      reviewReports: 0,
+      completedReports: 0,
+    };
+  }
+
   const [rows] = await db.execute(
     `
     SELECT
@@ -171,9 +208,12 @@ export const getReportsStats = async (academicSupervisorID) => {
         FROM REPORT_SUBMISSION rs
         JOIN CASE_REPORT cr
           ON rs.reportID = cr.reportID
+        JOIN \`User\` u
+          ON u.userID = rs.studentID
         WHERE cr.academicSupervisorID = ?
           AND cr.reportStatus = 'PUBLISHED'
-          AND rs.approvalStatus = 'PENDING'
+          AND rs.approvalStatus = 'Pending'
+          AND u.selectedHospital = ?
       ) AS pendingReports,
 
       (
@@ -181,9 +221,12 @@ export const getReportsStats = async (academicSupervisorID) => {
         FROM REPORT_SUBMISSION rs
         JOIN CASE_REPORT cr
           ON rs.reportID = cr.reportID
+        JOIN \`User\` u
+          ON u.userID = rs.studentID
         WHERE cr.academicSupervisorID = ?
           AND cr.reportStatus = 'PUBLISHED'
-          AND rs.approvalStatus = 'PENDING'
+          AND rs.approvalStatus = 'Pending'
+          AND u.selectedHospital = ?
       ) AS reviewReports,
 
       (
@@ -191,32 +234,45 @@ export const getReportsStats = async (academicSupervisorID) => {
         FROM REPORT_SUBMISSION rs
         JOIN CASE_REPORT cr
           ON rs.reportID = cr.reportID
+        JOIN \`User\` u
+          ON u.userID = rs.studentID
         WHERE cr.academicSupervisorID = ?
           AND cr.reportStatus = 'PUBLISHED'
-          AND rs.approvalStatus = 'APPROVED'
+          AND rs.approvalStatus = 'Accept'
+          AND u.selectedHospital = ?
       ) AS completedReports
     `,
     [
       academicSupervisorID,
       academicSupervisorID,
+      supervisorHospital,
       academicSupervisorID,
+      supervisorHospital,
       academicSupervisorID,
+      supervisorHospital,
     ]
   );
 
   return rows[0];
 };
 
-
-/* =====================================================
-   4. عرض كل طلاب التقرير: مين سلّم ومين ما سلّم
-   GET /api/supervisor/report/:reportID/students
-===================================================== */
-
+/**
+ * Get all students related to one report.
+ *
+ * It shows each student with their submission status.
+ *
+ * @param {number|string} reportID - Report ID.
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @returns {Promise<Array>} List of students with submission status.
+ */
 export const getReportStudentsForSupervisor = async (
   reportID,
   academicSupervisorID
 ) => {
+  const supervisorHospital = await getSupervisorHospital(academicSupervisorID);
+
+  if (!supervisorHospital) return [];
+
   const [rows] = await db.execute(
     `
     SELECT
@@ -248,10 +304,11 @@ export const getReportStudentsForSupervisor = async (
 
     JOIN \`User\` u
       ON u.userID = s.studentID
+      AND u.selectedHospital = ?
 
     LEFT JOIN REPORT_SUBMISSION rs
       ON rs.reportID = cr.reportID
-     AND rs.studentID = s.studentID
+      AND rs.studentID = s.studentID
 
     WHERE cr.reportID = ?
       AND cr.academicSupervisorID = ?
@@ -259,22 +316,30 @@ export const getReportStudentsForSupervisor = async (
 
     ORDER BY u.firstName ASC, u.lastName ASC
     `,
-    [reportID, academicSupervisorID]
+    [supervisorHospital, reportID, academicSupervisorID]
   );
 
   return rows;
 };
 
-
-/* =====================================================
-   5. عرض إجابات طالب معين للمشرف
-   GET /api/supervisor/submission/:submissionID/answers
-===================================================== */
-
+/**
+ * Get the answers of one student submission.
+ *
+ * It checks that the submission belongs to a report created by
+ * the same supervisor and hospital.
+ *
+ * @param {number|string} submissionID - Submission ID.
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @returns {Promise<Object|null>} Submission data with answers, or null if not found.
+ */
 export const getSubmissionAnswersForSupervisor = async (
   submissionID,
   academicSupervisorID
 ) => {
+  const supervisorHospital = await getSupervisorHospital(academicSupervisorID);
+
+  if (!supervisorHospital) return null;
+
   const [submissionRows] = await db.execute(
     `
     SELECT
@@ -308,8 +373,9 @@ export const getSubmissionAnswersForSupervisor = async (
     WHERE rs.submissionID = ?
       AND cr.academicSupervisorID = ?
       AND cr.reportStatus = 'PUBLISHED'
+      AND u.selectedHospital = ?
     `,
-    [submissionID, academicSupervisorID]
+    [submissionID, academicSupervisorID, supervisorHospital]
   );
 
   if (!submissionRows.length) {
@@ -345,16 +411,28 @@ export const getSubmissionAnswersForSupervisor = async (
   };
 };
 
-
-/* =====================================================
-   6. موافقة المشرف على تسليم الطالب
-   PUT /api/supervisor/submission/:submissionID/approve
-===================================================== */
-
+/**
+ * Approve a student's report submission.
+ *
+ * The approval is allowed only if the submission belongs to
+ * a report created by the same supervisor and hospital.
+ *
+ * @param {number|string} submissionID - Submission ID.
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @returns {Promise<Object>} Update result.
+ */
 export const approveSubmission = async (
   submissionID,
   academicSupervisorID
 ) => {
+  const supervisorHospital = await getSupervisorHospital(academicSupervisorID);
+
+  if (!supervisorHospital) {
+    return {
+      affectedRows: 0,
+    };
+  }
+
   const [result] = await db.execute(
     `
     UPDATE REPORT_SUBMISSION rs
@@ -362,16 +440,20 @@ export const approveSubmission = async (
     JOIN CASE_REPORT cr
       ON rs.reportID = cr.reportID
 
+    JOIN \`User\` u
+      ON u.userID = rs.studentID
+
     SET
-      rs.approvalStatus = 'APPROVED',
+      rs.approvalStatus = 'Accept',
       rs.approvedBy = ?,
       rs.approvedAt = NOW()
 
     WHERE rs.submissionID = ?
       AND cr.academicSupervisorID = ?
       AND cr.reportStatus = 'PUBLISHED'
+      AND u.selectedHospital = ?
     `,
-    [academicSupervisorID, submissionID, academicSupervisorID]
+    [academicSupervisorID, submissionID, academicSupervisorID, supervisorHospital]
   );
 
   return result;

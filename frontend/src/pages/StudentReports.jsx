@@ -42,8 +42,18 @@ export default function StudentReports() {
     }
   };
 
+  const isExpiredNotSubmitted = (report) => {
+    return report.studentReportState === "EXPIRED_NOT_SUBMITTED";
+  };
+
   const getStatusText = (report) => {
-    if (!report.submissionID) return "لم يتم التسليم";
+    if (isExpiredNotSubmitted(report)) {
+      return "انتهت الفترة ولم يتم التسليم";
+    }
+
+    if (!report.submissionID) {
+      return "لم يتم التسليم";
+    }
 
     if (report.approvalStatus === "APPROVED") {
       return "تمت الموافقة";
@@ -53,7 +63,13 @@ export default function StudentReports() {
   };
 
   const getStatusClass = (report) => {
-    if (!report.submissionID) return "unknown";
+    if (isExpiredNotSubmitted(report)) {
+      return "expired";
+    }
+
+    if (!report.submissionID) {
+      return "unknown";
+    }
 
     if (report.approvalStatus === "APPROVED") {
       return "completed";
@@ -65,10 +81,12 @@ export default function StudentReports() {
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
       const title = report.reportTitle || "";
+      const periodName = report.periodName || "";
       const statusText = getStatusText(report);
 
       return (
         title.toLowerCase().includes(search.toLowerCase()) ||
+        periodName.toLowerCase().includes(search.toLowerCase()) ||
         statusText.toLowerCase().includes(search.toLowerCase())
       );
     });
@@ -85,6 +103,10 @@ export default function StudentReports() {
       (report) => report.approvalStatus === "APPROVED"
     ).length;
 
+    const expiredNotSubmittedCount = reports.filter((report) =>
+      isExpiredNotSubmitted(report)
+    ).length;
+
     const notSubmittedCount = reports.filter(
       (report) => !report.submissionID
     ).length;
@@ -94,6 +116,7 @@ export default function StudentReports() {
       submittedCount,
       approvedCount,
       notSubmittedCount,
+      expiredNotSubmittedCount,
     };
   }, [reports]);
 
@@ -112,7 +135,14 @@ export default function StudentReports() {
   };
 
   const getActionText = (report) => {
-    if (report.submissionID) return "عرض التقرير";
+    if (isExpiredNotSubmitted(report)) {
+      return "عرض";
+    }
+
+    if (report.submissionID) {
+      return "عرض التقرير";
+    }
+
     return "تعبئة التقرير";
   };
 
@@ -163,7 +193,9 @@ export default function StudentReports() {
           <div className="stat-content">
             <span>لم يتم التسليم</span>
             <strong>{stats.notSubmittedCount || 0}</strong>
-            <p>تقارير تحتاج إلى تعبئة</p>
+            <p>
+              منها {stats.expiredNotSubmittedCount || 0} انتهت فترتها
+            </p>
           </div>
           <div className="stat-icon">⏳</div>
         </div>
@@ -178,7 +210,7 @@ export default function StudentReports() {
           <input
             className="input"
             type="text"
-            placeholder="ابحث باسم التقرير أو الحالة..."
+            placeholder="ابحث باسم التقرير أو الفترة أو الحالة..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -203,8 +235,8 @@ export default function StudentReports() {
           <div className="reports-table">
             <div className="table-head">
               <span>عنوان التقرير</span>
+              <span>الفترة التدريبية</span>
               <span>تاريخ التسليم</span>
-              <span>الوقت</span>
               <span>الحالة</span>
               <span>الإجراء</span>
             </div>
@@ -222,13 +254,18 @@ export default function StudentReports() {
                   </div>
                 </div>
 
-                <span>{formatDate(report.submissionDate)}</span>
+                <span>
+                  {report.periodName || "غير محددة"}
+                  {report.periodLevel ? ` - ${report.periodLevel}` : ""}
+                </span>
 
-                <span>{report.submissionTime || "غير محدد"}</span>
+                <span>{formatDate(report.submissionDate)}</span>
 
                 <span className={`status-badge ${getStatusClass(report)}`}>
                   {getStatusText(report)}
-                  <span className="status-check">✓</span>
+                  <span className="status-check">
+                    {isExpiredNotSubmitted(report) ? "!" : "✓"}
+                  </span>
                 </span>
 
                 <button
