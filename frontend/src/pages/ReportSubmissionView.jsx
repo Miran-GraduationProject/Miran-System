@@ -18,16 +18,26 @@ function ReportSubmissionView() {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:3000/api/reviewCase/full-report/${id}`
-        );
+       const token = localStorage.getItem("token");
+
+      const res = await fetch(
+         ` http://localhost:3000/api/supervisor/submission/${id}/answers`,
+            {
+              headers: {
+                Authorization:`Bearer ${token}` ,
+              },
+            }
+          );
 
         const data = await res.json();
+        console.log("DATA : ",data)
+        console.log("ANSWERS: ",data.submission.answers)
 
         // فحص البيانات
-        setReport(data.report || null);
-        setFields(data.fields || []);
-        setAnswers(data.answers || []);
+        
+        setReport(data.submission || null);
+        setFields([]);
+        setAnswers(data.submission?.answers || []);
 
       } catch (error) {
         console.error("Error fetching report:", error);
@@ -43,14 +53,10 @@ function ReportSubmissionView() {
 //   الجزء الثاني: معالجة البيانات
 
 // دمج الحقول مع الإجابات في شكل واحد جاهز للعرض
-const mergedDetails = fields.map((field) => {
-  const answer = answers.find((a) => a.fieldID === field.fieldID);
-
-  return {
-    label: field.fieldLabel,       // اسم الحقل
-    answer: answer ? answer.answerText : "—", // الإجابة أو شرطة لو ما فيه
-  };
-});
+const mergedDetails = answers.map((answer) => ({
+  label: answer.fieldLabel || "حقل",
+  answer: answer.answer || "—",
+}));
 
 
 //   الجزء الثالث: عرض الصفحة
@@ -74,7 +80,7 @@ const mergedDetails = fields.map((field) => {
       <div className="report-info">
         <p><strong>عنوان التقرير:</strong> {report.reportTitle}</p>
         <p><strong>حالة التقرير:</strong> {report.reportStatus}</p>
-        <p><strong>تاريخ النشر:</strong> {report.publishedAt}</p>
+        <p><strong>تاريخ النشر:</strong> {report.approvedAt}</p>
         <p><strong>تاريخ التسليم:</strong> {report.submissionDate}</p>
         <p><strong>وقت التسليم:</strong> {report.submissionTime}</p>
         <p><strong>حالة الموافقة:</strong> {report.approvalStatus}</p>
