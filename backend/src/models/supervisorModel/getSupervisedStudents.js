@@ -29,11 +29,9 @@ const getSupervisedStudents = async (academicSupervisorID) => {
      ORDER BY h.name ASC, u.firstName ASC`,
     [academicSupervisorID]
   );
-
   if (!rows[0]) return ["No students assigned on your hospital"];
   return rows;
-};
-
+}
 export { getSupervisedStudents };
 
 

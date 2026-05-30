@@ -226,7 +226,58 @@ body{
     color: #155D27;
 }
 
+.more-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 
+.more-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  padding: 5px;
+  color: #333;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 35px;
+  right: 0;
+
+  background: #B7EFC5;
+  border-radius: 10px;
+
+  min-width: 180px;
+  padding: 10px 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+  z-index: 999;
+}
+
+.dropdown-item {
+  text-decoration: none;
+  color: #333;
+
+  padding: 10px 15px;
+
+  transition: 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #92E6A7;
+}
 /*------------------------ nav-left------------------------ */
 
 .nav-left{
@@ -354,7 +405,6 @@ body{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
     padding: 10px;
 }
 
@@ -363,9 +413,11 @@ body{
     align-items: center;
     justify-content: flex-end;
     flex-direction: row-reverse;
-    padding-left: 10px;
-    padding-right: 30px;
+   
     gap: 10px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 
     
     
@@ -376,12 +428,19 @@ body{
    width: auto;
    flex: none;
    margin: 0;
+   font-size: 16px;
+   color: #155D27;
+   font-weight: 500;
+   background-color: transparent !important;
+   border: none !important;
+   box-shadow: none !important;
 }
 
 
 .card-img-info{
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
+    
 }
 
 
@@ -392,6 +451,7 @@ body{
     display: flex;
     align-self: center; 
     justify-self: center;
+   
 }
 
 
@@ -465,11 +525,10 @@ body{
         align-items: center;
         justify-content: center;
         position: absolute;
-
-        top: auto;
-        bottom: 475px;
-        left: 79%;
-        transform: translateX(-50%);
+        right: -145px;
+        top:50px;
+       
+        
         background: none;
         border: none;
         cursor: pointer;
@@ -502,3 +561,15 @@ body{
  
 }  
 
+
+@media(max-width:1000px){
+     .logout{
+        display: none;
+    }
+
+    .nav-left{
+        position: absolute;
+        left: 23%;
+        transform: translateX(-50%);
+    }
+}

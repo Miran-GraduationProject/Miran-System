@@ -40,7 +40,7 @@ export default function Templates() {
   const fetchTrainingPeriods = async () => {
     try {
       const res = await fetch(
-           "http://localhost:3000/api/supervisor/training-periods", // هنا اغيره بعد مااضيف api للمشرف يوصل للفترات 
+        "http://localhost:3000/api/supervisor/training-periods",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -78,6 +78,11 @@ export default function Templates() {
 
       const data = await res.json();
 
+      if (!res.ok) {
+        console.error("Error fetching template:", data);
+        return;
+      }
+
       if (data.reportTitle) {
         setReportTitle(isCopy ? `${data.reportTitle} - نسخة` : data.reportTitle);
       }
@@ -100,6 +105,11 @@ export default function Templates() {
       );
 
       const data = await res.json();
+
+      if (!res.ok) {
+        console.error("Error fetching template fields:", data);
+        return;
+      }
 
       if (Array.isArray(data.fields) && data.fields.length > 0) {
         setFields(
@@ -158,8 +168,10 @@ export default function Templates() {
           }
         );
 
+        const data = await res.json().catch(() => ({}));
+
         if (!res.ok) {
-          alert("حدث خطأ أثناء حذف الحقل");
+          alert(data.message || "حدث خطأ أثناء حذف الحقل");
           return;
         }
       } catch (error) {
@@ -182,7 +194,7 @@ export default function Templates() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          reportTitle,
+          reportTitle: reportTitle.trim(),
         }),
       }
     );
@@ -204,14 +216,16 @@ export default function Templates() {
         },
         body: JSON.stringify({
           templateID: newTemplateID,
-          fieldLabel: field.fieldLabel,
+          fieldLabel: field.fieldLabel.trim(),
           fieldType: field.fieldType,
           isRequired: field.isRequired ? 1 : 0,
         }),
       });
 
+      const fieldData = await fieldRes.json().catch(() => ({}));
+
       if (!fieldRes.ok) {
-        throw new Error("Error adding field");
+        throw new Error(fieldData.message || "Error adding field");
       }
     }
 
@@ -230,14 +244,16 @@ export default function Templates() {
           },
           body: JSON.stringify({
             fieldID: field.fieldID,
-            fieldLabel: field.fieldLabel,
+            fieldLabel: field.fieldLabel.trim(),
             fieldType: field.fieldType,
             isRequired: field.isRequired ? 1 : 0,
           }),
         });
 
+        const data = await res.json().catch(() => ({}));
+
         if (!res.ok) {
-          throw new Error("Error updating field");
+          throw new Error(data.message || "Error updating field");
         }
       } else {
         const res = await fetch("http://localhost:3000/api/supervisor/field", {
@@ -248,14 +264,16 @@ export default function Templates() {
           },
           body: JSON.stringify({
             templateID,
-            fieldLabel: field.fieldLabel,
+            fieldLabel: field.fieldLabel.trim(),
             fieldType: field.fieldType,
             isRequired: field.isRequired ? 1 : 0,
           }),
         });
 
+        const data = await res.json().catch(() => ({}));
+
         if (!res.ok) {
-          throw new Error("Error adding field");
+          throw new Error(data.message || "Error adding field");
         }
       }
     }
@@ -289,14 +307,14 @@ export default function Templates() {
       return savedTemplateID;
     } catch (error) {
       console.error("Error saving template:", error);
-      alert("حدث خطأ أثناء حفظ القالب");
+      alert(error.message || "حدث خطأ أثناء حفظ القالب");
       return null;
     } finally {
       setSaving(false);
     }
   };
 
-  const publishReport = async () => {
+  const createReport = async () => {
     if (!periodID) {
       alert("اختار الفترة التدريبية قبل النشر");
       return;
@@ -318,6 +336,7 @@ export default function Templates() {
           body: JSON.stringify({
             templateID: savedTemplateID,
             periodID,
+            reportTitle: reportTitle.trim(),
           }),
         }
       );
@@ -332,7 +351,7 @@ export default function Templates() {
       alert("تم نشر التقرير للطلاب بنجاح");
       navigate("/reports");
     } catch (error) {
-      console.error("Error publishing report:", error);
+      console.error("Error creating report:", error);
       alert("حدث خطأ أثناء نشر التقرير");
     }
   };
@@ -455,7 +474,7 @@ export default function Templates() {
             <button
               className="primary-btn"
               type="button"
-              onClick={publishReport}
+              onClick={createReport}
               disabled={saving}
             >
               نشر التقرير

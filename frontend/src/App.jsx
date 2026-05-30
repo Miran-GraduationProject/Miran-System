@@ -1,36 +1,47 @@
 import Log from "./pages/auth";
 import ProtectedRoute from "./components/protectedRoute";
-import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import { useState, useEffect } from "react";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import CoordinatorDashboard from "./pages/coordinatorPage/CoordinatorDashboard";
-import SupervisorDashboard from "./pages//supervisor/SupervisorDashboard";
+import SupervisorDashboard from "./pages/supervisor/SupervisorDashboard";
 
-import TrainingPeriodsPage from './pages/coordinatorPage/TrainingPeriodsPage';
-import HospitalsPage from './pages/coordinatorPage/HospitalsPage';
-import RegistrationMonitorPage from './pages/coordinatorPage/RegistrationMonitorPage';
-import StudentListPage from './pages/coordinatorPage/StudentListPage';
-import ConfirmedAllocationsPage from './pages/coordinatorPage/ConfirmedAllocationsPage';
-import StudentPreferencesPage from './pages/student/StudentPreferencesPage';
-import StudentDetails from './pages/coordinatorPage/StudentDetails';
+import TrainingPeriodsPage from "./pages/coordinatorPage/TrainingPeriodsPage";
+import HospitalsPage from "./pages/coordinatorPage/HospitalsPage";
+import RegistrationMonitorPage from "./pages/coordinatorPage/RegistrationMonitorPage";
+import StudentListPage from "./pages/coordinatorPage/StudentListPage";
+import ConfirmedAllocationsPage from "./pages/coordinatorPage/ConfirmedAllocationsPage";
+import StudentPreferencesPage from "./pages/student/StudentPreferencesPage";
+import StudentDetails from "./pages/supervisor/StudentDetails";
 
 import Reports from "./pages/supervisor/Reports";
 import ReportCreate from "./pages/supervisor/ReportCreate";
 import Templates from "./pages/supervisor/Templates";
+import ReportStudents from "./pages/supervisor/ReportStudents";
+
+import StudentReports from "./pages/StudentReports";
+import StudentReportFill from "./pages/StudentReportFill";
+
 import SplashScreen from "./components/SplashScreen";
-
 import Navbar from "./components/navbar";
-
+import Footer from "./components/footer"
 const Layout = ({ children }) => {
   const location = useLocation();
   const hideNavbar = location.pathname === "/login";
+
   return (
     <>
       {!hideNavbar && <Navbar />}
-      <div className="page-top">
-        {children}
-      </div>
+      <div className="page-top">{children}</div>
+      <Footer />
     </>
   );
 };
@@ -50,7 +61,6 @@ function App() {
       ) : (
         <BrowserRouter>
           <Routes>
-
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="/login" element={<Log />} />
 
@@ -76,13 +86,72 @@ function App() {
               }
             />
 
-            {/* ── Coordinator routes ── */}
-            <Route path="/coordinator" element={<Layout><ProtectedRoute Role="UniversityCoordinator"><CoordinatorDashboard /></ProtectedRoute></Layout>} />
-            <Route path="/hospitals" element={<Layout><ProtectedRoute Role="UniversityCoordinator"><HospitalsPage /></ProtectedRoute></Layout>} />
-            <Route path="/training-periods" element={<Layout><ProtectedRoute Role="UniversityCoordinator"><TrainingPeriodsPage /></ProtectedRoute></Layout>} />
-            <Route path="/registration-monitor" element={<Layout><ProtectedRoute Role="UniversityCoordinator"><RegistrationMonitorPage /></ProtectedRoute></Layout>} />
-            <Route path="/student-list" element={<Layout><ProtectedRoute Role="UniversityCoordinator"><StudentListPage /></ProtectedRoute></Layout>} />
-            <Route path="/confirmed-allocations" element={<Layout><ProtectedRoute Role="UniversityCoordinator"><ConfirmedAllocationsPage /></ProtectedRoute></Layout>} />
+            {/* Coordinator routes */}
+            <Route
+              path="/coordinator"
+              element={
+                <Layout>
+                  <ProtectedRoute Role="UniversityCoordinator">
+                    <CoordinatorDashboard />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+
+            <Route
+              path="/hospitals"
+              element={
+                <Layout>
+                  <ProtectedRoute Role="UniversityCoordinator">
+                    <HospitalsPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+
+            <Route
+              path="/training-periods"
+              element={
+                <Layout>
+                  <ProtectedRoute Role="UniversityCoordinator">
+                    <TrainingPeriodsPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+
+            <Route
+              path="/registration-monitor"
+              element={
+                <Layout>
+                  <ProtectedRoute Role="UniversityCoordinator">
+                    <RegistrationMonitorPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+
+            <Route
+              path="/student-list"
+              element={
+                <Layout>
+                  <ProtectedRoute Role="UniversityCoordinator">
+                    <StudentListPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+
+            <Route
+              path="/confirmed-allocations"
+              element={
+                <Layout>
+                  <ProtectedRoute Role="UniversityCoordinator">
+                    <ConfirmedAllocationsPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
 
             <Route
               path="/supervisor"
@@ -151,11 +220,22 @@ function App() {
             />
 
             <Route
+              path="/reports/:reportID/students"
+              element={
+                <Layout>
+                  <ProtectedRoute Role="AcademicSupervisor">
+                    <ReportStudents />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+
+            <Route
               path="/student/reports"
               element={
                 <Layout>
                   <ProtectedRoute Role="Student">
-                    {/* <StudentReports /> */}
+                    <StudentReports />
                   </ProtectedRoute>
                 </Layout>
               }
@@ -166,12 +246,11 @@ function App() {
               element={
                 <Layout>
                   <ProtectedRoute Role="Student">
-                    {/* <StudentReportFill /> */}
+                    <StudentReportFill />
                   </ProtectedRoute>
                 </Layout>
               }
             />
-
           </Routes>
         </BrowserRouter>
       )}

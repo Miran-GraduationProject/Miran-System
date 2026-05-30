@@ -5,61 +5,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import '../../styles/Button.css';
 import '../../styles/page.css';
 import '../../styles/BackButton.css'
+import '../../styles/reports.css';
 import { styled } from "styled-components";
 import { FaArrowRight } from "react-icons/fa";
-
-
-// تنسيق معلومات الطالب من مكتبة styled-components مباشرة
-const Card = styled.div`
-  background: #ffffff;
-  padding: 25px;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  width: 100%;
-  max-width: 650px;
-  margin-right: 0;
-  margin-left: auto;
-  direction: rtl;
-  font-family: "Tajawal", sans-serif;
-`;
-
-const Header = styled.div`
-  text-align: center;
-  margin-bottom: 25px;
-
-  h2 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #1f3728;
-  }
-`;
-
-const InfoSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const Row = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #e6e6e6;
-
-  &:last-child {
-    border-bottom: none;
-  }
-`;
-
-const Label = styled.span`
-  font-weight: 600;
-  color: #333;
-`;
-
-const Value = styled.span`
-  color: #555;
-  font-weight: 500;
-`;
 
 
 function StudentDetails() {
@@ -106,52 +54,89 @@ function StudentDetails() {
   if (!student) return <p>لم يتم العثور...</p>;
 
   return (
-  <div className="container"> 
-    <main className="main-content">
-      
-      <button className="backButton" onClick={() => navigate(`/supervisor`)}>
+    <div className="reports-page">
+
+      <button className="view-report-btn" onClick={() => navigate(`/supervisor`)}>
           <FaArrowRight />
           العودة إلى قائمة الطلاب
       </button>
 
-      <header className="page-header">
-        <h1>تفاصيل الطالب</h1>
-        <p>عرض معلومات الطالب وتقاريره</p>
-      </header>
+      <div className="top-reports-section">
+        <div className="reports-header">
+          <div className="reports-title">
+            <div className="page-icon">📊</div>
 
-      <Card>
+            <div>
+              <h1>تفاصيل الطالب</h1>
+              <p>عرض معلومات الطالب وتقاريره</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <Header>
-      <h2>معلومات الطالب الشخصية</h2>
-    </Header>
+      <div className="stats-grid">
 
-    <InfoSection>
+        <div className="stat-card">
+          <div className="stat-content">
+            <span>الاسم</span>
+            <strong style={{ fontSize: "16px" }}>{student.firstName} {student.middleName} {student.lastName}</strong>
+          </div>
+          <div className="stat-icon">👤</div>
+        </div>
 
-      <Row>
-        <Label>الاسم</Label>
-        <Value>{student.firstName} {student.middleName} {student.lastName}</Value>
-      </Row>
+        <div className="stat-card">
+          <div className="stat-content">
+            <span>الرقم الجامعي</span>
+            <strong style={{ fontSize: "16px" }}>{student.studentID}</strong>
+          </div>
+          <div className="stat-icon">🪪</div>
+        </div>
 
-      <Row>
-        <Label>الرقم الجامعي</Label>
-        <Value>{student.studentID}</Value>
-      </Row>
+        <div className="stat-card">
+          <div className="stat-content">
+            <span>البريد الجامعي</span>
+            <strong style={{ fontSize: "16px" }}>{student.email}</strong>
+          </div>
+          <div className="stat-icon">✉️</div>
+        </div>
 
-      <Row>
-        <Label>البريد الجامعي</Label>
-        <Value>{student.email}</Value>
-      </Row>
+        <div className="stat-card">
+          <div className="stat-content">
+            <span>المستوى الدراسي</span>
+            <strong style={{ fontSize: "16px" }}>{student.level}</strong>
+          </div>
+          <div className="stat-icon">⏸️</div>
+        </div>
 
-      <Row>
-        <Label>المستوى</Label>
-        <Value>{student.level}</Value>
-      </Row>
+        {student.periodName && (
+          <div className="stat-card">
+            <div className="stat-content">
+              <span>الفترة التدريبية</span>
+              <strong style={{ fontSize: "16px" }}>{student.periodName}</strong>
+            </div>
+            <div className="stat-icon">✔️</div>
+          </div>
+        )}
 
-    </InfoSection>
+        {student.reports !== undefined && (
+          <div className="stat-card">
+            <div className="stat-content">
+              <span>عدد التقارير</span>
+              <strong style={{ fontSize: "16px" }}>{student.reports}</strong>
+            </div>
+            <div className="stat-icon">📄</div>
+          </div>
+        )}
 
-  </Card>
-    </main>
-  </div>
+        <div className="stat-card">
+          <div className="stat-content">
+            <span>المستشفى</span>
+            <strong style={{ fontSize: "16px" }}>{student.hospitalName}</strong>
+          </div>
+          <div className="stat-icon">🏥</div>
+        </div>
+      </div>
+    </div>
   );
 }
 export default StudentDetails;

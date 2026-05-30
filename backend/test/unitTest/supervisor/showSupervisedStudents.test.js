@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../src/app.js";
+import app from "../../../src/app.js";
 
 describe("Show supervised students test", () => {
     test("Does it return the students list?", async () => {
