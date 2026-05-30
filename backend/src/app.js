@@ -27,6 +27,10 @@ import logbookRoutes from "./routes/logbook.routes.js";
 
 
 
+
+
+
+
 dotenv.config();
 
 const app=express();
@@ -59,7 +63,7 @@ app.use("/api/student", studentRoutes);
 app.use("/api/supervisor", supervisorRoutes);
 
 // Review Cases & Mandatory Cases
-app.use("/api/review", reviewCaseRoutes);
+app.use("/api/reviewCase", reviewCaseRoutes);
 app.use("/api/mandatory", mandatoryCasesRoutes);
 
 

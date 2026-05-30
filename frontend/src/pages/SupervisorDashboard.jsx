@@ -163,7 +163,8 @@ function SupervisorDashboard() {
                        onClick={async () => {
                         try {
                            const res = await fetch(
-                                      `http://localhost:3000/api/logbook/download/${s.studentID}`
+                                    (`http://localhost:3000/api/logbook/${s.studentID}`)
+
                             );
                          if (!res.ok) throw new Error("Download failed");
                          const blob = await res.blob();

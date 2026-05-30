@@ -4,6 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import "../styles/reports.css";
 import "../styles/search.css";
 
+
 export default function ReportStudents() {
   const { reportID } = useParams();
   const navigate = useNavigate();
@@ -125,6 +126,12 @@ export default function ReportStudents() {
       return "غير محدد";
     }
   };
+      
+
+
+
+  
+
 
   return (
     <div className="reports-page">
@@ -263,7 +270,8 @@ export default function ReportStudents() {
                   <button
                     className="view-report-btn"
                     onClick={() =>
-                      navigate(`/reports/submission/${student.submissionID}`)
+                     navigate(`/reports/submission/${student.submissionID}`)
+
                     }
                   >
                     عرض التقرير
