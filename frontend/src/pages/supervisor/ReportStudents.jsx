@@ -125,6 +125,12 @@ export default function ReportStudents() {
       return "غير محدد";
     }
   };
+      
+
+
+
+  
+
 
   return (
     <div className="reports-page">
@@ -263,7 +269,8 @@ export default function ReportStudents() {
                   <button
                     className="view-report-btn"
                     onClick={() =>
-                      navigate(`/reports/submission/${student.submissionID}`)
+                     navigate(`/reports/submission/${student.submissionID}`)
+
                     }
                   >
                     عرض التقرير

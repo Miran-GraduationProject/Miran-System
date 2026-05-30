@@ -27,8 +27,13 @@ import ReportCreate from "./pages/supervisor/ReportCreate";
 import Templates from "./pages/supervisor/Templates";
 import ReportStudents from "./pages/supervisor/ReportStudents";
 
-import StudentReports from "./pages/StudentReports";
 import StudentReportFill from "./pages/StudentReportFill";
+
+import ErrorDownload from "./pages/ErrorDownload";
+import ReportSubmissionView from "./pages/ReportSubmissionView";
+
+
+import StudentReports from "./pages/StudentReports";
 
 import SplashScreen from "./components/SplashScreen";
 import Navbar from "./components/navbar";
@@ -251,6 +256,26 @@ function App() {
                 </Layout>
               }
             />
+            <Route
+             path="/error-download"
+             element={
+               <Layout>
+                   <ErrorDownload />
+               </Layout>
+             }
+
+            />
+            <Route
+               path="/reports/submission/:id"
+              element={
+                 <Layout>
+                     <ReportSubmissionView />
+                 </Layout>
+              }
+             />
+
+
+
           </Routes>
         </BrowserRouter>
       )}

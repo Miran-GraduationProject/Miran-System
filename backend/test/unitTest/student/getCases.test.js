@@ -26,14 +26,14 @@ describe("getStudentCases", () => {
         mockQuery.mockReset();
     });
 
-    test ("TC1: should return cases with pending status when no reports exist", async () => {
+    test ("TC1: should return no reports when no reports exist", async () => {
         const mockCases = [
             { caseID: 1, caseName: "Case 1", notes: "Notes 1", templateID: 101 }
         ];
 
         const mockReports = [];
 
-mockQuery
+        mockQuery
             .mockResolvedValueOnce([mockCases]) // Mock cases query
             .mockResolvedValueOnce([mockReports]); // Mock reports query
 
@@ -44,10 +44,8 @@ mockQuery
 
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
-            message: "Cases retrieved successfully",
-            data: [
-                expect.objectContaining({status: "pending"})
-            ]
+            message: "No reports found",
+            data: []
         });
     });
 

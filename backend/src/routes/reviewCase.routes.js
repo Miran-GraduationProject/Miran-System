@@ -1,8 +1,11 @@
 // reviewCase.routes.js
+
+
 import express from "express";
 import {
   getReportsByStudentId,
-  getReportById,           // ✅ الاسم الصحيح هنا
+  getReportById,  
+  getFullReportById,         // الاسم الصحيح هنا
        
 } from "../controllers/reviewCase.controller.js";
 
@@ -13,6 +16,9 @@ router.get("/:studentId", getReportsByStudentId);
 
 // جلب تقرير واحد حسب reportID
 router.get("/report/:reportId", getReportById);
+
+router.get("/full-report/:reportId", getFullReportById);
+
 
 
 

@@ -34,8 +34,6 @@ const getSupervisedStudents = async (academicSupervisorID) => {
 }
 export { getSupervisedStudents };
 
-
-
 // --------------------------- خزعبلات ---------------------------------------------
 
 // //جيب الطلاب المشرف عليهم بناءً على المشرف المحدد لكل مستشفى
