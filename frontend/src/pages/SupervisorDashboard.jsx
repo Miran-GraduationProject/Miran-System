@@ -100,7 +100,7 @@ function SupervisorDashboard() {
               className="table-head"
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1.6fr 1.4fr 1fr 1fr 0.7fr',
+                  gridTemplateColumns: '1.6fr 1.4fr 1fr 1fr 0.7fr 0.7fr', // أضفنا عمود سادس
                 gap: '16px',
                 alignItems: 'center',
               }}
@@ -110,6 +110,7 @@ function SupervisorDashboard() {
               <span>الفترة التدريبية</span>
               <span>التقارير</span>
               <span>الإجراء</span>
+              <span>Log book</span>
             </div>
 
             <div className="table-body">
@@ -127,7 +128,7 @@ function SupervisorDashboard() {
                       key={s.studentID}
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: '1.6fr 1.4fr 1fr 1fr 0.7fr',
+                        gridTemplateColumns: '1.6fr 1.4fr 1fr 1fr 0.7fr 0.7fr',
                         gap: '16px',
                         alignItems: 'center',
                       }}
@@ -154,6 +155,31 @@ function SupervisorDashboard() {
                       >
                         عرض
                       </button>
+
+
+                       <div className="logbook-cell">
+                      <button
+                       className="download-btn"
+                       onClick={async () => {
+                        try {
+                           const res = await fetch(
+                                    (`http://localhost:3000/api/logbook/${s.studentID}`)
+
+                            );
+                         if (!res.ok) throw new Error("Download failed");
+                         const blob = await res.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          window.open(url, "_blank");
+                          } catch (error) {
+                             navigate("/error-download");
+                          }
+                        }
+                       }
+                         >
+                           تحميل PDF
+                      </button>
+                      </div>
+                      
                     </div>
                   );
                 })

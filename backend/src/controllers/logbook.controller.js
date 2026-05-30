@@ -7,32 +7,33 @@ class LogbookController {
   static generateLogbook(req, res) {
     const { studentId } = req.params;
 
-    // ✅ تأكيد الاتصال
+
     if (!db) {
       return res.status(500).json({ message: "Database connection not established" });
     }
 
-    // ✅ استعلام بيانات الطالب
+    // بيانات الطالب
     const studentQuery = `
-  SELECT studentID, periodID, TrainingStatus, universityGPA, level
-  FROM STUDENT
-  WHERE studentID = ?
-`;
+      SELECT studentID, periodID, TrainingStatus, universityGPA, level
+      FROM STUDENT
+      WHERE studentID = ?
+    `;
 
-
-   // ✅ استعلام تقارير الطالب
-const reportsQuery = `
-  SELECT 
-    cr.reportID,
-    cr.reportStatus AS status,
-    rs.submissionDate,
-    rs.submissionTime,
-    cr.periodID
-  FROM REPORT_SUBMISSION rs
-  JOIN CASE_REPORT cr ON rs.reportID = cr.reportID
-  WHERE rs.studentID = ?
-  ORDER BY rs.submissionDate DESC, rs.submissionTime DESC
-`;
+    // تقارير الطالب (مع templateID + submissionID)
+    const reportsQuery = `
+      SELECT 
+        cr.reportID,
+        cr.reportStatus AS status,
+        rs.submissionDate,
+        rs.submissionTime,
+        cr.periodID,
+        cr.templateID,     -- مهم لجلب الحقول
+        rs.submissionID    -- مهم لجلب الإجابات
+      FROM REPORT_SUBMISSION rs
+      JOIN CASE_REPORT cr ON rs.reportID = cr.reportID
+      WHERE rs.studentID = ?
+      ORDER BY rs.submissionDate DESC, rs.submissionTime DESC
+    `;
 
     db.query(studentQuery, [studentId], (err, studentResult) => {
       if (err) {
@@ -46,19 +47,64 @@ const reportsQuery = `
 
       const student = studentResult[0];
 
-      db.query(reportsQuery, [studentId], (err, reportsResult) => {
+      db.query(reportsQuery, [studentId], async (err, reportsResult) => {
         if (err) {
           console.error("Database Error (reports):", err);
           return res.status(500).json({ message: "Database error (reports)" });
         }
 
-        // ✅ إنشاء مجلد uploads إذا ما كان موجود
+              // هنا نجيب الحقول والإجابات لكل تقرير
+        for (let report of reportsResult) {
+          // جلب الحقول الخاصة بالنموذج
+          const fields = await new Promise((resolve, reject) => {
+            db.query(
+              "SELECT fieldID, fieldLabel FROM REPORT_FIELD WHERE templateID = ?",
+              [report.templateID],
+              (err, result) => {
+                if (err) {
+                  console.error("Database Error (fields):", err);
+                  resolve([]); // لا نرمي خطأ — عشان ما يوديك صفحة error
+                } else {
+                  resolve(result);
+                }
+              }
+            );
+          });
+
+          // جلب إجابات الطالب
+          const answers = await new Promise((resolve, reject) => {
+            db.query(
+              "SELECT fieldID, answerText FROM REPORT_ANSWER WHERE submissionID = ?",
+              [report.submissionID],
+              (err, result) => {
+                if (err) {
+                  console.error("Database Error (answers):", err);
+                  resolve([]); //  نفس الشي — ما نخليها توقف
+                } else {
+                  resolve(result);
+                }
+              }
+            );
+          });
+
+          // دمج الحقول مع الإجابات
+          report.details = fields.map((field) => {
+            const answer = answers.find((a) => a.fieldID === field.fieldID);
+            return {
+              label: field.fieldLabel,
+              answer: answer ? answer.answerText : "—",
+            };
+          });
+        }
+
+                //  بعد ما خلصنا دمج الحقول والإجابات، نبدأ إنشاء الـ PDF
+
         const uploadsDir = path.join(process.cwd(), "uploads");
         if (!fs.existsSync(uploadsDir)) {
           fs.mkdirSync(uploadsDir);
         }
 
-        // ✅ إنشاء ملف PDF داخل uploads
+
         const filePath = path.join(uploadsDir, `logbook_${studentId}.pdf`);
         const doc = new PDFDocument();
         const stream = fs.createWriteStream(filePath);
@@ -76,28 +122,44 @@ const reportsQuery = `
         doc.text(`Period ID: ${student.periodID || "N/A"}`);
         doc.moveDown();
 
-        // عنوان فرعي
+        // عنوان التقارير
         doc.fontSize(18).text("Case Reports", { underline: true });
         doc.moveDown();
 
-        // تقارير الطالب
+
         if (reportsResult.length === 0) {
           doc.fontSize(14).text("No reports found for this student.");
         } else {
           reportsResult.forEach((report, index) => {
-            doc.fontSize(14).text(`Report #${index + 1}`);
-            doc.text(`Report ID: ${report.reportID}`);
+            doc.fontSize(16).text(`Report #${index + 1}`, { underline: true });
+            doc.fontSize(14).text(`Report ID: ${report.reportID}`);
             doc.text(`Status: ${report.status}`);
             doc.text(`Submission Date: ${report.submissionDate}`);
             doc.text(`Submission Time: ${report.submissionTime}`);
             doc.text(`Period ID: ${report.periodID}`);
+            doc.moveDown();
+
+            // طباعة الحقول والإجابات
+            doc.fontSize(15).text("Report Details:", { underline: true });
+            doc.moveDown(0.5);
+
+            if (report.details.length === 0) {
+              doc.fontSize(12).text("No fields or answers found.");
+            } else {
+              report.details.forEach((item) => {
+                doc.fontSize(14).text(`• ${item.label}`);
+                doc.fontSize(12).text(`  Answer: ${item.answer}`);
+                doc.moveDown(0.5);
+              });
+            }
+
             doc.moveDown();
           });
         }
 
         doc.end();
 
-        // ✅ بعد إنشاء الملف، نرسله للتحميل
+        // إرسال الملف للتحميل
         stream.on("finish", () => {
           res.download(filePath, `logbook_${studentId}.pdf`);
         });
