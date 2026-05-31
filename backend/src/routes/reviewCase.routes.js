@@ -5,7 +5,8 @@ import express from "express";
 import {
   getReportsByStudentId,
   getReportById,  
-  getFullReportById,         // الاسم الصحيح هنا
+  getFullReportById,  
+  updateReportStatus,
        
 } from "../controllers/reviewCase.controller.js";
 
@@ -18,6 +19,8 @@ router.get("/:studentId", getReportsByStudentId);
 router.get("/report/:reportId", getReportById);
 
 router.get("/full-report/:reportId", getFullReportById);
+
+
 
 
 

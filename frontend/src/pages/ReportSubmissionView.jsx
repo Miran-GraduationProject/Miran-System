@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "../styles/ReportView.css";
 
+
 function ReportSubmissionView() {
   const { id } = useParams(); // ← رقم التقرير من الرابط
 
@@ -107,6 +108,8 @@ const mergedDetails = answers.map((answer) => ({
     </div>
   );
 }
+
+
 
 export default ReportSubmissionView;
 
