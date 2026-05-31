@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/reports.css";
-import "../styles/search.css";
+import "../../styles/reports.css";
+import "../../styles/search.css";
 import { FaSearch } from "react-icons/fa";
 
 export default function Reports() {

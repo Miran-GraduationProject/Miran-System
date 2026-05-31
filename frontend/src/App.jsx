@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import CoordinatorDashboard from "./pages/coordinatorPage/CoordinatorDashboard";
-import SupervisorDashboard from "./pages/SupervisorDashboard";
+import SupervisorDashboard from "./pages/supervisor/SupervisorDashboard";
 
 import TrainingPeriodsPage from "./pages/coordinatorPage/TrainingPeriodsPage";
 import HospitalsPage from "./pages/coordinatorPage/HospitalsPage";

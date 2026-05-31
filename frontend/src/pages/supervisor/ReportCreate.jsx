@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/reportCreate.css";
+import "../../styles/reportCreate.css";
 import { FiFileText } from "react-icons/fi";
 import { FiTrash2 } from "react-icons/fi";
 export default function ReportCreate() {
