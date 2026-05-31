@@ -141,7 +141,7 @@ function StudentListPage() {
   const unassigned = preview.filter(r => r.status === 'Unassigned').length;
 
   const statusPill = {
-    CONFIRMED: { bg: P_LT,      color: P,        label: 'معتمد ✓'       },
+    CONFIRMED: { bg: P_LT,      color: P,        label: 'معتمد'       },
     DRAFT:     { bg: '#fffbeb', color: '#d97706', label: 'مسودة'          },
     NONE:      { bg: '#f3f4f6', color: '#6b7280', label: 'لم يُولَّد بعد' },
   }[allocationStatus];

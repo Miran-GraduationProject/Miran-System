@@ -1,7 +1,7 @@
 // الفرص التدريبية المؤكدة — TailAdmin RTL style
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { MdVerified, MdLocalHospital, MdPeople, MdPrint, MdCalendarToday } from 'react-icons/md';
+import { MdVerified, MdLocalHospital, MdPeople, MdPrint, MdCalendarToday, MdWarning } from 'react-icons/md';
 
 const API_BASE = 'http://localhost:3000/api/coordinator/training-period';
 const P      = '#2d8a56';
@@ -112,7 +112,7 @@ function ConfirmedAllocationsPage() {
 
       {error && (
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '12px 18px', marginBottom: '20px', color: '#b91c1c' }}>
-          ⚠️ {error}
+          <MdWarning size={16} style={{ verticalAlign: 'middle', marginLeft: '6px' }} /> {error}
         </div>
       )}
 
@@ -131,7 +131,7 @@ function ConfirmedAllocationsPage() {
                 <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#fff' }}>{data.period?.name}</h2>
               </div>
               <span style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', borderRadius: '20px', padding: '5px 14px', fontSize: '13px', fontWeight: 600 }}>
-                معتمد ✓
+                معتمد
               </span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '16px' }}>
