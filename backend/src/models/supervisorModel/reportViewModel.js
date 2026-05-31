@@ -22,6 +22,20 @@ const getSupervisorHospital = async (academicSupervisorID) => {
   return rows[0]?.selectedHospital || null;
 };
 
+const getSupervisorHospitalId = async (academicSupervisorID) => {
+  const [rows] = await db.execute(
+    `
+    SELECT hospitalID
+    FROM HOSPITAL
+    WHERE supervisorID = ?
+    LIMIT 1
+    `,
+    [academicSupervisorID]
+  );
+
+  return rows[0]?.hospitalID || null;
+};
+
 /**
  * Get one published report for the supervisor.
  *
@@ -108,9 +122,11 @@ export const getReport = async (reportID, academicSupervisorID) => {
  * @returns {Promise<Array>} List of reports.
  */
 export const getAllReports = async (academicSupervisorID) => {
-  const supervisorHospital = await getSupervisorHospital(academicSupervisorID);
+  const supervisorHospitalId = await getSupervisorHospitalId(
+    academicSupervisorID
+  );
 
-  if (!supervisorHospital) return [];
+  if (!supervisorHospitalId) return [];
 
   const [rows] = await db.execute(
     `
@@ -136,12 +152,19 @@ export const getAllReports = async (academicSupervisorID) => {
     JOIN TRAINING_PERIOD tp
       ON cr.periodID = tp.periodID
 
-    LEFT JOIN STUDENT s
-      ON s.periodID = cr.periodID
+    JOIN TRAINING_OPPORTUNITY op
+      ON op.periodID = cr.periodID
+      AND op.hospitalID = ?
 
-    LEFT JOIN \`User\` u
+    JOIN STUDENT_ENROLLMENT en
+      ON en.opportunityID = op.opportunityID
+      AND en.periodID = cr.periodID
+
+    JOIN STUDENT s
+      ON s.studentID = en.studentID
+
+    JOIN \`User\` u
       ON u.userID = s.studentID
-      AND u.selectedHospital = ?
 
     LEFT JOIN REPORT_SUBMISSION rs
       ON rs.reportID = cr.reportID
@@ -149,7 +172,6 @@ export const getAllReports = async (academicSupervisorID) => {
 
     WHERE cr.academicSupervisorID = ?
       AND cr.reportStatus = 'PUBLISHED'
-      AND u.userID IS NOT NULL
 
     GROUP BY
       cr.reportID,
@@ -166,7 +188,7 @@ export const getAllReports = async (academicSupervisorID) => {
 
     ORDER BY cr.publishedAt DESC, cr.reportID DESC
     `,
-    [supervisorHospital, academicSupervisorID]
+    [supervisorHospitalId, academicSupervisorID]
   );
 
   return rows;
@@ -269,9 +291,11 @@ export const getReportStudentsForSupervisor = async (
   reportID,
   academicSupervisorID
 ) => {
-  const supervisorHospital = await getSupervisorHospital(academicSupervisorID);
+  const supervisorHospitalId = await getSupervisorHospitalId(
+    academicSupervisorID
+  );
 
-  if (!supervisorHospital) return [];
+  if (!supervisorHospitalId) return [];
 
   const [rows] = await db.execute(
     `
@@ -299,12 +323,19 @@ export const getReportStudentsForSupervisor = async (
 
     FROM CASE_REPORT cr
 
+    JOIN TRAINING_OPPORTUNITY op
+      ON op.periodID = cr.periodID
+      AND op.hospitalID = ?
+
+    JOIN STUDENT_ENROLLMENT en
+      ON en.opportunityID = op.opportunityID
+      AND en.periodID = cr.periodID
+
     JOIN STUDENT s
-      ON s.periodID = cr.periodID
+      ON s.studentID = en.studentID
 
     JOIN \`User\` u
       ON u.userID = s.studentID
-      AND u.selectedHospital = ?
 
     LEFT JOIN REPORT_SUBMISSION rs
       ON rs.reportID = cr.reportID
@@ -316,7 +347,7 @@ export const getReportStudentsForSupervisor = async (
 
     ORDER BY u.firstName ASC, u.lastName ASC
     `,
-    [supervisorHospital, reportID, academicSupervisorID]
+    [supervisorHospitalId, reportID, academicSupervisorID]
   );
 
   return rows;
