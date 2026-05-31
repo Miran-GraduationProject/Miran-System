@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import { MdDateRange, MdAdd, MdEdit, MdDelete, MdClose, MdSearch, MdRefresh } from 'react-icons/md';
+import { MdDateRange, MdAdd, MdEdit, MdDelete, MdClose, MdSearch, MdRefresh, MdWarning } from 'react-icons/md';
 import PageHeader  from '../../components/common/PageHeader';
 import AlertBox    from '../../components/common/AlertBox';
 import FilterTabs  from '../../components/common/FilterTabs';
@@ -293,7 +293,7 @@ export default function TrainingPeriodsPage() {
 
                 {submitError && (
                   <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'10px', padding:'10px 14px', marginTop:'14px', color:'#b91c1c', fontSize:'13px' }}>
-                    ⚠️ {submitError}
+                    <MdWarning size={16} style={{ verticalAlign: 'middle', marginLeft: '6px' }} /> {submitError}
                   </div>
                 )}
               </div>

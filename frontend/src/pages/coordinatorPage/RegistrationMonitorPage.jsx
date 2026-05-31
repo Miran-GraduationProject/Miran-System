@@ -1,7 +1,7 @@
 // متابعة حالة التسجيل — TailAdmin RTL style
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { MdBarChart, MdRefresh, MdLocalHospital } from 'react-icons/md';
+import { MdBarChart, MdRefresh, MdLocalHospital, MdPeople, MdWarning } from 'react-icons/md';
 
 const API_BASE = 'http://localhost:3000/api/coordinator';
 const P        = '#2d8a56';
@@ -97,7 +97,7 @@ export default function RegistrationMonitorPage() {
 
       {error && (
         <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'12px', padding:'12px 18px', marginBottom:'20px', color:'#b91c1c' }}>
-          ⚠️ {error}
+          <MdWarning size={16} style={{ verticalAlign: 'middle', marginLeft: '6px' }} /> {error}
         </div>
       )}
 
@@ -120,11 +120,13 @@ export default function RegistrationMonitorPage() {
           {/* Gender Cards */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'24px' }}>
             {[
-              { label:'طلاب ذكور',    sub:'سجّلوا رغباتهم',  reg: stats.totalMaleRegistered   || 0, total: stats.totalMaleStudents   || 0, color: P,         bg: P_LT,    barColor:'#3b82f6', icon:'👨‍🎓' },
-              { label:'طالبات إناث', sub:'سجّلن رغباتهن',   reg: stats.totalFemaleRegistered || 0, total: stats.totalFemaleStudents || 0, color: P,         bg: P_LT,    barColor:'#a855f7', icon:'👩‍🎓' },
+              { label:'طلاب ذكور',    sub:'سجّلوا رغباتهم',  reg: stats.totalMaleRegistered   || 0, total: stats.totalMaleStudents   || 0, color: P,         bg: P_LT,    barColor:'#3b82f6', Icon: MdPeople, iconColor:'#3b82f6' },
+              { label:'طالبات إناث', sub:'سجّلن رغباتهن',   reg: stats.totalFemaleRegistered || 0, total: stats.totalFemaleStudents || 0, color: P,         bg: P_LT,    barColor:'#a855f7', Icon: MdPeople, iconColor:'#a855f7' },
             ].map(c => (
               <div key={c.label} style={{ background:'#fff', borderRadius:'16px', border:'1px solid #e5e7eb', padding:'24px', boxShadow:'0 1px 4px rgba(0,0,0,0.04)', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
-                <div style={{ width:52, height:52, borderRadius:'50%', background:c.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'24px', marginBottom:'4px' }}>{c.icon}</div>
+                <div style={{ width:52, height:52, borderRadius:'50%', background:c.bg, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'4px' }}>
+                  <c.Icon size={24} color={c.iconColor} />
+                </div>
                 <p style={{ margin:0, fontSize:'14px', fontWeight:600, color:'#374151' }}>{c.label}</p>
                 <p style={{ margin:0, fontSize:'32px', fontWeight:800, color:c.color }}>{c.reg}</p>
                 <p style={{ margin:0, fontSize:'12px', color:'#9ca3af' }}>{c.sub}</p>
@@ -167,7 +169,7 @@ export default function RegistrationMonitorPage() {
 
                   let badgeText, badgeBg, badgeColor, headerBg;
                   if (bothFull) {
-                    badgeText = 'اكتملت ✓'; badgeBg = 'rgba(255,255,255,0.2)'; badgeColor = '#fff'; headerBg = P;
+                    badgeText = 'اكتملت'; badgeBg = 'rgba(255,255,255,0.2)'; badgeColor = '#fff'; headerBg = P;
                   } else if (mFull && !fFull) {
                     badgeText = 'الذكور اكتملوا'; badgeBg = '#eff6ff'; badgeColor = '#1d4ed8'; headerBg = '#f9fafb';
                   } else if (fFull && !mFull) {

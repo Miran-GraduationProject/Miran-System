@@ -1,7 +1,7 @@
 // إدارة المستشفيات
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { MdLocalHospital, MdAdd, MdEdit, MdDelete, MdRefresh, MdSearch } from 'react-icons/md';
+import { MdLocalHospital, MdAdd, MdEdit, MdDelete, MdRefresh, MdSearch, MdLocationOn, MdCalendarToday, MdWarning } from 'react-icons/md';
 import PageHeader from '../../components/common/PageHeader';
 
 const API  = 'http://localhost:3000/api/coordinator/hospitals';
@@ -140,19 +140,19 @@ export default function HospitalsPage() {
       {/* Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '28px 20px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <span style={{ fontSize: '42px', lineHeight: 1 }}>🏥</span>
+          <MdLocalHospital size={42} color={P} />
           <p style={{ margin: '14px 0 6px', fontSize: '14px', color: '#6b7280', fontWeight: 500 }}>إجمالي المستشفيات</p>
           <p style={{ margin: '0 0 4px', fontSize: '30px', fontWeight: 700, color: '#111827' }}>{hospitals.length}</p>
           <p style={{ margin: 0, fontSize: '12px', color: '#9ca3af' }}>في منظومة التدريب</p>
         </div>
         <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '28px 20px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <span style={{ fontSize: '42px', lineHeight: 1 }}>📍</span>
+          <MdLocationOn size={42} color="#3b82f6" />
           <p style={{ margin: '14px 0 6px', fontSize: '14px', color: '#6b7280', fontWeight: 500 }}>المدن المشاركة</p>
           <p style={{ margin: '0 0 4px', fontSize: '30px', fontWeight: 700, color: '#111827' }}>{cities.length}</p>
           <p style={{ margin: 0, fontSize: '12px', color: '#9ca3af' }}>منطقة جغرافية</p>
         </div>
         <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '28px 20px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <span style={{ fontSize: '42px', lineHeight: 1 }}>📅</span>
+          <MdCalendarToday size={42} color="#8b5cf6" />
           <p style={{ margin: '14px 0 6px', fontSize: '14px', color: '#6b7280', fontWeight: 500 }}>آخر إضافة</p>
           <p style={{ margin: '0 0 4px', fontSize: '22px', fontWeight: 700, color: '#111827' }}>
             {lastAdded ? new Date(lastAdded.createdAt).toLocaleDateString('ar-SA') : '—'}
@@ -197,7 +197,7 @@ export default function HospitalsPage() {
             </div>
             {submitError && (
               <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', color: '#b91c1c', fontSize: '13px' }}>
-                ⚠️ {submitError}
+                <MdWarning size={16} style={{ verticalAlign: 'middle', marginLeft: '6px' }} /> {submitError}
               </div>
             )}
             <div style={{ display: 'flex', gap: '10px' }}>
