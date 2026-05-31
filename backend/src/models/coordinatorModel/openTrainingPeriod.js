@@ -1,5 +1,5 @@
 /**هذا الكلاس شغلته بس انه يتكلم مع قاعدة البيانات فقط ويحقق رابع ريكواريمنت
- * عندنا سبع وضائف هنا
+ * 
  * 
  */
 
@@ -56,23 +56,21 @@ const checkOpenPeriodByLevel = async (level) => {
 };
 
 
-// تجيب أحدث فترة للطالب سواء OPEN أو CLOSED — للعرض فقط (الطالب يشوف رغباته بعد الإغلاق)
-const getPeriodByLevelOpenOrClosed = async (level) => {
-    const [rows] = await dbConnect.promise().execute(
-        `SELECT * FROM TRAINING_PERIOD
-         WHERE status IN ('OPEN', 'CLOSED') AND level = ?
-         ORDER BY createdAt DESC LIMIT 1`,
-        [level]
-    );
-    return rows[0] || null;
-};
-
-
 // تحدّث الحالات تلقائياً بناءً على التواريخ
-// OPEN → CLOSED إذا انتهى وقت التسجيل
-// ACTIVE → INACTIVE إذا انتهى تاريخ الفترة
+// CLOSED → OPEN   إذا بدأ وقت التسجيل ولم ينته بعد
+// OPEN   → CLOSED إذا انتهى وقت التسجيل
+// INACTIVE → ACTIVE   إذا بدأ التدريب ولم ينته بعد
+// ACTIVE   → INACTIVE إذا انتهى تاريخ الفترة
 const syncStatuses = async () => {
     const now = new Date();
+
+    // الفترات المغلقة اللي بدأ وقت تسجيلها تصبح OPEN
+    await dbConnect.promise().execute(
+        `UPDATE TRAINING_PERIOD
+         SET status = 'OPEN'
+         WHERE status = 'CLOSED' AND registrationOpen <= ? AND registrationClose >= ?`,
+        [now, now]
+    );
 
     // الفترات المفتوحة اللي انتهى تسجيلها تصبح CLOSED
     await dbConnect.promise().execute(
@@ -80,6 +78,15 @@ const syncStatuses = async () => {
          SET status = 'CLOSED'
          WHERE status = 'OPEN' AND registrationClose < ?`,
         [now]
+    );
+
+    // الفرص المرتبطة بفترات بدأ تدريبها تصبح ACTIVE
+    await dbConnect.promise().execute(
+        `UPDATE TRAINING_OPPORTUNITY op
+         JOIN TRAINING_PERIOD p ON p.periodID = op.periodID
+         SET op.status = 'ACTIVE'
+         WHERE op.status = 'INACTIVE' AND p.startDate <= ? AND p.endDate >= ?`,
+        [now, now]
     );
 
     // الفرص المرتبطة بفترات انتهى تدريبها تصبح INACTIVE
@@ -135,23 +142,25 @@ const removeHospitalFromPeriod = async (periodID, hospitalID) => {
          WHERE periodID = ? AND hospitalID = ?`,
         [periodID, hospitalID]
     );
+    // عدد الصوفوف الي نم حذفها
     return result.affectedRows > 0;
 };
  
  
-// بصراحة مني متاكدة منه لانها حاجة اضافية
 // الي هي يجيب احصائيات التسجيل
 const getRegistrationStats = async (periodID) => {
     // نحدّث الحالات أولاً لضمان أن الإحصائيات تعكس الوضع الحالي
     await syncStatuses();
-
-    let period;
+// تعريف المتغير period عشان نستخدمه في الاستعلامات الجاية
+  // ونحط فيه بيانات فترة التدريب
+     let period;
 // اول شي تجيب الفترة عن طريق الاي دي حقها او الي حاليا مفتوحه
     if (periodID) {
         const [rows] = await dbConnect.promise().execute(
             `SELECT * FROM TRAINING_PERIOD WHERE periodID = ?`,
             [periodID]
         );
+        // اذا ما لقى فترة رجع null
         if (!rows[0]) return null;
         period = rows[0];
     } else {
@@ -206,7 +215,7 @@ const getLinkedHospitalIDs = async (periodID) => {
 };
 
 
-// تحديث بيانات الفترة وسعات مستشفياتها في معاملة واحدة — للحفاظ على الاتساق
+// تحديث بيانات الفترة وسعات مستشفياتها  
 const updatePeriodWithCapacities = async (periodID, data, hospitals) => {
     const { name, level, startDate, endDate, registrationOpen, registrationClose } = data;
     const connection = await dbConnect.promise().getConnection();
@@ -295,7 +304,6 @@ export {
     syncStatuses,
     openTrainingPeriod,
     checkOpenPeriodByLevel,
-    getPeriodByLevelOpenOrClosed,
     getAllPeriods,
     getPeriodByID,
     getLinkedHospitalIDs,

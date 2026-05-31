@@ -42,7 +42,7 @@ const addHospital = async (req, res) => {
         });
     } catch (error) {
         console.error('addHospital error:', error);
-
+// الاسم مكرر في قاعدة البيانات، لازم يكون فريد
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({ message: "A hospital with this name already exists" });
         }

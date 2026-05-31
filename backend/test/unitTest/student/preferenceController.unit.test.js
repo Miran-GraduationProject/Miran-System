@@ -5,12 +5,12 @@ jest.unstable_mockModule('../../../src/models/studentModel/studentPreference.js'
     getAvailableHospitals: jest.fn(),
     getStudentPreferences: jest.fn(),
     savePreferences: jest.fn(),
-    getStudentLevel: jest.fn()
+    getStudentLevel: jest.fn(),
+    getPeriodByLevelOpenOrClosed: jest.fn()
 }));
 
 jest.unstable_mockModule('../../../src/models/coordinatorModel/openTrainingPeriod.js', () => ({
     checkOpenPeriodByLevel: jest.fn(),
-    getPeriodByLevelOpenOrClosed: jest.fn(),
     syncStatuses: jest.fn()
 }));
 
