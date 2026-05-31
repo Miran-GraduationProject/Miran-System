@@ -163,8 +163,12 @@ export default function Templates() {
           {
             method: "DELETE",
             headers: {
+              "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify({
+              templateID,
+            }),
           }
         );
 
@@ -243,6 +247,7 @@ export default function Templates() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
+            templateID,
             fieldID: field.fieldID,
             fieldLabel: field.fieldLabel.trim(),
             fieldType: field.fieldType,

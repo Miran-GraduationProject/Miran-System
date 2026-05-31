@@ -1,4 +1,4 @@
- import {
+import {
   createTrainingReport,
   getTrainingPeriods,
 } from "../../models/supervisorModel/createReportModel.js";
@@ -8,41 +8,50 @@ import {
   createTemplateFields,
 } from "../../models/supervisorModel/reportTemplateModel.js";
 
-/* =====================================================
-   إنشاء / نشر تقرير تدريبي
+/**
+ * Get the AcademicSupervisor ID from the logged-in user token.
+ * If the ID does not exist, it returns null.
+ * @param {Object} req - The request object.
+ * @returns {number|string|null} The AcademicSupervisor ID or null.
+ */
 
-   الحالة 1:
-   استخدام قالب محفوظ:
-   - يصل templateID من الفرونت
-   - يتم نشر التقرير مباشرة في CASE_REPORT
+const getAcademicSupervisorID = (req) => {
+ return req.user?.id ?? null;
+};
 
-   الحالة 2:
-   إنشاء من الصفر:
-   - لا يصل templateID
-   - تصل fields من الفرونت
-   - يتم إنشاء TEMPLATE
-   - يتم إنشاء ReportField
-   - يتم نشر التقرير في CASE_REPORT
-===================================================== */
+/**
+ * Create a training report.
+ *
+ * If templateID is provided, the report will be created using an existing template.
+ * If templateID is not provided, a new template and fields will be created first,
+ * then the report will be published to students.
+ * @param {Object} req - Request object.
+ * @param {Object} req.body - Request body.
+ * @param {number|string} req.body.templateID - Existing template ID, optional.
+ * @param {number|string} req.body.periodID - Training period ID.
+ * @param {string} req.body.reportTitle - Report title.
+ * @param {Array<Object>} req.body.fields - Report fields when creating from scratch.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 
 export const createTrainingReportController = async (req, res) => {
   try {
     const { templateID, periodID, reportTitle, fields } = req.body || {};
 
-    const academicSupervisorID =
-      req.user?.id || req.user?.userID || req.user?.academicSupervisorID;
-
-    if (!periodID) {
-      return res.status(400).json({
-        success: false,
-        message: "Training period ID is required",
-      });
-    }
+    const academicSupervisorID = getAcademicSupervisorID(req);
 
     if (!academicSupervisorID) {
       return res.status(401).json({
         success: false,
         message: "Academic supervisor ID not found in token",
+      });
+    }
+
+    if (!periodID) {
+      return res.status(400).json({
+        success: false,
+        message: "Training period ID is required",
       });
     }
 
@@ -117,13 +126,26 @@ export const createTrainingReportController = async (req, res) => {
   }
 };
 
-/* =====================================================
-   جلب الفترات التدريبية
-===================================================== */
+/**
+ * Get training periods related to the logged-in supervisor.
+ *
+ * @param {Object} req - Request object.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 
 export const getTrainingPeriodsController = async (req, res) => {
   try {
-    const periods = await getTrainingPeriods();
+    const academicSupervisorID = getAcademicSupervisorID(req);
+
+    if (!academicSupervisorID) {
+      return res.status(401).json({
+        success: false,
+        message: "Academic supervisor ID not found in token",
+      });
+    }
+
+    const periods = await getTrainingPeriods(academicSupervisorID);
 
     return res.status(200).json({
       success: true,

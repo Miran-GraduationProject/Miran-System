@@ -30,7 +30,7 @@ import {
 
 import { createCase, updateCase, deleteCase } from '../controllers/SupervisorControllers/cases.js';
 
-const router = express.Router();
+const router = express.Router(); 
 
 // حماية كاملة لكل الروابط الموجودة بحيث تتأكد انه فقط المشرف الي بيتعامل معها
 router.use(verifyToken, verifyRole('AcademicSupervisor'));
