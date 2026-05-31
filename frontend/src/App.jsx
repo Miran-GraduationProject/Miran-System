@@ -20,12 +20,12 @@ import RegistrationMonitorPage from "./pages/coordinatorPage/RegistrationMonitor
 import StudentListPage from "./pages/coordinatorPage/StudentListPage";
 import ConfirmedAllocationsPage from "./pages/coordinatorPage/ConfirmedAllocationsPage";
 import StudentPreferencesPage from "./pages/student/StudentPreferencesPage";
-import StudentDetails from "./pages/coordinatorPage/StudentDetails";
+import StudentDetails from "./pages/supervisor/StudentDetails";
 
-import Reports from "./pages/Reports";
-import ReportStudents from "./pages/ReportStudents";
-import ReportCreate from "./pages/ReportCreate";
-import Templates from "./pages/Templates";
+import Reports from "./pages/supervisor/Reports";
+import ReportStudents from "./pages/supervisor/ReportStudents";
+import ReportCreate from "./pages/supervisor/ReportCreate";
+import Templates from "./pages/supervisor/Templates";
 import ErrorDownload from "./pages/ErrorDownload";
 import ReportSubmissionView from "./pages/ReportSubmissionView";
 

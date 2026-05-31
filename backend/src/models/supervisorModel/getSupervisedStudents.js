@@ -30,41 +30,6 @@ const getSupervisedStudents = async (academicSupervisorID) => {
     [academicSupervisorID]
   );
 
-  const supervisorHospital = supRows[0].selectedHospital;
-
-  // جيب الطلاب الي داخلين في نفس المشتفى للمشرف
-  const [rows] = await dbConnect.promise().execute(
-    `SELECT u.firstName, u.lastName, u.gender, u.email, s.studentID, s.periodID, s.level
-     FROM STUDENT s
-     JOIN \`User\` u ON u.userID = s.studentID
-     WHERE u.selectedHospital = ?`,
-    [supervisorHospital]
-  );
-
-  // جيب كل التقارير للطالب
-  for (let student of rows) {
-    const [reportRows] = await dbConnect.promise().execute(
-  `SELECT COUNT(*) AS reports
-   FROM REPORT_SUBMISSION rs
-   JOIN CASE_REPORT cr ON rs.reportID = cr.reportID
-   WHERE rs.studentID = ?
-     AND cr.academicSupervisorID = ?
-     AND cr.reportStatus = 'PUBLISHED'`,
-  [student.studentID, academicSupervisorID]
-);
-
-    // احسب عدد التقارير واضفها للطالب
-    student.reports = reportRows[0].reports;
-
-    const [periodRows] = await dbConnect.promise().execute(
-      `SELECT name FROM TRAINING_PERIOD WHERE periodID = ? LIMIT 1`,
-      [student.periodID]
-    );
-
-    student.periodName = periodRows[0]?.name || "Unknown Period";
-
-  }
-
   if (!rows[0]) return ["No students assigned on your hospital"];
   return rows;
 }
