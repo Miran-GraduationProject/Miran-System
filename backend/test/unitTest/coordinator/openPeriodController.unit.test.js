@@ -4,7 +4,6 @@ jest.unstable_mockModule('../../../src/models/coordinatorModel/openTrainingPerio
     syncStatuses: jest.fn(),
     openTrainingPeriod: jest.fn(),
     checkOpenPeriodByLevel: jest.fn(),
-    getPeriodByLevelOpenOrClosed: jest.fn(),
     getAllPeriods: jest.fn(),
     getPeriodByID: jest.fn(),
     getLinkedHospitalIDs: jest.fn(),

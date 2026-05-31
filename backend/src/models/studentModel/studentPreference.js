@@ -1,10 +1,32 @@
 /**
  * هذا الكلاس بيحقق خامس ريكواريمنت والي هي ان الطالب يرتب اولوياته    
  * لما يفك صفحة التسجيل ويشوف كل المستشفيات ويرتبها ويسوي حفظ هذا الكلاس هو الي يروح لقاعدة البيانات ويحفظ او يمسح او يعدل الترتيب
- * عندنا أربع وظائف هنا
+ * عندنا خمس وظائف هنا
  */
 
 import dbConnect from "../../config/dbConnect.js";
+
+
+// تجيب مستوى الطالب من جدول STUDENT
+const getStudentLevel = async (studentID) => {
+    const [rows] = await dbConnect.promise().execute(
+        `SELECT level FROM STUDENT WHERE studentID = ? LIMIT 1`,
+        [studentID]
+    );
+    return rows[0]?.level || null;
+};
+
+
+// تجيب أحدث فترة للمستوى سواء OPEN أو CLOSED — الطالب يشوف رغباته بعد الإغلاق
+const getPeriodByLevelOpenOrClosed = async (level) => {
+    const [rows] = await dbConnect.promise().execute(
+        `SELECT * FROM TRAINING_PERIOD
+         WHERE status IN ('OPEN', 'CLOSED') AND level = ?
+         ORDER BY createdAt DESC LIMIT 1`,
+        [level]
+    );
+    return rows[0] || null;
+};
 
 
 // تجيب كل المستشفيات الي مسجلة في الفترة عشان الطالب يرتبها
@@ -75,19 +97,10 @@ const savePreferences = async (studentID, periodID, preferences) => {
 };
 
 
-// تجيب مستوى الطالب من جدول STUDENT
-const getStudentLevel = async (studentID) => {
-    const [rows] = await dbConnect.promise().execute(
-        `SELECT level FROM STUDENT WHERE studentID = ? LIMIT 1`,
-        [studentID]
-    );
-    return rows[0]?.level || null;
-};
-
-
 export {
+    getStudentLevel,
+    getPeriodByLevelOpenOrClosed,
     getAvailableHospitals,
     getStudentPreferences,
-    savePreferences,
-    getStudentLevel
+    savePreferences
 };

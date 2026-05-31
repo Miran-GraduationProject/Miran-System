@@ -13,6 +13,9 @@ import fs from "fs";
 // 🗄️ الاتصال بقاعدة البيانات
 import dbConnect from "./config/dbConnect.js";
 
+// 🔄 مزامنة حالات الفترات التدريبية
+import { syncStatuses } from "./models/coordinatorModel/openTrainingPeriod.js";
+
 // 📦 الروتس
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -93,6 +96,10 @@ if (process.env.NODE_ENV !== "test") {
   app.listen(port, () => {
     console.log("server is running");
   });
+
+  // تشغيل المزامنة فور بدء السيرفر ثم كل 5 دقائق
+  syncStatuses().catch(console.error);
+  setInterval(() => syncStatuses().catch(console.error), 5 * 60 * 1000);
 }
 //app.listen(port,()=>{
 //    console.log("server is running")

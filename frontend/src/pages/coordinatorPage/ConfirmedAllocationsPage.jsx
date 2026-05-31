@@ -134,7 +134,7 @@ function ConfirmedAllocationsPage() {
                 معتمد ✓
               </span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '16px' }}>
               {[
                 { label: 'بداية التدريب',  value: fmtDate(data.period?.startDate) },
                 { label: 'نهاية التدريب',   value: fmtDate(data.period?.endDate)   },
@@ -150,7 +150,7 @@ function ConfirmedAllocationsPage() {
           </div>
 
           {/* Stat Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px', marginBottom: '24px' }}>
             <StatCard label="إجمالي الطلاب" value={totalStudents}               color="#6366f1" bg="#eef2ff"  icon={MdPeople}        />
             <StatCard label="الذكور"          value={maleCount}                   color="#3b82f6" bg="#eff6ff"  icon={MdPeople}        />
             <StatCard label="الإناث"          value={femaleCount}                 color="#8b5cf6" bg="#f5f3ff"  icon={MdPeople}        />
@@ -193,7 +193,7 @@ function ConfirmedAllocationsPage() {
                 </div>
 
                 {/* Two-column tables */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0', direction: 'rtl' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0', direction: 'rtl' }}>
                   {/* Males Table */}
                   <div style={{ borderLeft: '1px solid #f3f4f6' }}>
                     <div style={{ padding: '12px 20px', background: '#eff6ff', borderBottom: '1px solid #f3f4f6' }}>

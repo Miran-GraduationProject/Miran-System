@@ -1,7 +1,11 @@
 // إدارة قوائم الطلاب — TailAdmin RTL style
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { MdPeople, MdAutoFixHigh, MdCheckCircle, MdSearch, MdRefresh, MdEdit, MdClose } from 'react-icons/md';
+import { MdPeople, MdAutoFixHigh, MdCheckCircle, MdSearch, MdEdit, MdClose } from 'react-icons/md';
+import PageHeader  from '../../components/common/PageHeader';
+import StatCard    from '../../components/common/StatCard';
+import AlertBox    from '../../components/common/AlertBox';
+import FilterTabs  from '../../components/common/FilterTabs';
 
 const API_BASE = 'http://localhost:3000/api/coordinator/training-period';
 const P      = '#2d8a56';
@@ -12,20 +16,6 @@ const selectStyle = {
   padding: '9px 14px', borderRadius: '10px', border: '1px solid #e5e7eb',
   fontSize: '14px', fontFamily: 'inherit', background: '#fff', color: '#111827', direction: 'rtl',
 };
-
-function StatCard({ label, value, color, bg }) {
-  return (
-    <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '20px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-      <div style={{ width: 48, height: 48, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <MdPeople size={22} color={color} />
-      </div>
-      <div>
-        <p style={{ margin: 0, fontSize: '26px', fontWeight: 700, color: '#111827' }}>{value}</p>
-        <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#6b7280' }}>{label}</p>
-      </div>
-    </div>
-  );
-}
 
 function StudentListPage() {
   const [periods, setPeriods]               = useState([]);
@@ -156,59 +146,40 @@ function StudentListPage() {
     NONE:      { bg: '#f3f4f6', color: '#6b7280', label: 'لم يُولَّد بعد' },
   }[allocationStatus];
 
+  const filterTabsList = [
+    { key: 'ALL',        label: 'الكل',       count: preview.length },
+    { key: 'ASSIGNED',   label: 'تم التعيين', count: assigned       },
+    { key: 'UNASSIGNED', label: 'غير معيّن',  count: unassigned     },
+  ];
+
   return (
     <div dir="rtl" style={{ padding: '32px', minHeight: '100vh', background: P_LT }}>
 
-      {/* Header */}
-      <div style={{
-        background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb',
-        padding: '24px 28px', marginBottom: '24px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <span style={{ width: 44, height: 44, borderRadius: 12, background: P_LT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <MdPeople size={22} color={P} />
+      <PageHeader icon={MdPeople} title="إدارة قوائم الطلاب" subtitle="توليد التوزيع التلقائي ومراجعته وتعديله واعتماده">
+        {loading ? (
+          <span style={{ fontSize: '13px', color: '#9ca3af' }}>جاري التحميل...</span>
+        ) : (
+          <select value={pid} onChange={e => { setPid(e.target.value); setError(''); setSuccess(''); }} style={selectStyle}>
+            <option value="">اختر فترة...</option>
+            {periods.map(p => <option key={p.periodID} value={p.periodID}>{p.name} — {p.status}</option>)}
+          </select>
+        )}
+        {pid && (
+          <span style={{ background: statusPill.bg, color: statusPill.color, borderRadius: '20px', padding: '5px 14px', fontSize: '13px', fontWeight: 600 }}>
+            {statusPill.label}
           </span>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#111827' }}>إدارة قوائم الطلاب</h1>
-            <p style={{ margin: '3px 0 0', fontSize: '13px', color: '#6b7280' }}>توليد التوزيع التلقائي ومراجعته وتعديله واعتماده</p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {loading ? (
-            <span style={{ fontSize: '13px', color: '#9ca3af' }}>جاري التحميل...</span>
-          ) : (
-            <select value={pid} onChange={e => { setPid(e.target.value); setError(''); setSuccess(''); }} style={selectStyle}>
-              <option value="">اختر فترة...</option>
-              {periods.map(p => <option key={p.periodID} value={p.periodID}>{p.name} — {p.status}</option>)}
-            </select>
-          )}
-          {pid && (
-            <span style={{ background: statusPill.bg, color: statusPill.color, borderRadius: '20px', padding: '5px 14px', fontSize: '13px', fontWeight: 600 }}>
-              {statusPill.label}
-            </span>
-          )}
-        </div>
-      </div>
+        )}
+      </PageHeader>
 
-      {error && (
-        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '12px 18px', marginBottom: '20px', color: '#b91c1c' }}>
-          ⚠️ {error}
-        </div>
-      )}
-      {success && (
-        <div style={{ background: P_LT, border: `1px solid ${P_MD}`, borderRadius: '12px', padding: '12px 18px', marginBottom: '20px', color: P, fontWeight: 600 }}>
-          ✅ {success}
-        </div>
-      )}
+      {error   && <AlertBox type="error"   message={error}   />}
+      {success && <AlertBox type="success" message={success} />}
 
       {/* Stat Cards */}
       {preview.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
-          <StatCard label="إجمالي الطلاب"  value={preview.length} color="#6366f1" bg="#eef2ff" />
-          <StatCard label="تم تعيينهم"     value={assigned}       color={P}       bg={P_LT}   />
-          <StatCard label="غير معيّنين"    value={unassigned}     color="#dc2626" bg="#fef2f2" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <StatCard icon={MdPeople}      label="إجمالي الطلاب" value={preview.length} color="#6366f1" bg="#eef2ff" />
+          <StatCard icon={MdCheckCircle} label="تم تعيينهم"    value={assigned}       color={P}       bg={P_LT}   />
+          <StatCard icon={MdClose}       label="غير معيّنين"   value={unassigned}     color="#dc2626" bg="#fef2f2" />
         </div>
       )}
 
@@ -262,39 +233,10 @@ function StudentListPage() {
 
       {/* Table */}
       {!prevLoad && preview.length > 0 && (
-        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflowX: 'auto' }}>
           {/* Filter Bar */}
           <div style={{ padding: '14px 24px', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {/* Tabs */}
-            <div style={{ display: 'flex', alignItems: 'center', background: '#f3f4f6', borderRadius: '12px', padding: '4px', flexShrink: 0 }}>
-              {[
-                { key: 'ALL',        label: 'الكل',       count: preview.length },
-                { key: 'ASSIGNED',   label: 'تم التعيين', count: assigned       },
-                { key: 'UNASSIGNED', label: 'غير معيّن',  count: unassigned     },
-              ].map(tab => {
-                const active = filterStatus === tab.key;
-                return (
-                  <button key={tab.key} onClick={() => setFilterStatus(tab.key)} style={{
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                    padding: '6px 14px', borderRadius: '9px', border: 'none', cursor: 'pointer',
-                    fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, transition: 'all 0.15s',
-                    background: active ? '#fff' : 'transparent',
-                    color:      active ? '#111827' : '#6b7280',
-                    boxShadow:  active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  }}>
-                    {tab.label}
-                    <span style={{
-                      background: active ? P : '#e5e7eb',
-                      color:      active ? '#fff' : '#6b7280',
-                      borderRadius: '20px', padding: '1px 7px', fontSize: '12px', fontWeight: 700,
-                    }}>
-                      {tab.count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            {/* Search */}
+            <FilterTabs tabs={filterTabsList} active={filterStatus} onChange={setFilterStatus} />
             <div style={{ position: 'relative', flex: 1 }}>
               <MdSearch size={18} color="#9ca3af" style={{ position: 'absolute', top: '50%', right: '12px', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               <input
@@ -363,7 +305,7 @@ function StudentListPage() {
       {/* Edit Modal */}
       {editRow && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', borderRadius: '20px', padding: '32px', width: '440px', boxShadow: '0 20px 60px rgba(0,0,0,0.15)', direction: 'rtl' }}>
+          <div style={{ background: '#fff', borderRadius: '20px', padding: '32px', width: 'min(440px, 95vw)', boxShadow: '0 20px 60px rgba(0,0,0,0.15)', direction: 'rtl' }}>
             <div style={{ marginBottom: '24px' }}>
               <h2 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: '#111827' }}>تعديل يدوي</h2>
             </div>
