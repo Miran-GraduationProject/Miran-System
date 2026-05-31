@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/reports.css";
 import "../styles/search.css";
-import { FaSearch } from "react-icons/fa";
+import {
+  FaSearch,
+  FaFileAlt,
+  FaCheck,
+  FaCircle,
+  FaClock,
+  FaExclamation,
+} from "react-icons/fa";
 
 export default function StudentReports() {
   const navigate = useNavigate();
@@ -78,6 +85,14 @@ export default function StudentReports() {
     return "submitted";
   };
 
+  const renderStatusIcon = (report) => {
+    if (isExpiredNotSubmitted(report)) {
+      return <FaExclamation />;
+    }
+
+    return <FaCheck />;
+  };
+
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
       const title = report.reportTitle || "";
@@ -151,7 +166,9 @@ export default function StudentReports() {
       <div className="top-reports-section">
         <div className="reports-header">
           <div className="reports-title">
-            <div className="page-icon">📄</div>
+            <div className="page-icon">
+              <FaFileAlt />
+            </div>
 
             <div>
               <h1>تقاريري</h1>
@@ -168,7 +185,10 @@ export default function StudentReports() {
             <strong>{stats.totalReports || 0}</strong>
             <p>كل التقارير المرتبطة بك</p>
           </div>
-          <div className="stat-icon">📄</div>
+
+          <div className="stat-icon">
+            <FaFileAlt />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -177,7 +197,10 @@ export default function StudentReports() {
             <strong>{stats.submittedCount || 0}</strong>
             <p>تقارير تم إرسالها</p>
           </div>
-          <div className="stat-icon">✅</div>
+
+          <div className="stat-icon">
+            <FaCheck />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -186,18 +209,22 @@ export default function StudentReports() {
             <strong>{stats.approvedCount || 0}</strong>
             <p>تقارير وافق عليها المشرف</p>
           </div>
-          <div className="stat-icon">🟢</div>
+
+          <div className="stat-icon">
+            <FaCircle />
+          </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-content">
             <span>لم يتم التسليم</span>
             <strong>{stats.notSubmittedCount || 0}</strong>
-            <p>
-              منها {stats.expiredNotSubmittedCount || 0} انتهت فترتها
-            </p>
+            <p>منها {stats.expiredNotSubmittedCount || 0} انتهت فترتها</p>
           </div>
-          <div className="stat-icon">⏳</div>
+
+          <div className="stat-icon">
+            <FaClock />
+          </div>
         </div>
       </div>
 
@@ -244,10 +271,13 @@ export default function StudentReports() {
             {filteredReports.map((report) => (
               <div className="table-row" key={report.reportID}>
                 <div className="report-title-cell">
-                  <span className="row-file-icon">📄</span>
+                  <span className="row-file-icon">
+                    <FaFileAlt />
+                  </span>
 
                   <div>
                     <span>{report.reportTitle || "بدون عنوان"}</span>
+
                     <small className="date-cell">
                       تاريخ النشر: {formatDate(report.publishedAt)}
                     </small>
@@ -263,8 +293,9 @@ export default function StudentReports() {
 
                 <span className={`status-badge ${getStatusClass(report)}`}>
                   {getStatusText(report)}
+
                   <span className="status-check">
-                    {isExpiredNotSubmitted(report) ? "!" : "✓"}
+                    {renderStatusIcon(report)}
                   </span>
                 </span>
 

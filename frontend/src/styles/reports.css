@@ -382,3 +382,19 @@
   color: #b42318;
 }
 
+.page-icon svg,
+.stat-icon svg {
+  font-size: 24px;
+}
+
+.row-file-icon svg {
+  font-size: 17px;
+}
+
+.status-check svg {
+  font-size: 10px;
+}
+
+.btn-icon svg {
+  font-size: 14px;
+}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { FiFileText, FiPlus } from "react-icons/fi";
 import "../styles/templates.css";
 
 export default function Templates() {
@@ -369,7 +370,9 @@ export default function Templates() {
     <div className="builder-page">
       <div className="builder-header">
         <div className="builder-title">
-          <div className="builder-page-icon">📄</div>
+          <div className="builder-page-icon">
+            <FiFileText />
+          </div>
 
           <div>
             <h1>بناء التقرير</h1>
@@ -410,7 +413,8 @@ export default function Templates() {
             <h3>حقول التقرير</h3>
 
             <button type="button" onClick={addField}>
-              + إضافة حقل
+              <FiPlus />
+              إضافة حقل
             </button>
           </div>
 

@@ -355,3 +355,28 @@
     grid-template-columns: 1fr;
   }
 }
+.header-icon svg {
+  font-size: 24px;
+}
+
+.small-card-icon svg {
+  font-size: 17px;
+}
+
+.plus-circle svg {
+  font-size: 30px;
+}
+
+.template-icon svg {
+  font-size: 19px;
+}
+
+.template-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.template-badge svg {
+  font-size: 18px;
+}
