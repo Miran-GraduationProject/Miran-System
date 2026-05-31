@@ -280,7 +280,7 @@ const submitReportAnswers = async (reportID, studentID, answers) => {
         submissionDate,
         submissionTime
       )
-      VALUES (?, ?, 'PENDING', CURDATE(), CURTIME())
+      VALUES (?, ?, 'قيد المراجعة', CURDATE(), CURTIME())
       `,
       [reportID, studentID]
     );
