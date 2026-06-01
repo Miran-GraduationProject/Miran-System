@@ -327,3 +327,10 @@
     width: 100%;
   }
 }
+.fill-page-icon svg {
+  font-size: 24px;
+}
+
+.decision-icon svg {
+  font-size: 18px;
+}

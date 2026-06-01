@@ -1,15 +1,14 @@
 .create-report-page {
   direction: rtl;
   min-height: 100vh;
-  background:linear-gradient(
+  background: linear-gradient(
     to bottom,
     #ecfdf5 0%,
-    #f7fcf9 100%) ;
+    #f7fcf9 100%
+  );
   padding: 32px;
   color: #203820;
 }
-
-
 
 .create-report-header {
   display: flex;
@@ -48,7 +47,6 @@
   font-weight: 400;
 }
 
-
 .create-options {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
@@ -70,7 +68,6 @@
 .create-card {
   min-height: 260px;
 }
-
 
 .steps-card {
   padding: 24px;
@@ -133,7 +130,6 @@
   font-weight: 400;
 }
 
-
 .create-card {
   padding: 30px;
   text-align: center;
@@ -190,7 +186,6 @@
   background: #107a5d;
 }
 
-
 .templates-section {
   background: #ffffff;
   border: 1px solid #e4eadf;
@@ -225,7 +220,6 @@
   gap: 18px;
 }
 
-
 .template-card {
   padding: 22px;
   min-height: 250px;
@@ -244,10 +238,14 @@
 .template-badge {
   background: #feb4b4;
   color: #c81111;
-  padding: 12px 12px;
+  padding: 12px;
   border-radius: 12px;
   font-weight: 600;
   font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .template-icon {
@@ -354,4 +352,24 @@
   .template-buttons {
     grid-template-columns: 1fr;
   }
+}
+
+.header-icon svg {
+  font-size: 24px;
+}
+
+.small-card-icon svg {
+  font-size: 17px;
+}
+
+.plus-circle svg {
+  font-size: 30px;
+}
+
+.template-icon svg {
+  font-size: 19px;
+}
+
+.template-badge svg {
+  font-size: 18px;
 }

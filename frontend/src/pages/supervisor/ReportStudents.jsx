@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
+import {
+  FaSearch,
+  FaUsers,
+  FaInbox,
+  FaClock,
+  FaCheck,
+} from "react-icons/fa";
 import "../../styles/reports.css";
 import "../../styles/search.css";
-
-
 
 export default function ReportStudents() {
   const { reportID } = useParams();
@@ -139,19 +143,15 @@ export default function ReportStudents() {
       return "غير محدد";
     }
   };
-      
-
-
-
-  
-
 
   return (
     <div className="reports-page">
       <div className="top-reports-section">
         <div className="reports-header">
           <div className="reports-title">
-            <div className="page-icon">👥</div>
+            <div className="page-icon">
+              <FaUsers />
+            </div>
 
             <div>
               <h1>طلاب التقرير</h1>
@@ -178,7 +178,10 @@ export default function ReportStudents() {
             <strong>{stats.totalStudents}</strong>
             <p>كل الطلاب المرتبطين بالفترة</p>
           </div>
-          <div className="stat-icon">👥</div>
+
+          <div className="stat-icon">
+            <FaUsers />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -187,7 +190,10 @@ export default function ReportStudents() {
             <strong>{stats.submittedStudents}</strong>
             <p>طلاب أرسلوا التقرير</p>
           </div>
-          <div className="stat-icon">📥</div>
+
+          <div className="stat-icon">
+            <FaInbox />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -196,7 +202,10 @@ export default function ReportStudents() {
             <strong>{stats.notSubmittedStudents}</strong>
             <p>طلاب لم يرسلوا التقرير</p>
           </div>
-          <div className="stat-icon">⏱</div>
+
+          <div className="stat-icon">
+            <FaClock />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -205,7 +214,10 @@ export default function ReportStudents() {
             <strong>{stats.approvedStudents}</strong>
             <p>تقارير تمت الموافقة عليها</p>
           </div>
-          <div className="stat-icon">✓</div>
+
+          <div className="stat-icon">
+            <FaCheck />
+          </div>
         </div>
       </div>
 
@@ -256,20 +268,17 @@ export default function ReportStudents() {
                   <span className="student-avatar">
                     {(student.firstName || "؟").charAt(0)}
                   </span>
+
                   <span>{getStudentName(student) || "غير محدد"}</span>
                 </div>
 
                 <span>{student.studentID}</span>
 
-                <span
-                  className={`status-badge ${getSubmissionClass(student)}`}
-                >
+                <span className={`status-badge ${getSubmissionClass(student)}`}>
                   {getSubmissionText(student)}
                 </span>
 
-                <span
-                  className={`status-badge ${getApprovalClass(student)}`}
-                >
+                <span className={`status-badge ${getApprovalClass(student)}`}>
                   {getApprovalText(student)}
                 </span>
 
@@ -283,8 +292,7 @@ export default function ReportStudents() {
                   <button
                     className="view-report-btn"
                     onClick={() =>
-                     navigate(`/reports/submission/${student.submissionID}`)
-
+                      navigate(`/reports/submission/${student.submissionID}`)
                     }
                   >
                     عرض التقرير

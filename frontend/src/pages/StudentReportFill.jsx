@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  FiFileText,
+  FiCheck,
+  FiAlertCircle,
+  FiClock,
+} from "react-icons/fi";
 import "../styles/studentReportFill.css";
 
 export default function StudentReportFill() {
@@ -173,6 +179,12 @@ export default function StudentReportFill() {
     return reviewState;
   }, [isSubmitted, reviewState, isExpiredNotSubmitted]);
 
+  const renderDecisionIcon = () => {
+    if (isApproved) return <FiCheck />;
+    if (isExpiredNotSubmitted) return <FiAlertCircle />;
+    return <FiClock />;
+  };
+
   const renderFieldInput = (field) => {
     const value = formAnswers[field.fieldID] || "";
     const disabled = !canSubmit;
@@ -225,7 +237,9 @@ export default function StudentReportFill() {
     <div className="student-fill-page">
       <div className="fill-header">
         <div className="fill-title">
-          <div className="fill-page-icon">📄</div>
+          <div className="fill-page-icon">
+            <FiFileText />
+          </div>
 
           <div>
             <h1>{pageTitle}</h1>
@@ -265,7 +279,7 @@ export default function StudentReportFill() {
                     : "pending"
                 }`}
               >
-                {isApproved ? "✓" : isExpiredNotSubmitted ? "!" : "⏳"}
+                {renderDecisionIcon()}
               </div>
 
               <div>
@@ -347,7 +361,7 @@ export default function StudentReportFill() {
                     : "pending"
                 }`}
               >
-                {isApproved ? "✓" : isExpiredNotSubmitted ? "!" : "⏳"}
+                {renderDecisionIcon()}
               </div>
 
               <div>
