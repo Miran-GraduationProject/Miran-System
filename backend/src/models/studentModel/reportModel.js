@@ -189,7 +189,6 @@ const submitReportAnswers = async (reportID, studentID, answers) => {
     };
   }
 
-  const connection = await db.getConnection();
 
   try {
     await connection.beginTransaction();
@@ -319,6 +318,59 @@ const submitReportAnswers = async (reportID, studentID, answers) => {
   } finally {
     connection.release();
   }
+
+  const report = reportRows[0];
+
+  // التحقق من انتهاء الفترة التدريبية
+  const [dateCheck] = await db.execute(
+    `SELECT CASE WHEN ? < CURDATE() THEN 1 ELSE 0 END AS isExpired`,
+    [report.endDate]
+  );
+
+  if (dateCheck[0].isExpired === 1) {
+    return { success: false, statusCode: 403, message: "Training period has ended. You can no longer submit this report" };
+  }
+
+  // منع التسليم المزدوج
+  const [existingSubmission] = await db.execute(
+    `SELECT submissionID FROM REPORT_SUBMISSION WHERE reportID = ? AND studentID = ?`,
+    [reportID, studentID]
+  );
+
+  if (existingSubmission.length) {
+    return {
+      success: false,
+      statusCode: 400,
+      message: "Report already submitted",
+      submissionID: existingSubmission[0].submissionID,
+    };
+  }
+
+  // إنشاء سجل التسليم
+  const [submissionResult] = await db.execute(
+    `INSERT INTO REPORT_SUBMISSION (reportID, studentID, submissionDate, submissionTime)
+     VALUES (?, ?, CURDATE(), CURTIME())`,
+    [reportID, studentID]
+  );
+
+  const submissionID = submissionResult.insertId;
+
+  // حفظ الإجابات
+  for (const a of answers) {
+    await db.execute(
+      `INSERT INTO REPORT_ANSWER (submissionID, fieldID, answer) VALUES (?, ?, ?)`,
+      [submissionID, a.fieldID, a.answer]
+    );
+  }
+
+  return {
+    success: true,
+    statusCode: 201,
+    message: "Report submitted successfully",
+    reportID,
+    submissionID,
+    totalAnswers: answers.length,
+  };
 };
 
 export {

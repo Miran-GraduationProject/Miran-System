@@ -148,6 +148,7 @@ export const submitReportController = async (req, res) => {
       totalAnswers: result.totalAnswers,
     });
   } catch (error) {
+    console.error("=== SUBMIT ERROR ===", error.message, error.stack);
     return res.status(500).json({
       message: "Error submitting report",
       error: error.message,

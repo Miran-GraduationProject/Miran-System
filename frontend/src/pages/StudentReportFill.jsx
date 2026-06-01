@@ -136,7 +136,7 @@ export default function StudentReportFill() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "حدث خطأ أثناء تسليم التقرير");
+        alert((data.error ? `[${data.error}] ` : "") + (data.message || "حدث خطأ أثناء تسليم التقرير"));
         return;
       }
 
@@ -333,18 +333,18 @@ export default function StudentReportFill() {
             <h2>تعليمات</h2>
 
             <div className="info-item">
-              <span>1</span>
               <p>يرجى تعبئة جميع الحقول المطلوبة قبل تسليم التقرير.</p>
+              <span>1</span>
             </div>
 
             <div className="info-item">
-              <span>2</span>
               <p>بعد التسليم لن تتمكني من تعديل إجابات التقرير.</p>
+              <span>2</span>
             </div>
 
             <div className="info-item">
-              <span>3</span>
               <p>بعد التسليم سيظهر التقرير للمشرف لمراجعته والموافقة عليه.</p>
+              <span>3</span>
             </div>
           </div>
         ) : (
