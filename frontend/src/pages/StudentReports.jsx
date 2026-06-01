@@ -53,6 +53,15 @@ export default function StudentReports() {
     return report.studentReportState === "EXPIRED_NOT_SUBMITTED";
   };
 
+  const getReviewState = (status) => {
+    const value = String(status || "Pending").toLowerCase();
+
+    if (value === "accept" || value === "accepted") return "accepted";
+    if (value === "reject" || value === "rejected") return "rejected";
+    if (value === "needs revision") return "needs revision";
+    return "pending";
+  };
+
   const getStatusText = (report) => {
     if (isExpiredNotSubmitted(report)) {
       return "انتهت الفترة ولم يتم التسليم";
@@ -62,11 +71,7 @@ export default function StudentReports() {
       return "لم يتم التسليم";
     }
 
-    if (report.approvalStatus === "APPROVED") {
-      return "تمت الموافقة";
-    }
-
-    return "تم التسليم";
+    return getReviewState(report.approvalStatus);
   };
 
   const getStatusClass = (report) => {
@@ -78,8 +83,18 @@ export default function StudentReports() {
       return "unknown";
     }
 
-    if (report.approvalStatus === "APPROVED") {
+    const reviewState = getReviewState(report.approvalStatus);
+
+    if (reviewState === "accepted") {
       return "completed";
+    }
+
+    if (reviewState === "rejected") {
+      return "expired";
+    }
+
+    if (reviewState === "needs revision") {
+      return "review";
     }
 
     return "submitted";
@@ -115,7 +130,7 @@ export default function StudentReports() {
     ).length;
 
     const approvedCount = reports.filter(
-      (report) => report.approvalStatus === "APPROVED"
+      (report) => getReviewState(report.approvalStatus) === "accepted"
     ).length;
 
     const expiredNotSubmittedCount = reports.filter((report) =>

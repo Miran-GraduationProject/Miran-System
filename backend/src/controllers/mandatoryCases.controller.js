@@ -1,7 +1,7 @@
 import db from "../config/dbConnect.js";
 
 class MandatoryCasesController {
-  // ✅ GET كل الحالات الإلزامية
+  //  GET كل الحالات الإلزامية
   getMandatoryCases(req, res) {
     const query = "SELECT * FROM Mandatory_Cases";
     db.query(query, (err, results) => {
@@ -18,7 +18,7 @@ class MandatoryCasesController {
     });
   }
 
-  // ✅ POST إضافة حالة إلزامية جديدة
+  //  POST إضافة حالة إلزامية جديدة
   addMandatoryCase(req, res) {
     const { caseName, description_text, notes, periodID, createdBy } = req.body;
     const query = `
@@ -39,12 +39,12 @@ class MandatoryCasesController {
     });
   }
 
-  // ✅ GET اختبار بسيط
+  // GET اختبار بسيط
   testTable(req, res) {
     res.status(200).json({ message: "Test route working fine ✅" });
   }
 }
 
-// ✅ إنشاء كائن من الكلاس وتصديره
+//  إنشاء كائن من الكلاس وتصديره
 const controller = new MandatoryCasesController();
 export default controller;

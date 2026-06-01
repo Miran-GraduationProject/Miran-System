@@ -20,8 +20,18 @@ export default function StudentReportFill() {
 
   const token = localStorage.getItem("token");
 
+  const getReviewState = (status) => {
+    const value = String(status || "Pending").toLowerCase();
+
+    if (value === "accept" || value === "accepted") return "accepted";
+    if (value === "reject" || value === "rejected") return "rejected";
+    if (value === "needs revision") return "needs revision";
+    return "pending";
+  };
+
   const isSubmitted = Boolean(report?.submissionID);
-  const isApproved = report?.approvalStatus === "APPROVED";
+  const reviewState = getReviewState(report?.approvalStatus);
+  const isApproved = reviewState === "accepted";
   const isExpiredNotSubmitted =
     report?.studentReportState === "EXPIRED_NOT_SUBMITTED";
 
@@ -166,9 +176,8 @@ export default function StudentReportFill() {
   const reviewStatusText = useMemo(() => {
     if (isExpiredNotSubmitted) return "انتهت الفترة ولم يتم التسليم";
     if (!isSubmitted) return "لم يتم التسليم";
-    if (isApproved) return "تمت موافقة المشرف";
-    return "بانتظار موافقة المشرف";
-  }, [isSubmitted, isApproved, isExpiredNotSubmitted]);
+    return reviewState;
+  }, [isSubmitted, reviewState, isExpiredNotSubmitted]);
 
   const renderDecisionIcon = () => {
     if (isApproved) return <FiCheck />;
