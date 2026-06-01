@@ -27,7 +27,7 @@ const login = async (req, res) => {
     const user = await FindUserByEmail(email);
 
     if (!user) {
-      return res.status(404).json({ message: "Invalid email or password" });
+      return res.status(404).json({ message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
     }
 
     const isMatchPassord = (await password) === user.password;
@@ -37,7 +37,7 @@ const login = async (req, res) => {
     if (!isMatchPassord) {
       return res
         .status(404)
-        .json({ message: "Invalid email or password /Incorrect password" });
+        .json({ message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
     }
 
     const token = jwt.sign(
@@ -50,7 +50,7 @@ const login = async (req, res) => {
         email: user.email,
       },
       process.env.JWT_Secret,
-      { expiresIn: "1h" },
+      { expiresIn: "3h" },
     );
 
     res.status(200).json({ token });
