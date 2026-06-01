@@ -48,6 +48,11 @@ function Log() {
       }
     } catch (error) {
       console.error("Login failed", error);
+        if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+    } else {
+        alert("حدث خطأ أثناء تسجيل الدخول، يرجى المحاولة مره اخرى");
+    }
     }
   };
 

@@ -24,7 +24,7 @@ export const verifyToken = (req, res, next) => {
     return res.status(403).json({ message: " no token provided" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decode) => {
+  jwt.verify(token, process.env.JWT_Secret, (err, decode) => {
     if (err) {
       return res.status(401).json({ message: "unauthorized access" });
     }

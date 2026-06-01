@@ -8,7 +8,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useState, useEffect } from "react";
-
+emplates";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import CoordinatorDashboard from "./pages/coordinatorPage/CoordinatorDashboard";
@@ -21,6 +21,7 @@ import StudentListPage from "./pages/coordinatorPage/StudentListPage";
 import ConfirmedAllocationsPage from "./pages/coordinatorPage/ConfirmedAllocationsPage";
 import StudentPreferencesPage from "./pages/student/StudentPreferencesPage";
 import StudentDetails from "./pages/supervisor/StudentDetails";
+
 
 import Reports from "./pages/supervisor/Reports";
 import ReportStudents from "./pages/supervisor/ReportStudents";
@@ -45,12 +46,10 @@ import DeleteCase from './pages/supervisor/DeleteCase';
 import SupervisorCasesManagement from './pages/supervisor/SupervisorCasesManagement';
 
 const Layout = ({ children }) => {
-  const location = useLocation();
-  const hideNavbar = location.pathname === "/login";
-
+  
   return (
     <>
-      {!hideNavbar && <Navbar />}
+      <Navbar />
       <div className="page-top">{children}</div>
       <Footer />
     </>

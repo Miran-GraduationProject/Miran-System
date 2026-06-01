@@ -1,4 +1,3 @@
-// 🧩 الأساسيات
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -7,16 +6,11 @@ import path from "path";
 import fs from "fs";
 
 
-
-
-
-// 🗄️ الاتصال بقاعدة البيانات
 import dbConnect from "./config/dbConnect.js";
 
-// 🔄 مزامنة حالات الفترات التدريبية
 import { syncStatuses } from "./models/coordinatorModel/openTrainingPeriod.js";
 
-// 📦 الروتس
+
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import coordinatorRoutes from "./routes/coordinatorRoutes.js";
@@ -27,7 +21,7 @@ import reviewCaseRoutes from "./routes/reviewCase.routes.js";
 import mandatoryCasesRoutes from "./routes/mandatoryCases.routes.js";
 import logbookRoutes from "./routes/logbook.routes.js";
 
-
+import helmet from "helmet";
 
 
 
@@ -38,7 +32,7 @@ dotenv.config();
 
 const app=express();
 const port=3000;
-
+app.use(helmet());
 /**
  * CORS configuration
  *
@@ -53,6 +47,19 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "frame-ancestors": ["'none'"],
+        "form-action": ["'self'"],
+      },
+    },
+  })
+);
+
 // Authentication & Users
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

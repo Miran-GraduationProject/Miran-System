@@ -50,11 +50,7 @@ function Navbar() {
       { name: "قوائم الطلاب",     path: "/student-list"          },
       { name: "الفرص المؤكدة",    path: "/confirmed-allocations" },
     ],
-    Administrator: [
-      { name: "الرئيسية للادمن", path: "/" },
-      { name: "إدارة المستخدمين", path: "/" },
-      { name: "الطلبات", path: "/" },
-    ],
+   
   };
 
   const currentLink = navLink[userRole];
