@@ -8,7 +8,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useState, useEffect } from "react";
-emplates";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import CoordinatorDashboard from "./pages/coordinatorPage/CoordinatorDashboard";
