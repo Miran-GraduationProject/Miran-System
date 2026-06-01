@@ -1,12 +1,20 @@
-import { 
-  getReportsByStudentIdModel,
-  getReportByIdModel
-} from "../models/reviewCase.js";
+import * as reviewCaseModel from "../models/reviewCase.js";
+
+const decisionToStatus = {
+  "قبول": "قبول",
+  "رفض": "رفض",
+};
+
+const statusToStudentState = {
+  "قبول": "قبول",
+  "رفض": "رفض",
+  "معلق": "معلق",
+};
 
 export const getReportsByStudentId = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const results = await getReportsByStudentIdModel(studentId);
+    const results = await reviewCaseModel.getReportsByStudentIdModel(studentId);
 
     if (results.length === 0) {
       return res.status(404).json({ message: "No reports found for this student" });
@@ -28,7 +36,7 @@ export const getReportsByStudentId = async (req, res) => {
 export const getReportById = async (req, res) => {
   try {
     const { reportId } = req.params;
-    const results = await getReportByIdModel(reportId);
+    const results = await reviewCaseModel.getReportByIdModel(reportId);
 
     if (results.length === 0) {
       return res.status(404).json({ message: "Report not found" });
@@ -43,6 +51,70 @@ export const getReportById = async (req, res) => {
     console.error("Database Error:", err);
     return res.status(500).json({
       message: "Database error while fetching case report"
+    });
+  }
+};
+
+export const getAcademicSupervisors = async (_req, res) => {
+  try {
+    const supervisors = await reviewCaseModel.getAcademicSupervisorsModel();
+
+    return res.status(200).json({
+      message: "Academic supervisors retrieved successfully",
+      data: supervisors,
+    });
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({
+      message: "Database error while fetching academic supervisors",
+    });
+  }
+};
+
+export const updateReportStatus = async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    const { decision, supervisorId } = req.body;
+    const status = decisionToStatus[decision];
+
+    if (!reportId) {
+      return res.status(400).json({ message: "reportId is required" });
+    }
+
+    if (!supervisorId) {
+      return res.status(400).json({ message: "supervisorId is required" });
+    }
+
+    if (!status) {
+      return res.status(400).json({
+        message: "decision must be قبول or رفض",
+      });
+    }
+
+    const result = await reviewCaseModel.updateReportStatusModel(
+      reportId,
+      status,
+      supervisorId
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Report submission not found" });
+    }
+
+    return res.status(200).json({
+      message: "Report status updated successfully",
+      data: {
+        reportId,
+        decision,
+        approvalStatus: status,
+        reportStatus: statusToStudentState[status] || "pending",
+        supervisorId,
+      },
+    });
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({
+      message: "Database error while updating report status",
     });
   }
 };
@@ -84,3 +156,5 @@ export const getFullReportById = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+

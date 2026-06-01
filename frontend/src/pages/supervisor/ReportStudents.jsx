@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
-import "../styles/reports.css";
-import "../styles/search.css";
-
+import {
+  FaSearch,
+  FaUsers,
+  FaInbox,
+  FaClock,
+  FaCheck,
+} from "react-icons/fa";
+import "../../styles/reports.css";
+import "../../styles/search.css";
 
 export default function ReportStudents() {
   const { reportID } = useParams();
@@ -105,14 +110,26 @@ export default function ReportStudents() {
     return "unknown";
   };
 
+  const getReviewState = (status) => {
+    const value = String(status || "Pending").toLowerCase();
+
+    if (value === "accept" || value === "accepted") return "accepted";
+    if (value === "reject" || value === "rejected") return "rejected";
+    if (value === "needs revision") return "needs revision";
+    return "pending";
+  };
+
   const getApprovalText = (student) => {
     if (student.submissionStatus === "NOT_SUBMITTED") return "لا يوجد تسليم";
-    if (student.approvalStatus === "APPROVED") return "تمت الموافقة";
-    return "بانتظار الموافقة";
+    return getReviewState(student.approvalStatus);
   };
 
   const getApprovalClass = (student) => {
-    if (student.approvalStatus === "APPROVED") return "completed";
+    const reviewState = getReviewState(student.approvalStatus);
+
+    if (reviewState === "accepted") return "completed";
+    if (reviewState === "rejected") return "expired";
+    if (reviewState === "needs revision") return "review";
     if (student.submissionStatus === "SUBMITTED") return "review";
     return "unknown";
   };
@@ -126,19 +143,15 @@ export default function ReportStudents() {
       return "غير محدد";
     }
   };
-      
-
-
-
-  
-
 
   return (
     <div className="reports-page">
       <div className="top-reports-section">
         <div className="reports-header">
           <div className="reports-title">
-            <div className="page-icon">👥</div>
+            <div className="page-icon">
+              <FaUsers />
+            </div>
 
             <div>
               <h1>طلاب التقرير</h1>
@@ -165,7 +178,10 @@ export default function ReportStudents() {
             <strong>{stats.totalStudents}</strong>
             <p>كل الطلاب المرتبطين بالفترة</p>
           </div>
-          <div className="stat-icon">👥</div>
+
+          <div className="stat-icon">
+            <FaUsers />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -174,7 +190,10 @@ export default function ReportStudents() {
             <strong>{stats.submittedStudents}</strong>
             <p>طلاب أرسلوا التقرير</p>
           </div>
-          <div className="stat-icon">📥</div>
+
+          <div className="stat-icon">
+            <FaInbox />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -183,7 +202,10 @@ export default function ReportStudents() {
             <strong>{stats.notSubmittedStudents}</strong>
             <p>طلاب لم يرسلوا التقرير</p>
           </div>
-          <div className="stat-icon">⏱</div>
+
+          <div className="stat-icon">
+            <FaClock />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -192,7 +214,10 @@ export default function ReportStudents() {
             <strong>{stats.approvedStudents}</strong>
             <p>تقارير تمت الموافقة عليها</p>
           </div>
-          <div className="stat-icon">✓</div>
+
+          <div className="stat-icon">
+            <FaCheck />
+          </div>
         </div>
       </div>
 
@@ -243,20 +268,17 @@ export default function ReportStudents() {
                   <span className="student-avatar">
                     {(student.firstName || "؟").charAt(0)}
                   </span>
+
                   <span>{getStudentName(student) || "غير محدد"}</span>
                 </div>
 
                 <span>{student.studentID}</span>
 
-                <span
-                  className={`status-badge ${getSubmissionClass(student)}`}
-                >
+                <span className={`status-badge ${getSubmissionClass(student)}`}>
                   {getSubmissionText(student)}
                 </span>
 
-                <span
-                  className={`status-badge ${getApprovalClass(student)}`}
-                >
+                <span className={`status-badge ${getApprovalClass(student)}`}>
                   {getApprovalText(student)}
                 </span>
 
@@ -270,8 +292,7 @@ export default function ReportStudents() {
                   <button
                     className="view-report-btn"
                     onClick={() =>
-                     navigate(`/reports/submission/${student.submissionID}`)
-
+                      navigate(`/reports/submission/${student.submissionID}`)
                     }
                   >
                     عرض التقرير

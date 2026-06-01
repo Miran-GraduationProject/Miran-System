@@ -1,25 +1,31 @@
-// reviewCase.routes.js
-
-
 import express from "express";
+import { verifyToken, verifyRole } from "../middlewares/atuhMiddleware.js";
 import {
   getReportsByStudentId,
-  getReportById,  
-  getFullReportById,         // الاسم الصحيح هنا
-       
+  getReportById,
+  getFullReportById,
+  getAcademicSupervisors,
+  updateReportStatus,
 } from "../controllers/reviewCase.controller.js";
 
 const router = express.Router();
 
-// جلب تقارير طالب حسب الرقم الجامعي
-router.get("/:studentId", getReportsByStudentId);
+router.get(
+  "/supervisors",
+  verifyToken,
+  verifyRole("AcademicSupervisor"),
+  getAcademicSupervisors
+);
+router.put(
+  "/update-status/:reportId",
+  verifyToken,
+  verifyRole("AcademicSupervisor"),
+  updateReportStatus
+);
 
-// جلب تقرير واحد حسب reportID
 router.get("/report/:reportId", getReportById);
-
 router.get("/full-report/:reportId", getFullReportById);
-
-
+router.get("/:studentId", getReportsByStudentId);
 
 
 export default router;

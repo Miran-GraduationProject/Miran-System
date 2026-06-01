@@ -1,0 +1,165 @@
+/* ── Status badge: needs revision ── */
+.status-badge.revision {
+  background: #fff0e0;
+  color: #b76000;
+}
+
+/* ── Table: 3-column layout for cases management pages ── */
+.cases-table-head,
+.cases-table-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1.4fr 0.8fr;
+  gap: 16px;
+  align-items: center;
+}
+
+/* ── Table: 6-column layout for student cases page ── */
+.cases-table-head--6col,
+.cases-table-row--6col {
+  display: grid;
+  grid-template-columns: 1.6fr 1.4fr 1fr 0.8fr 0.8fr 0.9fr;
+  gap: 16px;
+  align-items: center;
+}
+
+/* ── Buttons ── */
+.cases-btn-primary {
+  background: #15916f;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(21, 145, 111, 0.22);
+  transition: background 0.2s;
+}
+
+.cases-btn-primary:hover {
+  background: #107a5d;
+}
+
+.cases-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cases-btn-secondary {
+  background: #eef0ee;
+  color: #203820;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(32, 56, 32, 0.12);
+  transition: background 0.2s;
+}
+
+.cases-btn-secondary:hover {
+  background: #dde0dd;
+}
+
+.cases-btn-danger {
+  background: #d24141;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 9px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cases-btn-danger:hover {
+  background: #d32f2f;
+}
+
+/* ── Header action area ── */
+.cases-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Form ── */
+.case-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px 0 8px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #203820;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  border: 1px solid #d5dfcf;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #203820;
+  background: #fafcfa;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  direction: rtl;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #15916f;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: #b76000;
+  margin: 2px 0 0;
+}
+
+.form-error {
+  color: #b42318;
+  background: #fde2e2;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+/* ── Inline edit panel ── */
+.edit-panel {
+  padding: 16px 24px;
+  background: #f9faf9;
+  border-bottom: 1px solid #eee;
+}
+
+/* ── Confirm delete row ── */
+.confirm-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}

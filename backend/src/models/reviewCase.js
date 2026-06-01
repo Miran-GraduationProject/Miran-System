@@ -48,3 +48,37 @@ export const getReportByIdModel = (reportId) => {
     });
   });
 };
+
+export const getAcademicSupervisorsModel = () => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT userID, firstName, secondName, lastName, email
+      FROM \`User\`
+      WHERE role = 'AcademicSupervisor'
+      ORDER BY firstName ASC, lastName ASC
+    `;
+
+    db.query(query, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};
+
+export const updateReportStatusModel = (submissionId, status, supervisorId) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      UPDATE REPORT_SUBMISSION
+      SET
+        approvalStatus = ?,
+        approvedBy = ?,
+        approvedAt = NOW()
+      WHERE submissionID = ?
+    `;
+
+    db.query(query, [status, supervisorId, submissionId], (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};

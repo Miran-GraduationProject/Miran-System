@@ -343,3 +343,17 @@
     width: 100%;
   }
 }
+.builder-page-icon svg {
+  font-size: 24px;
+}
+
+.fields-title button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.fields-title button svg {
+  font-size: 15px;
+}

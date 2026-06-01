@@ -34,8 +34,7 @@ function Navbar() {
 
   const navLink = {
     AcademicSupervisor: [
-      { name: "  الرئيسية للمشرف", path: "/supervisor" },
-      { name: " الطلاب", path: "/students" },
+      { name: "الطلاب", path: "/supervisor" },
       { name: "التقارير", path: "/reports" },
     ],
     Student: [

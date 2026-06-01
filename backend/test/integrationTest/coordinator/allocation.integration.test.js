@@ -2,6 +2,7 @@
 import request from 'supertest';
 import app from '../../../src/app.js';
 import jwt from 'jsonwebtoken';
+import dbConnect from '../../../src/config/dbConnect.js';
 
 const SECRET = 'Software_Engineers_for_the_Miran_project';
 
@@ -124,4 +125,8 @@ describe('Integration — Req 6: Allocation', () => {
         expect(res.body).toHaveProperty('periods');
     });
 
+});
+
+afterAll(async () => {
+    await dbConnect.promise().end();
 });

@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { MdLock, MdHourglassEmpty, MdLocalHospital, MdStar } from 'react-icons/md';
 import '../../styles/studentPreferences.css';
 
 const BASE = 'http://localhost:3000/api/student';
@@ -111,7 +112,7 @@ function StudentPreferencesPage() {
       }));
       await axios.post(`${BASE}/preferences`, { preferences }, { headers });
       setHasSaved(true);
-      setSuccess('تم حفظ ترتيب رغباتك بنجاح ✓');
+      setSuccess('تم حفظ ترتيب رغباتك بنجاح');
     } catch (err) {
       setError(err.response?.data?.message || 'فشل الحفظ، حاول مرة أخرى');
     } finally {
@@ -171,12 +172,14 @@ function StudentPreferencesPage() {
           {/* Ranked List */}
           {registrationStatus === 'closed' && (
             <div className="sp-closed-notice">
-              🔒 انتهى وقت التسجيل — يمكنك مشاهدة ترتيبك المحفوظ فقط
+              <MdLock size={18} style={{ verticalAlign: 'middle', marginLeft: '6px' }} />
+              انتهى وقت التسجيل — يمكنك مشاهدة ترتيبك المحفوظ فقط
             </div>
           )}
           {registrationStatus === 'not_open' && (
             <div className="sp-closed-notice sp-not-open-notice">
-              ⏳ لم يبدأ التسجيل بعد — يفتح في {formatDate(period.registrationOpen)}
+              <MdHourglassEmpty size={18} style={{ verticalAlign: 'middle', marginLeft: '6px' }} />
+              لم يبدأ التسجيل بعد — يفتح في {formatDate(period.registrationOpen)}
             </div>
           )}
 
@@ -196,11 +199,11 @@ function StudentPreferencesPage() {
                 <div key={h.opportunityID} className={`sp-hospital-row ${index === 0 ? 'rank-first' : ''}`}>
                   <div className="sp-rank-badge">
                     <span className="sp-rank-num">{index + 1}</span>
-                    {index === 0 && <span className="sp-rank-star">★</span>}
+                    {index === 0 && <MdStar className="sp-rank-star" size={14} />}
                   </div>
 
                   <div className="sp-hospital-name">
-                    <span className="sp-hospital-icon">🏥</span>
+                    <MdLocalHospital className="sp-hospital-icon" size={18} />
                     <span>{h.hospitalName}</span>
                   </div>
 

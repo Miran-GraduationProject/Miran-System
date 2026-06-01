@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/reports.css";
-import "../styles/search.css";
-import { FaSearch } from "react-icons/fa";
+import "../../styles/reports.css";
+import "../../styles/search.css";
+import { FaSearch, FaFileAlt, FaPlus } from "react-icons/fa";
 
 export default function Reports() {
   const navigate = useNavigate();
@@ -13,40 +13,15 @@ export default function Reports() {
 
   const token = localStorage.getItem("token");
 
-  
-  // دالة البحث
-  const handleSearch = async () => {
-    try {
-      setLoading(true);
-      let url = "";
-
-      if (!isNaN(search)) {
-        url = `http://localhost:3000/api/reviewCase/${search}`;
-      } else {
-        url = `http://localhost:3000/api/reviewCase/student/${search}`;
-      }
-
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (res.ok) {
-        setReports(Array.isArray(data.data) ? data.data : [data.data]);
-      } else {
-        setReports([]);
-      }
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
- 
   // جلب التقارير المنشورة
   const fetchPublishedReports = async () => {
     try {
+      setLoading(true);
+
       const res = await fetch("http://localhost:3000/api/supervisor/reports", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
@@ -65,31 +40,29 @@ export default function Reports() {
     }
   };
 
-  
   // تشغيل جلب التقارير مرة واحدة
- 
   useEffect(() => {
     fetchPublishedReports();
   }, []);
 
-  
-  // الفلترة
- 
+  // فلترة التقارير داخل الصفحة حسب اسم التقرير أو الفترة
   const filteredReports = useMemo(() => {
+    const searchValue = search.trim().toLowerCase();
+
+    if (!searchValue) return reports;
+
     return reports.filter((report) => {
       const title = report.reportTitle || "";
       const periodName = report.periodName || "";
 
       return (
-        title.toLowerCase().includes(search.toLowerCase()) ||
-        periodName.toLowerCase().includes(search.toLowerCase())
+        title.toLowerCase().includes(searchValue) ||
+        periodName.toLowerCase().includes(searchValue)
       );
     });
   }, [reports, search]);
 
-  
   // دوال مساعدة
-  
   const getReportStatusText = (status) => {
     if (status === "PUBLISHED") return "نشط";
     if (status === "CLOSED") return "مغلق";
@@ -104,6 +77,7 @@ export default function Reports() {
 
   const formatDate = (date) => {
     if (!date) return "غير محدد";
+
     try {
       return new Date(date).toLocaleDateString("ar-SA");
     } catch {
@@ -114,24 +88,26 @@ export default function Reports() {
   const getPeriodText = (report) => {
     const periodName = report.periodName || "فترة غير محددة";
     const periodLevel = report.periodLevel ? ` - ${report.periodLevel}` : "";
+
     return `${periodName}${periodLevel}`;
   };
 
   const getStudentsText = (report) => {
     const totalStudents = Number(report.totalStudents || 0);
     const submittedStudents = Number(report.submittedStudents || 0);
+
     return `${submittedStudents} / ${totalStudents} سلموا`;
   };
 
- 
-  // JSX
-  
   return (
     <div className="reports-page">
       <div className="top-reports-section">
         <div className="reports-header">
           <div className="reports-title">
-            <div className="page-icon">📄</div>
+            <div className="page-icon">
+              <FaFileAlt />
+            </div>
+
             <div>
               <h1>التقارير</h1>
               <p>إدارة التقارير المنشورة ومتابعة تسليم الطلاب</p>
@@ -144,7 +120,9 @@ export default function Reports() {
             className="create-report-btn"
             onClick={() => navigate("/reports/create")}
           >
-            <span className="btn-icon">+</span>
+            <span className="btn-icon">
+              <FaPlus />
+            </span>
             إنشاء تقرير
           </button>
         </div>
@@ -162,9 +140,9 @@ export default function Reports() {
             placeholder="ابحث باسم التقرير أو الفترة..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
-          <FaSearch className="icon" onClick={handleSearch} />
+
+          <FaSearch className="icon" />
         </div>
       </div>
 
@@ -190,39 +168,42 @@ export default function Reports() {
               <span>الإجراء</span>
             </div>
 
-            {(filteredReports.length > 0 ? filteredReports : reports).map(
-              (report) => (
-                <div className="table-row" key={report.reportID}>
-                  <div className="report-title-cell">
-                    <span className="row-file-icon">📄</span>
-                    <span>{report.reportTitle || "بدون عنوان"}</span>
-                    <small className="date-cell">
-                      تاريخ النشر: {formatDate(report.publishedAt)}
-                    </small>
-                  </div>
-
-                  <span>{getPeriodText(report)}</span>
-                  <span>{getStudentsText(report)}</span>
-
-                  <span
-                    className={`status-badge ${getReportStatusClass(
-                      report.reportStatus
-                    )}`}
-                  >
-                    {getReportStatusText(report.reportStatus)}
+            {filteredReports.map((report) => (
+              <div className="table-row" key={report.reportID}>
+                <div className="report-title-cell">
+                  <span className="row-file-icon">
+                    <FaFileAlt />
                   </span>
 
-                  <button
-                    className="view-report-btn"
-                    onClick={() =>
-                      navigate(`/reports/${report.reportID}/students`)
-                    }
-                  >
-                    عرض
-                  </button>
+                  <span>{report.reportTitle || "بدون عنوان"}</span>
+
+                  <small className="date-cell">
+                    تاريخ النشر: {formatDate(report.publishedAt)}
+                  </small>
                 </div>
-              )
-            )}
+
+                <span>{getPeriodText(report)}</span>
+
+                <span>{getStudentsText(report)}</span>
+
+                <span
+                  className={`status-badge ${getReportStatusClass(
+                    report.reportStatus
+                  )}`}
+                >
+                  {getReportStatusText(report.reportStatus)}
+                </span>
+
+                <button
+                  className="view-report-btn"
+                  onClick={() =>
+                    navigate(`/reports/${report.reportID}/students`)
+                  }
+                >
+                  عرض
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>

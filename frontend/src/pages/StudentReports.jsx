@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/reports.css";
 import "../styles/search.css";
-import { FaSearch } from "react-icons/fa";
+import {
+  FaSearch,
+  FaFileAlt,
+  FaCheck,
+  FaCircle,
+  FaClock,
+  FaExclamation,
+} from "react-icons/fa";
 
 export default function StudentReports() {
   const navigate = useNavigate();
@@ -42,33 +49,74 @@ export default function StudentReports() {
     }
   };
 
-  const getStatusText = (report) => {
-    if (!report.submissionID) return "لم يتم التسليم";
+  const isExpiredNotSubmitted = (report) => {
+    return report.studentReportState === "EXPIRED_NOT_SUBMITTED";
+  };
 
-    if (report.approvalStatus === "APPROVED") {
-      return "تمت الموافقة";
+  const getReviewState = (status) => {
+    const value = String(status || "Pending").toLowerCase();
+
+    if (value === "accept" || value === "accepted") return "accepted";
+    if (value === "reject" || value === "rejected") return "rejected";
+    if (value === "needs revision") return "needs revision";
+    return "pending";
+  };
+
+  const getStatusText = (report) => {
+    if (isExpiredNotSubmitted(report)) {
+      return "انتهت الفترة ولم يتم التسليم";
     }
 
-    return "تم التسليم";
+    if (!report.submissionID) {
+      return "لم يتم التسليم";
+    }
+
+    return getReviewState(report.approvalStatus);
   };
 
   const getStatusClass = (report) => {
-    if (!report.submissionID) return "unknown";
+    if (isExpiredNotSubmitted(report)) {
+      return "expired";
+    }
 
-    if (report.approvalStatus === "APPROVED") {
+    if (!report.submissionID) {
+      return "unknown";
+    }
+
+    const reviewState = getReviewState(report.approvalStatus);
+
+    if (reviewState === "accepted") {
       return "completed";
+    }
+
+    if (reviewState === "rejected") {
+      return "expired";
+    }
+
+    if (reviewState === "needs revision") {
+      return "review";
     }
 
     return "submitted";
   };
 
+  const renderStatusIcon = (report) => {
+    if (isExpiredNotSubmitted(report)) {
+      return <FaExclamation />;
+    }
+
+    return <FaCheck />;
+  };
+
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
       const title = report.reportTitle || "";
+      const periodName = report.periodName || "";
       const statusText = getStatusText(report);
 
       return (
         title.toLowerCase().includes(search.toLowerCase()) ||
+        periodName.toLowerCase().includes(search.toLowerCase()) ||
         statusText.toLowerCase().includes(search.toLowerCase())
       );
     });
@@ -82,7 +130,11 @@ export default function StudentReports() {
     ).length;
 
     const approvedCount = reports.filter(
-      (report) => report.approvalStatus === "APPROVED"
+      (report) => getReviewState(report.approvalStatus) === "accepted"
+    ).length;
+
+    const expiredNotSubmittedCount = reports.filter((report) =>
+      isExpiredNotSubmitted(report)
     ).length;
 
     const notSubmittedCount = reports.filter(
@@ -94,6 +146,7 @@ export default function StudentReports() {
       submittedCount,
       approvedCount,
       notSubmittedCount,
+      expiredNotSubmittedCount,
     };
   }, [reports]);
 
@@ -112,7 +165,14 @@ export default function StudentReports() {
   };
 
   const getActionText = (report) => {
-    if (report.submissionID) return "عرض التقرير";
+    if (isExpiredNotSubmitted(report)) {
+      return "عرض";
+    }
+
+    if (report.submissionID) {
+      return "عرض التقرير";
+    }
+
     return "تعبئة التقرير";
   };
 
@@ -121,7 +181,9 @@ export default function StudentReports() {
       <div className="top-reports-section">
         <div className="reports-header">
           <div className="reports-title">
-            <div className="page-icon">📄</div>
+            <div className="page-icon">
+              <FaFileAlt />
+            </div>
 
             <div>
               <h1>تقاريري</h1>
@@ -138,7 +200,10 @@ export default function StudentReports() {
             <strong>{stats.totalReports || 0}</strong>
             <p>كل التقارير المرتبطة بك</p>
           </div>
-          <div className="stat-icon">📄</div>
+
+          <div className="stat-icon">
+            <FaFileAlt />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -147,7 +212,10 @@ export default function StudentReports() {
             <strong>{stats.submittedCount || 0}</strong>
             <p>تقارير تم إرسالها</p>
           </div>
-          <div className="stat-icon">✅</div>
+
+          <div className="stat-icon">
+            <FaCheck />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -156,16 +224,22 @@ export default function StudentReports() {
             <strong>{stats.approvedCount || 0}</strong>
             <p>تقارير وافق عليها المشرف</p>
           </div>
-          <div className="stat-icon">🟢</div>
+
+          <div className="stat-icon">
+            <FaCircle />
+          </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-content">
             <span>لم يتم التسليم</span>
             <strong>{stats.notSubmittedCount || 0}</strong>
-            <p>تقارير تحتاج إلى تعبئة</p>
+            <p>منها {stats.expiredNotSubmittedCount || 0} انتهت فترتها</p>
           </div>
-          <div className="stat-icon">⏳</div>
+
+          <div className="stat-icon">
+            <FaClock />
+          </div>
         </div>
       </div>
 
@@ -178,7 +252,7 @@ export default function StudentReports() {
           <input
             className="input"
             type="text"
-            placeholder="ابحث باسم التقرير أو الحالة..."
+            placeholder="ابحث باسم التقرير أو الفترة أو الحالة..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -203,8 +277,8 @@ export default function StudentReports() {
           <div className="reports-table">
             <div className="table-head">
               <span>عنوان التقرير</span>
+              <span>الفترة التدريبية</span>
               <span>تاريخ التسليم</span>
-              <span>الوقت</span>
               <span>الحالة</span>
               <span>الإجراء</span>
             </div>
@@ -212,23 +286,32 @@ export default function StudentReports() {
             {filteredReports.map((report) => (
               <div className="table-row" key={report.reportID}>
                 <div className="report-title-cell">
-                  <span className="row-file-icon">📄</span>
+                  <span className="row-file-icon">
+                    <FaFileAlt />
+                  </span>
 
-                  <div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                     <span>{report.reportTitle || "بدون عنوان"}</span>
+
                     <small className="date-cell">
                       تاريخ النشر: {formatDate(report.publishedAt)}
                     </small>
                   </div>
                 </div>
 
-                <span>{formatDate(report.submissionDate)}</span>
+                <span>
+                  {report.periodName || "غير محددة"}
+                  {report.periodLevel ? ` - ${report.periodLevel}` : ""}
+                </span>
 
-                <span>{report.submissionTime || "غير محدد"}</span>
+                <span>{formatDate(report.submissionDate)}</span>
 
                 <span className={`status-badge ${getStatusClass(report)}`}>
                   {getStatusText(report)}
-                  <span className="status-check">✓</span>
+
+                  <span className="status-check">
+                    {renderStatusIcon(report)}
+                  </span>
                 </span>
 
                 <button

@@ -6,27 +6,37 @@ import {
   submitReportAnswers,
 } from "../../models/studentModel/reportModel.js";
 
-/* ================= استخراج رقم الطالب من التوكن ================= */
+
+/**
+ * Get the student ID from the logged-in user token.
+ * If the ID does not exist, it returns null.
+ * @param {Object} req - The request object.
+ * @returns {number|string|null} The student ID or null.
+ */
 
 const getStudentIDFromToken = (req) => {
-  return req.user?.id || req.user?.userID || req.user?.studentID;
-};
+  return req.user?.id ?? null;
+}; 
 
-/* ================= يعرض قائمة التقارير للطالب ================= */
+
+  /**
+ * Get all reports for the logged-in student.
+ * @param {Object} req - Request object.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 
 export const getStudentReportsController = async (req, res) => {
   try {
     const studentID = getStudentIDFromToken(req);
-
     if (!studentID) {
       return res.status(401).json({
         message: "Student ID not found in token",
       });
     }
 
-    const reports = await getStudentReports(studentID);
-
-    return res.json({
+const reports = await getStudentReports(studentID);
+    return res.status(200).json({
       reports,
     });
   } catch (error) {
@@ -37,27 +47,28 @@ export const getStudentReportsController = async (req, res) => {
   }
 };
 
-/* ================= يعرض تقرير واحد للطالب ================= */
-/*
-  إذا التقرير غير مسلم:
-  يرجع report + fields + answers فاضية
-
-  إذا التقرير مسلم:
-  يرجع report + fields + answers
-*/
+/**
+ * Get one report for the student.
+ * It returns the report details, fields, and answers if they exist.
+ * @param {Object} req - Request object.
+ * @param {Object} req.params - Route parameters.
+ * @param {number|string} req.params.reportID - Report ID.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 
 export const getReportController = async (req, res) => {
   try {
     const { reportID } = req.params;
 
     const studentID = getStudentIDFromToken(req);
-
+   
     if (!studentID) {
       return res.status(401).json({
         message: "Student ID not found in token",
       });
     }
-
+    
     if (!reportID) {
       return res.status(400).json({
         message: "reportID is required",
@@ -73,10 +84,9 @@ export const getReportController = async (req, res) => {
     }
 
     const fields = await getReportFields(report[0].templateID);
-
     const answers = await getReportAnswers(report[0].submissionID);
 
-    return res.json({
+    return res.status(200).json({
       report: report[0],
       fields,
       answers,
@@ -89,7 +99,17 @@ export const getReportController = async (req, res) => {
   }
 };
 
-/* ================= حفظ اجابات الطالب ================= */
+
+/**
+ * Submit student answers for a report.
+ * It checks the report ID and answers before saving them.
+ * @param {Object} req - Request object.
+ * @param {Object} req.body - Request body.
+ * @param {number|string} req.body.reportID - Report ID.
+ * @param {Array<Object>} req.body.answers - Student answers.
+ * @param {Object} res - Response object.
+ * @returns {Promise<void>}
+ */
 
 export const submitReportController = async (req, res) => {
   try {
@@ -118,16 +138,17 @@ export const submitReportController = async (req, res) => {
     const result = await submitReportAnswers(reportID, studentID, answers);
 
     if (result.success === false) {
-      return res.status(400).json(result);
+      return res.status(result.statusCode || 400).json(result);
     }
 
-    return res.json({
+    return res.status(result.statusCode || 201).json({
       message: "Report submitted successfully",
       submissionID: result.submissionID,
       reportID: result.reportID,
       totalAnswers: result.totalAnswers,
     });
   } catch (error) {
+    console.error("=== SUBMIT ERROR ===", error.message, error.stack);
     return res.status(500).json({
       message: "Error submitting report",
       error: error.message,

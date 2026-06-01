@@ -95,6 +95,12 @@
   font-weight: 700;
 }
 
+/* حالة انتهاء الفترة */
+.fill-badge.expired-badge {
+  background: #fde2e2;
+  color: #b42318;
+}
+
 /* Fields */
 .fill-fields {
   display: grid;
@@ -268,6 +274,12 @@
   color: #b77900;
 }
 
+/* حالة انتهاء الفترة */
+.decision-icon.expired {
+  background: #fde2e2;
+  color: #b42318;
+}
+
 .supervisor-decision-box span {
   display: block;
   color: #6b756b;
@@ -314,4 +326,11 @@
   .primary-fill-btn {
     width: 100%;
   }
+}
+.fill-page-icon svg {
+  font-size: 24px;
+}
+
+.decision-icon svg {
+  font-size: 18px;
 }

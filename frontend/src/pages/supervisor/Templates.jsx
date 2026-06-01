@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import "../styles/templates.css";
+import { FiFileText, FiPlus } from "react-icons/fi";
+import "../../styles/templates.css";
+
+const FIELD_TYPES = [
+  { value: "text", label: "نص قصير" },
+  { value: "textarea", label: "نص طويل" },
+  { value: "date", label: "تاريخ" },
+  { value: "number", label: "رقم" },
+];
 
 export default function Templates() {
   const navigate = useNavigate();
@@ -28,6 +36,15 @@ export default function Templates() {
 
   const token = localStorage.getItem("token");
 
+  const authHeaders = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const jsonAuthHeaders = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+
   useEffect(() => {
     fetchTrainingPeriods();
 
@@ -42,9 +59,7 @@ export default function Templates() {
       const res = await fetch(
         "http://localhost:3000/api/supervisor/training-periods",
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: authHeaders,
         }
       );
 
@@ -70,9 +85,7 @@ export default function Templates() {
       const res = await fetch(
         `http://localhost:3000/api/supervisor/template/${id}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: authHeaders,
         }
       );
 
@@ -98,9 +111,7 @@ export default function Templates() {
       const res = await fetch(
         `http://localhost:3000/api/supervisor/template-fields/${id}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: authHeaders,
         }
       );
 
@@ -132,8 +143,8 @@ export default function Templates() {
   }, [fields]);
 
   const addField = () => {
-    setFields([
-      ...fields,
+    setFields((currentFields) => [
+      ...currentFields,
       {
         fieldLabel: "",
         fieldType: "text",
@@ -144,9 +155,35 @@ export default function Templates() {
   };
 
   const updateFieldValue = (index, key, value) => {
-    const updatedFields = [...fields];
-    updatedFields[index][key] = value;
-    setFields(updatedFields);
+    setFields((currentFields) => {
+      const updatedFields = [...currentFields];
+
+      updatedFields[index] = {
+        ...updatedFields[index],
+        [key]: value,
+      };
+
+      return updatedFields;
+    });
+  };
+
+  const deleteFieldFromDatabase = async (fieldID) => {
+    const res = await fetch(
+      `http://localhost:3000/api/supervisor/field/${fieldID}`,
+      {
+        method: "DELETE",
+        headers: jsonAuthHeaders,
+        body: JSON.stringify({
+          templateID,
+        }),
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || "حدث خطأ أثناء حذف الحقل");
+    }
   };
 
   const removeField = async (index) => {
@@ -158,41 +195,25 @@ export default function Templates() {
       if (!confirmDelete) return;
 
       try {
-        const res = await fetch(
-          `http://localhost:3000/api/supervisor/field/${field.fieldID}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          alert(data.message || "حدث خطأ أثناء حذف الحقل");
-          return;
-        }
+        await deleteFieldFromDatabase(field.fieldID);
       } catch (error) {
         console.error("Error deleting field:", error);
-        alert("حدث خطأ أثناء حذف الحقل");
+        alert(error.message || "حدث خطأ أثناء حذف الحقل");
         return;
       }
     }
 
-    setFields(fields.filter((_, i) => i !== index));
+    setFields((currentFields) =>
+      currentFields.filter((_, fieldIndex) => fieldIndex !== index)
+    );
   };
 
-  const createNewTemplateWithFields = async () => {
+  const createTemplate = async () => {
     const templateRes = await fetch(
       "http://localhost:3000/api/supervisor/template",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: jsonAuthHeaders,
         body: JSON.stringify({
           reportTitle: reportTitle.trim(),
         }),
@@ -205,28 +226,53 @@ export default function Templates() {
       throw new Error(templateData.message || "Error creating template");
     }
 
-    const newTemplateID = templateData.templateID;
+    return templateData.templateID;
+  };
+
+  const addFieldToTemplate = async (selectedTemplateID, field) => {
+    const fieldRes = await fetch("http://localhost:3000/api/supervisor/field", {
+      method: "POST",
+      headers: jsonAuthHeaders,
+      body: JSON.stringify({
+        templateID: selectedTemplateID,
+        fieldLabel: field.fieldLabel.trim(),
+        fieldType: field.fieldType,
+        isRequired: field.isRequired ? 1 : 0,
+      }),
+    });
+
+    const fieldData = await fieldRes.json().catch(() => ({}));
+
+    if (!fieldRes.ok) {
+      throw new Error(fieldData.message || "Error adding field");
+    }
+  };
+
+  const updateFieldInTemplate = async (field) => {
+    const res = await fetch("http://localhost:3000/api/supervisor/field", {
+      method: "PUT",
+      headers: jsonAuthHeaders,
+      body: JSON.stringify({
+        templateID,
+        fieldID: field.fieldID,
+        fieldLabel: field.fieldLabel.trim(),
+        fieldType: field.fieldType,
+        isRequired: field.isRequired ? 1 : 0,
+      }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || "Error updating field");
+    }
+  };
+
+  const createNewTemplateWithFields = async () => {
+    const newTemplateID = await createTemplate();
 
     for (const field of validFields) {
-      const fieldRes = await fetch("http://localhost:3000/api/supervisor/field", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          templateID: newTemplateID,
-          fieldLabel: field.fieldLabel.trim(),
-          fieldType: field.fieldType,
-          isRequired: field.isRequired ? 1 : 0,
-        }),
-      });
-
-      const fieldData = await fieldRes.json().catch(() => ({}));
-
-      if (!fieldRes.ok) {
-        throw new Error(fieldData.message || "Error adding field");
-      }
+      await addFieldToTemplate(newTemplateID, field);
     }
 
     setTemplateID(newTemplateID);
@@ -236,52 +282,16 @@ export default function Templates() {
   const updateExistingTemplateFields = async () => {
     for (const field of validFields) {
       if (field.fieldID && !field.isNew) {
-        const res = await fetch("http://localhost:3000/api/supervisor/field", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            fieldID: field.fieldID,
-            fieldLabel: field.fieldLabel.trim(),
-            fieldType: field.fieldType,
-            isRequired: field.isRequired ? 1 : 0,
-          }),
-        });
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          throw new Error(data.message || "Error updating field");
-        }
+        await updateFieldInTemplate(field);
       } else {
-        const res = await fetch("http://localhost:3000/api/supervisor/field", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            templateID,
-            fieldLabel: field.fieldLabel.trim(),
-            fieldType: field.fieldType,
-            isRequired: field.isRequired ? 1 : 0,
-          }),
-        });
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          throw new Error(data.message || "Error adding field");
-        }
+        await addFieldToTemplate(templateID, field);
       }
     }
 
     return templateID;
   };
 
-  const saveTemplate = async () => {
+  const saveTemplate = async (showMessage = true) => {
     if (!reportTitle.trim()) {
       alert("اكتب عنوان التقرير");
       return null;
@@ -303,7 +313,10 @@ export default function Templates() {
         savedTemplateID = await updateExistingTemplateFields();
       }
 
-      alert("تم حفظ القالب بنجاح");
+      if (showMessage) {
+        alert("تم حفظ القالب بنجاح");
+      }
+
       return savedTemplateID;
     } catch (error) {
       console.error("Error saving template:", error);
@@ -320,7 +333,7 @@ export default function Templates() {
       return;
     }
 
-    const savedTemplateID = await saveTemplate();
+    const savedTemplateID = await saveTemplate(false);
 
     if (!savedTemplateID) return;
 
@@ -329,10 +342,7 @@ export default function Templates() {
         "http://localhost:3000/api/supervisor/create-report",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: jsonAuthHeaders,
           body: JSON.stringify({
             templateID: savedTemplateID,
             periodID,
@@ -364,7 +374,9 @@ export default function Templates() {
     <div className="builder-page">
       <div className="builder-header">
         <div className="builder-title">
-          <div className="builder-page-icon">📄</div>
+          <div className="builder-page-icon">
+            <FiFileText />
+          </div>
 
           <div>
             <h1>بناء التقرير</h1>
@@ -405,7 +417,8 @@ export default function Templates() {
             <h3>حقول التقرير</h3>
 
             <button type="button" onClick={addField}>
-              + إضافة حقل
+              <FiPlus />
+              إضافة حقل
             </button>
           </div>
 
@@ -433,10 +446,11 @@ export default function Templates() {
                         updateFieldValue(index, "fieldType", e.target.value)
                       }
                     >
-                      <option value="text">نص قصير</option>
-                      <option value="textarea">نص طويل</option>
-                      <option value="date">تاريخ</option>
-                      <option value="number">رقم</option>
+                      {FIELD_TYPES.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -465,7 +479,7 @@ export default function Templates() {
             <button
               className="secondary-btn"
               type="button"
-              onClick={saveTemplate}
+              onClick={() => saveTemplate(true)}
               disabled={saving}
             >
               حفظ كقالب

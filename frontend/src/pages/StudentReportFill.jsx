@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  FiFileText,
+  FiCheck,
+  FiAlertCircle,
+  FiClock,
+} from "react-icons/fi";
 import "../styles/studentReportFill.css";
 
 export default function StudentReportFill() {
@@ -14,8 +20,22 @@ export default function StudentReportFill() {
 
   const token = localStorage.getItem("token");
 
+  const getReviewState = (status) => {
+    const value = String(status || "Pending").toLowerCase();
+
+    if (value === "accept" || value === "accepted") return "accepted";
+    if (value === "reject" || value === "rejected") return "rejected";
+    if (value === "needs revision") return "needs revision";
+    return "pending";
+  };
+
   const isSubmitted = Boolean(report?.submissionID);
-  const isApproved = report?.approvalStatus === "APPROVED";
+  const reviewState = getReviewState(report?.approvalStatus);
+  const isApproved = reviewState === "accepted";
+  const isExpiredNotSubmitted =
+    report?.studentReportState === "EXPIRED_NOT_SUBMITTED";
+
+  const canSubmit = !isSubmitted && !isExpiredNotSubmitted;
 
   useEffect(() => {
     fetchReport();
@@ -67,6 +87,8 @@ export default function StudentReportFill() {
   };
 
   const handleAnswerChange = (fieldID, value) => {
+    if (!canSubmit) return;
+
     setFormAnswers((prev) => ({
       ...prev,
       [fieldID]: value,
@@ -87,7 +109,7 @@ export default function StudentReportFill() {
   };
 
   const handleSubmit = async () => {
-    if (isSubmitted) return;
+    if (!canSubmit) return;
 
     if (!validateAnswers()) return;
 
@@ -114,7 +136,7 @@ export default function StudentReportFill() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "حدث خطأ أثناء تسليم التقرير");
+        alert((data.error ? `[${data.error}] ` : "") + (data.message || "حدث خطأ أثناء تسليم التقرير"));
         return;
       }
 
@@ -139,22 +161,41 @@ export default function StudentReportFill() {
     }
   };
 
+  const pageTitle = useMemo(() => {
+    if (isSubmitted) return "عرض التقرير";
+    if (isExpiredNotSubmitted) return "انتهت فترة التقرير";
+    return "تعبئة التقرير";
+  }, [isSubmitted, isExpiredNotSubmitted]);
+
+  const badgeText = useMemo(() => {
+    if (isSubmitted) return "تم التسليم";
+    if (isExpiredNotSubmitted) return "انتهت الفترة";
+    return "قيد التعبئة";
+  }, [isSubmitted, isExpiredNotSubmitted]);
+
   const reviewStatusText = useMemo(() => {
+    if (isExpiredNotSubmitted) return "انتهت الفترة ولم يتم التسليم";
     if (!isSubmitted) return "لم يتم التسليم";
-    if (isApproved) return "تمت موافقة المشرف";
-    return "بانتظار موافقة المشرف";
-  }, [isSubmitted, isApproved]);
+    return reviewState;
+  }, [isSubmitted, reviewState, isExpiredNotSubmitted]);
+
+  const renderDecisionIcon = () => {
+    if (isApproved) return <FiCheck />;
+    if (isExpiredNotSubmitted) return <FiAlertCircle />;
+    return <FiClock />;
+  };
 
   const renderFieldInput = (field) => {
     const value = formAnswers[field.fieldID] || "";
+    const disabled = !canSubmit;
 
     if (field.fieldType === "textarea") {
       return (
         <textarea
           value={value}
-          disabled={isSubmitted}
+          disabled={disabled}
           onChange={(e) => handleAnswerChange(field.fieldID, e.target.value)}
-          placeholder="اكتبي إجابتك هنا..."
+          placeholder={disabled ? "" : "اكتبي إجابتك هنا..."}
         />
       );
     }
@@ -169,9 +210,9 @@ export default function StudentReportFill() {
             : "text"
         }
         value={value}
-        disabled={isSubmitted}
+        disabled={disabled}
         onChange={(e) => handleAnswerChange(field.fieldID, e.target.value)}
-        placeholder="اكتبي إجابتك هنا..."
+        placeholder={disabled ? "" : "اكتبي إجابتك هنا..."}
       />
     );
   };
@@ -196,10 +237,12 @@ export default function StudentReportFill() {
     <div className="student-fill-page">
       <div className="fill-header">
         <div className="fill-title">
-          <div className="fill-page-icon">📄</div>
+          <div className="fill-page-icon">
+            <FiFileText />
+          </div>
 
           <div>
-            <h1>{isSubmitted ? "عرض التقرير" : "تعبئة التقرير"}</h1>
+            <h1>{pageTitle}</h1>
             <p>
               {report.reportTitle || "بدون عنوان"} - تاريخ النشر:{" "}
               {formatDate(report.publishedAt)}
@@ -213,22 +256,34 @@ export default function StudentReportFill() {
           <div className="fill-card-title">
             <h2>{report.reportTitle || "تقرير التدريب"}</h2>
 
-            <span className="fill-badge">
-              {isSubmitted ? "تم التسليم" : "قيد التعبئة"}
+            <span
+              className={`fill-badge ${
+                isExpiredNotSubmitted ? "expired-badge" : ""
+              }`}
+            >
+              {badgeText}
             </span>
           </div>
 
-          {isSubmitted && (
+          {(isSubmitted || isExpiredNotSubmitted) && (
             <div
               className="supervisor-decision-box"
               style={{ marginBottom: "22px" }}
             >
-              <div className={`decision-icon ${isApproved ? "approved" : "pending"}`}>
-                {isApproved ? "✓" : "⏳"}
+              <div
+                className={`decision-icon ${
+                  isApproved
+                    ? "approved"
+                    : isExpiredNotSubmitted
+                    ? "expired"
+                    : "pending"
+                }`}
+              >
+                {renderDecisionIcon()}
               </div>
 
               <div>
-                <span>حالة موافقة المشرف</span>
+                <span>حالة التقرير</span>
                 <strong>{reviewStatusText}</strong>
               </div>
             </div>
@@ -260,7 +315,7 @@ export default function StudentReportFill() {
               رجوع
             </button>
 
-            {!isSubmitted && (
+            {canSubmit && (
               <button
                 type="button"
                 className="primary-fill-btn"
@@ -273,32 +328,40 @@ export default function StudentReportFill() {
           </div>
         </div>
 
-        {!isSubmitted ? (
+        {canSubmit ? (
           <div className="fill-info-card">
             <h2>تعليمات</h2>
 
             <div className="info-item">
-              <span>1</span>
               <p>يرجى تعبئة جميع الحقول المطلوبة قبل تسليم التقرير.</p>
+              <span>1</span>
             </div>
 
             <div className="info-item">
-              <span>2</span>
               <p>بعد التسليم لن تتمكني من تعديل إجابات التقرير.</p>
+              <span>2</span>
             </div>
 
             <div className="info-item">
-              <span>3</span>
               <p>بعد التسليم سيظهر التقرير للمشرف لمراجعته والموافقة عليه.</p>
+              <span>3</span>
             </div>
           </div>
         ) : (
           <div className="fill-info-card review-side-card">
-            <h2>موافقة المشرف</h2>
+            <h2>{isExpiredNotSubmitted ? "حالة التقرير" : "موافقة المشرف"}</h2>
 
             <div className="supervisor-decision-box">
-              <div className={`decision-icon ${isApproved ? "approved" : "pending"}`}>
-                {isApproved ? "✓" : "⏳"}
+              <div
+                className={`decision-icon ${
+                  isApproved
+                    ? "approved"
+                    : isExpiredNotSubmitted
+                    ? "expired"
+                    : "pending"
+                }`}
+              >
+                {renderDecisionIcon()}
               </div>
 
               <div>

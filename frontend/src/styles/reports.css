@@ -372,3 +372,29 @@
     width: 100%;
   }
 }
+.status-badge.expired {
+  background: #fde2e2;
+  color: #b42318;
+}
+
+.status-badge.expired .status-check {
+  background: rgba(180, 35, 24, 0.12);
+  color: #b42318;
+}
+
+.page-icon svg,
+.stat-icon svg {
+  font-size: 24px;
+}
+
+.row-file-icon svg {
+  font-size: 17px;
+}
+
+.status-check svg {
+  font-size: 10px;
+}
+
+.btn-icon svg {
+  font-size: 14px;
+}

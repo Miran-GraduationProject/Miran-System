@@ -294,7 +294,12 @@ const removeHospital = async (req, res) => {
 const getRegistrationStatsController = async (req, res) => {
     try {
         const { periodID } = req.query;
-        const stats = await getRegistrationStats(periodID ? Number(periodID) : null);
+        let stats;
+        if (periodID) {
+            stats = await getRegistrationStats(Number(periodID));
+        } else {
+            stats = await getRegistrationStats(null);
+        }
         if (!stats) {
             return res.status(404).json({ message: "No open training period found" });
         }
@@ -340,7 +345,7 @@ const deletePeriod = async (req, res) => {
 };
 
 
-//هنا يعرض بصفحة ادارة المستشفيات كل الفترات باختصار
+//هنا يعرض بصفحة الفترات التدريبية كل الفترات باختصار
 /**
  * Returns a summary list of all training periods regardless of status.
  *

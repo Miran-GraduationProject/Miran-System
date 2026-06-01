@@ -2,12 +2,14 @@ import dbConnect from "../../config/dbConnect.js";
 
 const db = dbConnect.promise();
 
-/* =====================================================
-   TEMPLATE
-   إدارة القوالب
-===================================================== */
-
-export const getTemplateById = async (templateID) => {
+/**
+ * Get one template by its ID and supervisor ID.
+ *
+ * @param {number|string} templateID - Template ID.
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @returns {Promise<Array>} Template data if found.
+ */
+export const getTemplateById = async (templateID, academicSupervisorID) => {
   const [rows] = await db.execute(
     `SELECT 
        templateID,
@@ -18,13 +20,21 @@ export const getTemplateById = async (templateID) => {
        created_at,
        updated_at
      FROM TEMPLATE
-     WHERE templateID = ?`,
-    [templateID]
+     WHERE templateID = ?
+       AND academicSupervisorID = ?`,
+    [templateID, academicSupervisorID]
   );
 
   return rows;
 };
 
+/**
+ * Create a new report template for a supervisor.
+ *
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @param {string} reportTitle - Template title.
+ * @returns {Promise<Object>} Insert result.
+ */
 export const createTemplate = async (academicSupervisorID, reportTitle) => {
   const [result] = await db.execute(
     `INSERT INTO TEMPLATE 
@@ -43,8 +53,17 @@ export const createTemplate = async (academicSupervisorID, reportTitle) => {
   return result;
 };
 
-export const getAllTemplates = async () => {
-  const [rows] = await db.execute(`
+/**
+ * Get all templates created by a supervisor.
+ *
+ * It also returns the number of fields in each template.
+ *
+ * @param {number|string} academicSupervisorID - Academic supervisor ID.
+ * @returns {Promise<Array>} List of templates.
+ */
+export const getAllTemplates = async (academicSupervisorID) => {
+  const [rows] = await db.execute(
+    `
     SELECT 
       t.templateID,
       t.academicSupervisorID,
@@ -57,6 +76,7 @@ export const getAllTemplates = async () => {
     FROM TEMPLATE t
     LEFT JOIN ReportField rf 
       ON t.templateID = rf.templateID
+    WHERE t.academicSupervisorID = ?
     GROUP BY 
       t.templateID,
       t.academicSupervisorID,
@@ -66,16 +86,19 @@ export const getAllTemplates = async () => {
       t.created_at,
       t.updated_at
     ORDER BY t.templateID DESC
-  `);
+    `,
+    [academicSupervisorID]
+  );
 
   return rows;
 };
 
-/* =====================================================
-   ReportField
-   إدارة حقول القالب
-===================================================== */
-
+/**
+ * Get all fields for a specific template.
+ *
+ * @param {number|string} templateID - Template ID.
+ * @returns {Promise<Array>} List of template fields.
+ */
 export const getTemplateFields = async (templateID) => {
   const [rows] = await db.execute(
     `SELECT
@@ -93,6 +116,15 @@ export const getTemplateFields = async (templateID) => {
   return rows;
 };
 
+/**
+ * Add one field to a template.
+ *
+ * @param {number|string} templateID - Template ID.
+ * @param {string} fieldLabel - Field label.
+ * @param {string} fieldType - Field type.
+ * @param {number} isRequired - Shows if the field is required.
+ * @returns {Promise<Object>} Insert result.
+ */
 export const addReportField = async (
   templateID,
   fieldLabel,
@@ -114,6 +146,15 @@ export const addReportField = async (
   return result;
 };
 
+/**
+ * Create many fields for a template.
+ *
+ * This function checks that the fields array is valid before saving them.
+ *
+ * @param {number|string} templateID - Template ID.
+ * @param {Array<Object>} fields - Template fields.
+ * @returns {Promise<Object>} Creation result.
+ */
 export const createTemplateFields = async (templateID, fields) => {
   if (!Array.isArray(fields) || fields.length === 0) {
     return {
@@ -161,6 +202,15 @@ export const createTemplateFields = async (templateID, fields) => {
   };
 };
 
+/**
+ * Update one field in a template.
+ *
+ * @param {number|string} fieldID - Field ID.
+ * @param {string} fieldLabel - Updated field label.
+ * @param {string} fieldType - Updated field type.
+ * @param {number} isRequired - Shows if the field is required.
+ * @returns {Promise<Object>} Update result.
+ */
 export const updateReportField = async (
   fieldID,
   fieldLabel,
@@ -180,6 +230,14 @@ export const updateReportField = async (
   return result;
 };
 
+/**
+ * Delete one field and its related answers.
+ *
+ * A transaction is used so both delete operations succeed together.
+ *
+ * @param {number|string} fieldID - Field ID.
+ * @returns {Promise<Object>} Delete result.
+ */
 export const deleteReportField = async (fieldID) => {
   const connection = await db.getConnection();
 
@@ -209,11 +267,15 @@ export const deleteReportField = async (fieldID) => {
   }
 };
 
-/* =====================================================
-   حذف القالب وكل ما يرتبط به
-   يعتمد على الشكل الجديد فقط
-===================================================== */
-
+/**
+ * Delete a template and all related data.
+ *
+ * It deletes report answers, submissions, published reports,
+ * fields, and finally the template itself.
+ *
+ * @param {number|string} templateID - Template ID.
+ * @returns {Promise<Object>} Delete result.
+ */
 export const deleteTemplateAndFields = async (templateID) => {
   const connection = await db.getConnection();
 

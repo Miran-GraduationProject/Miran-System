@@ -9,61 +9,12 @@ import {
   MdPeople,
   MdDashboard,
 } from 'react-icons/md';
+import PageHeader from '../../components/common/PageHeader';
+import StatCard   from '../../components/common/StatCard';
 
 const PRIMARY    = '#2d8a56';
 const PRIMARY_LT = '#ecfdf5';
 const PRIMARY_MD = '#d1fae5';
-
-function StatCard({ icon: Icon, label, value, sub, accent }) {
-  return (
-    <div
-      style={{
-        background: accent ? PRIMARY : '#ffffff',
-        borderRadius: '16px',
-        border: `1px solid ${accent ? 'transparent' : '#e5e7eb'}`,
-        padding: '24px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-        transition: 'box-shadow 0.2s, transform 0.2s',
-        direction: 'rtl',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.boxShadow = '0 6px 20px rgba(45,138,86,0.15)';
-        e.currentTarget.style.transform = 'translateY(-2px)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)';
-        e.currentTarget.style.transform = 'none';
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span
-          style={{
-            width: '48px', height: '48px',
-            borderRadius: '12px',
-            background: accent ? 'rgba(255,255,255,0.2)' : PRIMARY_LT,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          <Icon size={22} color={accent ? '#fff' : PRIMARY} />
-        </span>
-        <span style={{ fontSize: '12px', color: accent ? 'rgba(255,255,255,0.7)' : '#9ca3af', fontWeight: 500 }}>
-          {sub}
-        </span>
-      </div>
-      <div>
-        <p style={{ margin: 0, fontSize: '13px', color: accent ? 'rgba(255,255,255,0.8)' : '#6b7280', marginBottom: '6px' }}>
-          {label}
-        </p>
-        <p style={{ margin: 0, fontSize: '36px', fontWeight: 700, color: accent ? '#ffffff' : '#111827', lineHeight: 1 }}>
-          {value}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 function QuickActionBtn({ label, icon: Icon, onClick, desc }) {
   const [hovered, setHovered] = useState(false);
@@ -142,118 +93,40 @@ export default function CoordinatorDashboard() {
   return (
     <div dir="rtl" style={{ padding: '32px', minHeight: '100vh', background: PRIMARY_LT }}>
 
-      {/* ── Page Header ── */}
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e5e7eb',
-          padding: '24px 28px',
-          marginBottom: '28px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <span
-            style={{
-              width: '44px', height: '44px',
-              borderRadius: '12px',
-              background: PRIMARY_LT,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <MdDashboard size={22} color={PRIMARY} />
-          </span>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#111827' }}>
-              لوحة التحكم الرئيسية
-            </h1>
-            <p style={{ margin: '3px 0 0', fontSize: '13px', color: '#6b7280' }}>
-              مرحباً {firstName}، إدارة شؤون التدريب التعاوني لجامعة أم القرى
-            </p>
-          </div>
-        </div>
-        <span
-          style={{
-            background: PRIMARY_LT,
-            border: `1px solid ${PRIMARY_MD}`,
-            borderRadius: '20px',
-            padding: '6px 16px',
-            fontSize: '13px',
-            color: PRIMARY,
-            fontWeight: 600,
-          }}
-        >
+      <PageHeader icon={MdDashboard} title="لوحة التحكم الرئيسية" subtitle={`مرحباً ${firstName}، إدارة شؤون التدريب التعاوني لجامعة أم القرى`}>
+        <span style={{
+          background: PRIMARY_LT, border: `1px solid ${PRIMARY_MD}`,
+          borderRadius: '20px', padding: '6px 16px',
+          fontSize: '13px', color: PRIMARY, fontWeight: 600,
+        }}>
           منسق جامعي
         </span>
+      </PageHeader>
+
+      {/* Stat Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+        gap: '20px',
+        marginBottom: '28px',
+      }}>
+        <StatCard icon={MdLocalHospital} label="المستشفيات المتاحة"  value={loading ? '—' : stats.hospitals}        sub="إجمالي المستشفيات" />
+        <StatCard icon={MdDateRange}     label="الفترات التدريبية"   value={loading ? '—' : stats.openPeriods}      sub="كل الفترات"        />
+        <StatCard icon={MdVerified}      label="فرص تدريب مؤكدة"    value={loading ? '—' : stats.allocatedPeriods} sub="تم الاعتماد"       accent />
       </div>
 
-      {/* ── Stat Cards ── */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '20px',
-          marginBottom: '28px',
-        }}
-      >
-        <StatCard
-          icon={MdLocalHospital}
-          label="المستشفيات المتاحة"
-          value={loading ? '—' : stats.hospitals}
-          sub="إجمالي المستشفيات"
-        />
-        <StatCard
-          icon={MdDateRange}
-          label="الفترات التدريبية"
-          value={loading ? '—' : stats.openPeriods}
-          sub="كل الفترات"
-        />
-        <StatCard
-          icon={MdVerified}
-          label="فرص تدريب مؤكدة"
-          value={loading ? '—' : stats.allocatedPeriods}
-          sub="تم الاعتماد"
-          accent
-        />
-      </div>
-
-      {/* ── Quick Actions ── */}
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e5e7eb',
-          padding: '24px 28px',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-        }}
-      >
+      {/* Quick Actions */}
+      <div style={{
+        background: '#ffffff', borderRadius: '16px', border: '1px solid #e5e7eb',
+        padding: '24px 28px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+      }}>
         <div style={{ marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#111827' }}>
-            الإجراءات السريعة
-          </h2>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#6b7280' }}>
-            وصول سريع لأهم صفحات النظام
-          </p>
+          <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#111827' }}>الإجراءات السريعة</h2>
+          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#6b7280' }}>وصول سريع لأهم صفحات النظام</p>
         </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '14px',
-          }}
-        >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px' }}>
           {quickActions.map((a) => (
-            <QuickActionBtn
-              key={a.path}
-              label={a.label}
-              desc={a.desc}
-              icon={a.icon}
-              onClick={() => navigate(a.path)}
-            />
+            <QuickActionBtn key={a.path} label={a.label} desc={a.desc} icon={a.icon} onClick={() => navigate(a.path)} />
           ))}
         </div>
       </div>

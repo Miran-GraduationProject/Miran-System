@@ -8,11 +8,11 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useState, useEffect } from "react";
-
+emplates";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import CoordinatorDashboard from "./pages/coordinatorPage/CoordinatorDashboard";
-import SupervisorDashboard from "./pages/SupervisorDashboard";
+import SupervisorDashboard from "./pages/supervisor/SupervisorDashboard";
 
 import TrainingPeriodsPage from "./pages/coordinatorPage/TrainingPeriodsPage";
 import HospitalsPage from "./pages/coordinatorPage/HospitalsPage";
@@ -20,19 +20,31 @@ import RegistrationMonitorPage from "./pages/coordinatorPage/RegistrationMonitor
 import StudentListPage from "./pages/coordinatorPage/StudentListPage";
 import ConfirmedAllocationsPage from "./pages/coordinatorPage/ConfirmedAllocationsPage";
 import StudentPreferencesPage from "./pages/student/StudentPreferencesPage";
-import StudentDetails from "./pages/coordinatorPage/StudentDetails";
+import StudentDetails from "./pages/supervisor/StudentDetails";
 
-import Reports from "./pages/Reports";
-import ReportStudents from "./pages/ReportStudents";
-import ReportCreate from "./pages/ReportCreate";
-import Templates from "./pages/Templates";
+
+import Reports from "./pages/supervisor/Reports";
+import ReportStudents from "./pages/supervisor/ReportStudents";
+import ReportCreate from "./pages/supervisor/ReportCreate";
+import Templates from "./pages/supervisor/Templates";
+import ErrorDownload from "./pages/ErrorDownload";
+import ReportSubmissionView from "./pages/ReportSubmissionView";
+
 
 import StudentReports from "./pages/StudentReports";
 import StudentReportFill from "./pages/StudentReportFill";
 
+
 import SplashScreen from "./components/SplashScreen";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer"
+
+import { StudentMandatoryCases } from './pages/student/StudentCases';
+import AddCase from './pages/supervisor/AddCase';
+import EditCase from './pages/supervisor/EditCase';
+import DeleteCase from './pages/supervisor/DeleteCase';
+import SupervisorCasesManagement from './pages/supervisor/SupervisorCasesManagement';
+
 const Layout = ({ children }) => {
   
   return (
@@ -249,6 +261,81 @@ function App() {
                 </Layout>
               }
             />
+            <Route
+             path="/error-download"
+             element={
+               <Layout>
+                   <ErrorDownload />
+               </Layout>
+             }
+
+            />
+            <Route
+               path="/reports/submission/:id"
+              element={
+                 <Layout>
+                     <ReportSubmissionView />
+                 </Layout>
+              }
+             />
+
+
+
+<Route
+  path="/student/cases"
+  element={
+    <Layout>
+      <ProtectedRoute Role="Student">
+        <StudentMandatoryCases />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
+<Route
+  path="/supervisor/cases"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <SupervisorCasesManagement />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
+<Route
+  path="/supervisor/cases/add"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <AddCase />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
+<Route
+  path="/supervisor/cases/edit"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <EditCase />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
+<Route
+  path="/supervisor/cases/delete"
+  element={
+    <Layout>
+      <ProtectedRoute Role="AcademicSupervisor">
+        <DeleteCase />
+      </ProtectedRoute>
+    </Layout>
+  }
+/>
+
           </Routes>
         </BrowserRouter>
       )}

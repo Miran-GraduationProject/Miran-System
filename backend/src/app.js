@@ -8,6 +8,9 @@ import fs from "fs";
 
 import dbConnect from "./config/dbConnect.js";
 
+import { syncStatuses } from "./models/coordinatorModel/openTrainingPeriod.js";
+
+
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import coordinatorRoutes from "./routes/coordinatorRoutes.js";
@@ -100,6 +103,10 @@ if (process.env.NODE_ENV !== "test") {
   app.listen(port, () => {
     console.log("server is running");
   });
+
+  // تشغيل المزامنة فور بدء السيرفر ثم كل 5 دقائق
+  syncStatuses().catch(console.error);
+  setInterval(() => syncStatuses().catch(console.error), 5 * 60 * 1000);
 }
 //app.listen(port,()=>{
 //    console.log("server is running")
