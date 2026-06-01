@@ -7,7 +7,7 @@ import '../../styles/page.css';
 import '../../styles/BackButton.css';
 import '../../styles/reports.css';
 import { styled } from "styled-components";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaChartBar, FaUser, FaIdCard, FaEnvelope, FaLayerGroup, FaCheckCircle, FaFileAlt, FaHospital, FaGraduationCap, FaHourglassHalf, FaCalendarWeek } from "react-icons/fa";
 
 
 function StudentDetails() {
@@ -155,7 +155,9 @@ function StudentDetails() {
       <div className="top-reports-section">
         <div className="reports-header">
           <div className="reports-title">
-            <div className="page-icon">📊</div>
+            <div className="page-icon">
+              <FaChartBar size={26} />
+            </div>
 
             <div>
               <h1>تفاصيل الطالب</h1>
@@ -172,7 +174,9 @@ function StudentDetails() {
             <span>الاسم</span>
             <strong style={{ fontSize: "16px" }}>{student.firstName} {student.middleName} {student.lastName}</strong>
           </div>
-          <div className="stat-icon">👤</div>
+          <div className="stat-icon">
+            <FaUser />
+          </div>
         </div>
 
         <div className="stat-card">
@@ -180,15 +184,15 @@ function StudentDetails() {
             <span>الرقم الجامعي</span>
             <strong style={{ fontSize: "16px" }}>{student.studentID}</strong>
           </div>
-          <div className="stat-icon">🪪</div>
-        </div>
+            <div className="stat-icon"><FaIdCard /></div>
+          </div>
 
         <div className="stat-card">
           <div className="stat-content">
             <span>البريد الجامعي</span>
             <strong style={{ fontSize: "16px" }}>{student.email}</strong>
           </div>
-          <div className="stat-icon">✉️</div>
+          <div className="stat-icon"><FaEnvelope /></div>
         </div>
 
         <div className="stat-card">
@@ -196,7 +200,7 @@ function StudentDetails() {
             <span>المستوى الدراسي</span>
             <strong style={{ fontSize: "16px" }}>{student.level}</strong>
           </div>
-          <div className="stat-icon">⏸️</div>
+          <div className="stat-icon"><FaGraduationCap /></div>
         </div>
 
         {student.periodName && (
@@ -205,7 +209,7 @@ function StudentDetails() {
               <span>الفترة التدريبية</span>
               <strong style={{ fontSize: "16px" }}>{student.periodName}</strong>
             </div>
-            <div className="stat-icon">✔️</div>
+            <div className="stat-icon"><FaCalendarWeek  /></div>
           </div>
         )}
 
@@ -215,7 +219,7 @@ function StudentDetails() {
               <span>عدد التقارير</span>
               <strong style={{ fontSize: "16px" }}>{student.reports}</strong>
             </div>
-            <div className="stat-icon">📄</div>
+            <div className="stat-icon"><FaFileAlt /></div>
           </div>
         )}
 
@@ -224,7 +228,7 @@ function StudentDetails() {
             <span>المستشفى</span>
             <strong style={{ fontSize: "16px" }}>{student.hospitalName}</strong>
           </div>
-          <div className="stat-icon">🏥</div>
+          <div className="stat-icon"><FaHospital /></div>
         </div>
       </div>
 

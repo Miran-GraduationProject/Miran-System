@@ -8,7 +8,9 @@ import '../../styles/search.css'
 import '../../styles/studentList.css'
 import "../../styles/reports.css";
 import "../../styles/student.css";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaUsers , FaFileAlt} from "react-icons/fa";
+
+
 
 function SupervisorDashboard() {
 
@@ -63,7 +65,9 @@ function SupervisorDashboard() {
       <div className="top-reports-section">
         <div className="reports-header">
           <div className="reports-title">
-            <div className="page-icon">🧍</div>
+            <div className="page-icon">
+              <FaUsers size={28} />
+            </div>
 
             <div>
               <h1>الطلاب تحت الإشراف</h1>
@@ -164,7 +168,9 @@ function SupervisorDashboard() {
                       <span>{s.periodName || "غير محددة"}</span>
 
                       <div className="report-title-cell">
-                        <span className="row-file-icon">📄</span>
+                        <span className="row-file-icon">
+                          <FaFileAlt />
+                        </span>
                         <span>{s.reports ?? 0}</span>
                       </div>
 
