@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'; // يوز ايفيكت لتشغيل كود معين من الباك ايند
 import { useNavigate } from 'react-router-dom'; // عشان ينتقل بين الصفحات
+import { FaTasks } from 'react-icons/fa';
 import '../../styles/page.css';
 import '../../styles/search.css'
 import '../../styles/studentList.css'
 import "../../styles/reports.css";
+import "../../styles/student.css";
 import { FaSearch } from "react-icons/fa";
 
 function SupervisorDashboard() {
@@ -68,7 +70,25 @@ function SupervisorDashboard() {
               <p>إدارة ومتابعة الطلاب</p>
             </div>
           </div>
+
         </div>
+      </div>
+
+      {/* كارد إدارة الحالات */}
+      <div className="student-cards-grid" style={{ marginBottom: "24px" }}>
+        <button
+          className="student-main-card"
+          onClick={() => navigate("/supervisor/cases")}
+        >
+          <span className="student-card-arrow">›</span>
+          <div className="student-card-content">
+            <div className="student-card-icon-wrap">
+              <span className="student-card-icon"><FaTasks /></span>
+            </div>
+            <h4>إدارة الحالات الإلزامية</h4>
+            <p>إضافة وتعديل وحذف الحالات</p>
+          </div>
+        </button>
       </div>
 
       <div className="search-card reports-search-card">

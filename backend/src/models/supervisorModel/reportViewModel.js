@@ -234,7 +234,7 @@ export const getReportsStats = async (academicSupervisorID) => {
           ON u.userID = rs.studentID
         WHERE cr.academicSupervisorID = ?
           AND cr.reportStatus = 'PUBLISHED'
-          AND rs.approvalStatus = 'Pending'
+          AND rs.approvalStatus = 'قيد المراجعة'
           AND u.selectedHospital = ?
       ) AS pendingReports,
 
@@ -247,7 +247,7 @@ export const getReportsStats = async (academicSupervisorID) => {
           ON u.userID = rs.studentID
         WHERE cr.academicSupervisorID = ?
           AND cr.reportStatus = 'PUBLISHED'
-          AND rs.approvalStatus = 'Pending'
+          AND rs.approvalStatus = 'قيد المراجعة'
           AND u.selectedHospital = ?
       ) AS reviewReports,
 
@@ -260,7 +260,7 @@ export const getReportsStats = async (academicSupervisorID) => {
           ON u.userID = rs.studentID
         WHERE cr.academicSupervisorID = ?
           AND cr.reportStatus = 'PUBLISHED'
-          AND rs.approvalStatus = 'Accept'
+          AND rs.approvalStatus = 'قبول'
           AND u.selectedHospital = ?
       ) AS completedReports
     `,
@@ -475,7 +475,7 @@ export const approveSubmission = async (
       ON u.userID = rs.studentID
 
     SET
-      rs.approvalStatus = 'Accept',
+      rs.approvalStatus = 'قبول',
       rs.approvedBy = ?,
       rs.approvedAt = NOW()
 

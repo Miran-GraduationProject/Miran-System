@@ -28,7 +28,7 @@ import {
   getReportStudentsController,
 } from '../controllers/SupervisorControllers/reportViewController.js';
 
-import { createCase, updateCase, deleteCase } from '../controllers/SupervisorControllers/cases.js';
+import { getCases, createCase, updateCase, deleteCase } from '../controllers/SupervisorControllers/cases.js';
 
 const router = express.Router(); 
 
@@ -71,6 +71,7 @@ router.put("/submission/:submissionID/approve", approveSubmissionController);
 
 //------------------------------------------------------
 
+router.get('/cases', getCases);
 router.post('/cases', verifyToken, verifyRole('AcademicSupervisor'), createCase);
 router.put('/cases/:caseID', verifyToken, verifyRole('AcademicSupervisor'), updateCase);
 router.delete('/cases', verifyToken, verifyRole('AcademicSupervisor'),(req, res) => {return res.status(400).json({ message: "case ID is required"});} );

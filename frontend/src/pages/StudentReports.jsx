@@ -290,7 +290,7 @@ export default function StudentReports() {
                     <FaFileAlt />
                   </span>
 
-                  <div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                     <span>{report.reportTitle || "بدون عنوان"}</span>
 
                     <small className="date-cell">
