@@ -1,17 +1,17 @@
-/** هذا كنترولر لخامس ريكوايرمنت 
- * عنده اربع وظائف يعرض للطالب المستشفيات المتاحه ويحفظ ترتيب الرغبات ويعرضها 
- *  وفيه ميثود تتاكد من فترةالتسجيل اذا مازالت مفتوحه وتجيبها حسب مستوى الطالب
+/** هذا كنترولر لخامس ريكوايرمنت
+ * يعرض للطالب المستشفيات المتاحة، يعرض رغباته الحالية، ويحفظ ترتيب الرغبات
+ * وفيه ميثود تتأكد من فترة التسجيل إذا ما زالت مفتوحة وتجيبها حسب مستوى الطالب
  */
- 
 
 import {
+    getStudentLevel,
+    getPeriodByLevelOpenOrClosed,
     getAvailableHospitals,
     getStudentPreferences,
-    savePreferences,
-    getStudentLevel
+    savePreferences
 } from '../../models/studentModel/studentPreference.js';
 
-import { checkOpenPeriodByLevel, getPeriodByLevelOpenOrClosed, syncStatuses } from '../../models/coordinatorModel/openTrainingPeriod.js';
+import { checkOpenPeriodByLevel, syncStatuses } from '../../models/coordinatorModel/openTrainingPeriod.js';
 
 
 // للإرسال فقط: فترة OPEN حصراً
@@ -22,6 +22,7 @@ const getPeriodForStudent = async (studentID) => {
     return await checkOpenPeriodByLevel(level);
 };
 
+
 // للعرض: فترة OPEN أو CLOSED (الطالب يشوف رغباته حتى بعد الإغلاق)
 const getPeriodForStudentView = async (studentID) => {
     await syncStatuses();
@@ -31,7 +32,7 @@ const getPeriodForStudentView = async (studentID) => {
 };
 
 
-//  نتحقق فيه ان التسجيل مفتوح ولا انتهى
+// نتحقق فيه أن التسجيل مفتوح ولا انتهى
 /**
  * Checks whether the registration window is currently active.
  *
@@ -50,8 +51,7 @@ const checkRegistrationOpen = (period) => {
 };
 
 
-
-//تعرض للطالب المستشفيات الي مسجلة بالفترة
+// تعرض للطالب المستشفيات الي مسجلة بالفترة
 /**
  * Returns available hospitals for the student's open training period.
  * Each student only sees hospitals assigned to their academic level.
@@ -85,7 +85,40 @@ const getHospitals = async (req, res) => {
 };
 
 
-// تحفظ ترتيب الطالب  كامل وتتحقق من كلشي بعدهااا تحفظ
+// الطالب يشوف ترتيبه الحالي
+// يعني لو حفظ ترتيبه من قبل يقدر يشوفه
+/**
+ * Returns the student's currently saved preference rankings for the open period.
+ *
+ * @route GET /preferences
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
+const getMyPreferences = async (req, res) => {
+    try {
+        const studentID = req.user.id;
+
+        const period = await getPeriodForStudentView(studentID);
+        if (!period) {
+            return res.status(404).json({ message: "No open training period found for your level" });
+        }
+
+        const preferences = await getStudentPreferences(studentID, period.periodID);
+
+        res.status(200).json({
+            periodID: period.periodID,
+            periodName: period.name,
+            preferences
+        });
+
+    } catch (error) {
+        console.error('getMyPreferences error:', error);
+        return res.status(500).json({ message: "Something went wrong, please try again" });
+    }
+};
+
+
+// تحفظ ترتيب الطالب كامل وتتحقق من كل شيء بعدها تحفظ
 /**
  * Saves the student's full ranked preference list.
  * Requires all hospitals to be ranked with no duplicate ranks,
@@ -172,37 +205,4 @@ const submitPreferences = async (req, res) => {
 };
 
 
-// الطالب يشوف ترتيبه الحالي
-// يعني لو حفظ ترتيبه من قبل يقدر يشوفه
-/**
- * Returns the student's currently saved preference rankings for the open period.
- *
- * @route GET /preferences
- * @param {express.Request} req
- * @param {express.Response} res
- */
-const getMyPreferences = async (req, res) => {
-    try {
-        const studentID = req.user.id;
-
-        const period = await getPeriodForStudentView(studentID);
-        if (!period) {
-            return res.status(404).json({ message: "No open training period found for your level" });
-        }
-
-        const preferences = await getStudentPreferences(studentID, period.periodID);
-
-        res.status(200).json({
-            periodID: period.periodID,
-            periodName: period.name,
-            preferences
-        });
-
-    } catch (error) {
-        console.error('getMyPreferences error:', error);
-        return res.status(500).json({ message: "Something went wrong, please try again" });
-    }
-};
-
-
-export { getHospitals, submitPreferences, getMyPreferences };
+export { getHospitals, getMyPreferences, submitPreferences };

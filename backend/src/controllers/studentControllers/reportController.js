@@ -47,7 +47,6 @@ const reports = await getStudentReports(studentID);
   }
 };
 
-
 /**
  * Get one report for the student.
  * It returns the report details, fields, and answers if they exist.

@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react'; // يوز ايفيكت لتشغيل كود معين من الباك ايند
 import { useNavigate } from 'react-router-dom'; // عشان ينتقل بين الصفحات
-import '../styles/Button.css';
-import '../styles/page.css';
-import '../styles/search.css'
-import '../styles/studentList.css'
-import "../styles/reports.css";
+import '../../styles/page.css';
+import '../../styles/search.css'
+import '../../styles/studentList.css'
+import "../../styles/reports.css";
 import { FaSearch } from "react-icons/fa";
 
 function SupervisorDashboard() {
@@ -62,11 +61,11 @@ function SupervisorDashboard() {
       <div className="top-reports-section">
         <div className="reports-header">
           <div className="reports-title">
-            <div className="page-icon">🏠</div>
+            <div className="page-icon">🧍</div>
 
             <div>
-              <h1>لوحة التحكم الرئيسية</h1>
-              <p>إدارة التقارير ومتابعة الطلاب </p>
+              <h1>الطلاب تحت الإشراف</h1>
+              <p>إدارة ومتابعة الطلاب</p>
             </div>
           </div>
         </div>
@@ -74,7 +73,7 @@ function SupervisorDashboard() {
 
       <div className="search-card reports-search-card">
         <div className="results-count">
-          عدد النتائج: {students.length} طالب
+          عدد النتائج: {students.length}
         </div>
 
         <div className="group">
@@ -92,7 +91,7 @@ function SupervisorDashboard() {
 
       <div className="reports-list-box">
         <div className="reports-list-header">
-          <h2>الطلاب تحت الاشراف</h2>
+          <h2>قائمة الطلاب</h2>
         </div>
 
           <div className="reports-table">

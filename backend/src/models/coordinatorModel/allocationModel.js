@@ -194,6 +194,18 @@ const confirmAllocation = async (periodID) => {
                 `UPDATE STUDENT SET periodID = ? WHERE studentID = ?`,
                 [periodID, allocation.studentID]
             );
+
+            // نحدّث المستشفى المختار للطالب في جدول User
+            const [oppRows] = await connection.execute(
+                `SELECT hospitalID FROM TRAINING_OPPORTUNITY WHERE opportunityID = ? LIMIT 1`,
+                [allocation.opportunityID]
+            );
+            if (oppRows[0]?.hospitalID) {
+                await connection.execute(
+                    `UPDATE \`User\` SET selectedHospital = ? WHERE userID = ?`,
+                    [oppRows[0].hospitalID, allocation.studentID]
+                );
+            }
         }
 
         //  نغير حالة الفترة لـ تم التوزيع

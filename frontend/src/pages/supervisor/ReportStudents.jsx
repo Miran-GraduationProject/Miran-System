@@ -7,8 +7,8 @@ import {
   FaClock,
   FaCheck,
 } from "react-icons/fa";
-import "../styles/reports.css";
-import "../styles/search.css";
+import "../../styles/reports.css";
+import "../../styles/search.css";
 
 export default function ReportStudents() {
   const { reportID } = useParams();

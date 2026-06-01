@@ -2,6 +2,7 @@
 import request from 'supertest';
 import app from '../../../src/app.js';
 import jwt from 'jsonwebtoken';
+import dbConnect from '../../../src/config/dbConnect.js';
 
 let token;
 let coordinatorID;
@@ -167,4 +168,8 @@ describe('Integration — Req 4: Training Period Management', () => {
         expect(res.statusCode).toBe(403);
     });
 
+});
+
+afterAll(async () => {
+    await dbConnect.promise().end();
 });

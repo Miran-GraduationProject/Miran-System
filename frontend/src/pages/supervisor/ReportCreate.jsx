@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/reportCreate.css";
-import {
-  FiFileText,
-  FiTrash2,
-  FiCheck,
-  FiPlus,
-} from "react-icons/fi";
+import "../../styles/reportCreate.css";
+import { FiFileText, FiTrash2, FiCheck, FiPlus } from "react-icons/fi";
 
 export default function ReportCreate() {
   const navigate = useNavigate();
@@ -65,32 +60,32 @@ export default function ReportCreate() {
       "هل أنت متأكد من رغبتك في حذف هذا القالب نهائياً؟"
     );
 
-    if (confirmDelete) {
-      try {
-        const token = localStorage.getItem("token");
+    if (!confirmDelete) return;
 
-        const res = await fetch(
-          `http://localhost:3000/api/supervisor/templates/${templateID}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+    try {
+      const token = localStorage.getItem("token");
 
-        if (res.ok) {
-          const updatedTemplates = templates.filter(
-            (t) => t.templateID !== templateID
-          );
-
-          setTemplates(updatedTemplates);
-        } else {
-          alert("فشل الحذف");
+      const res = await fetch(
+        `http://localhost:3000/api/supervisor/templates/${templateID}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } catch (error) {
-        console.log(error);
+      );
+
+      if (!res.ok) {
+        alert("فشل الحذف");
+        return;
       }
+
+      setTemplates((currentTemplates) =>
+        currentTemplates.filter((template) => template.templateID !== templateID)
+      );
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      alert("حدث خطأ أثناء حذف القالب");
     }
   };
 
@@ -167,7 +162,6 @@ export default function ReportCreate() {
                   <span
                     className="template-badge"
                     onClick={() => handleDeleteTemplate(template.templateID)}
-                    style={{ cursor: "pointer" }}
                     title="حذف القالب"
                   >
                     <FiTrash2 size={18} />

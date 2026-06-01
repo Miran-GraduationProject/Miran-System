@@ -2,7 +2,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import { MdDateRange, MdAdd, MdEdit, MdDelete, MdClose, MdSearch, MdRefresh } from 'react-icons/md';
+import { MdDateRange, MdAdd, MdEdit, MdDelete, MdClose, MdSearch, MdRefresh, MdWarning } from 'react-icons/md';
+import PageHeader  from '../../components/common/PageHeader';
+import AlertBox    from '../../components/common/AlertBox';
+import FilterTabs  from '../../components/common/FilterTabs';
 
 const API  = 'http://localhost:3000/api/coordinator/training-period';
 const P    = '#2d8a56';
@@ -157,41 +160,22 @@ export default function TrainingPeriodsPage() {
   return (
     <div dir="rtl" style={{ padding: '32px', minHeight: '100vh', background: P_LT }}>
 
-      {/* Header */}
-      <div style={{
-        background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb',
-        padding: '20px 24px', marginBottom: '24px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-      }}>
-        {/* Right: icon + title */}
-        <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-          <span style={{ width:44, height:44, borderRadius:12, background:P_LT, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <MdDateRange size={22} color={P} />
-          </span>
-          <div>
-            <h1 style={{ margin:0, fontSize:'18px', fontWeight:700, color:'#111827' }}>فترات التدريب</h1>
-            <p style={{ margin:'3px 0 0', fontSize:'13px', color:'#6b7280' }}>إنشاء وإدارة فترات التدريب التعاوني</p>
-          </div>
-        </div>
-        {/* Left: buttons */}
-        <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-          <button onClick={() => { setShowForm(true); setEditingID(null); setFormData({name:'',level:'',startDate:'',endDate:'',registrationOpen:'',registrationClose:''}); setHospitals([{...emptyHospital}]); setSubmitError(''); }} style={{
-            display:'flex', alignItems:'center', gap:'8px', whiteSpace:'nowrap',
-            background:P, color:'#fff', border:'none', borderRadius:'10px', padding:'10px 20px',
-            cursor:'pointer', fontWeight:600, fontSize:'14px', fontFamily:'inherit',
-          }}>
-            <MdAdd size={18}/> فتح فترة جديدة
-          </button>
-          <button onClick={fetchPeriods} style={{
-            display:'flex', alignItems:'center', gap:'8px',
-            background:'#fff', color:'#374151', border:'1px solid #d1d5db', borderRadius:'10px', padding:'10px 16px',
-            cursor:'pointer', fontWeight:600, fontSize:'14px', fontFamily:'inherit',
-          }}>
-            <MdRefresh size={18}/> تحديث
-          </button>
-        </div>
-      </div>
+      <PageHeader icon={MdDateRange} title="فترات التدريب" subtitle="إنشاء وإدارة فترات التدريب التعاوني">
+        <button onClick={() => { setShowForm(true); setEditingID(null); setFormData({name:'',level:'',startDate:'',endDate:'',registrationOpen:'',registrationClose:''}); setHospitals([{...emptyHospital}]); setSubmitError(''); }} style={{
+          display:'flex', alignItems:'center', gap:'8px', whiteSpace:'nowrap',
+          background:P, color:'#fff', border:'none', borderRadius:'10px', padding:'10px 20px',
+          cursor:'pointer', fontWeight:600, fontSize:'14px', fontFamily:'inherit',
+        }}>
+          <MdAdd size={18}/> فتح فترة جديدة
+        </button>
+        <button onClick={fetchPeriods} style={{
+          display:'flex', alignItems:'center', gap:'8px',
+          background:'#fff', color:'#374151', border:'1px solid #d1d5db', borderRadius:'10px', padding:'10px 16px',
+          cursor:'pointer', fontWeight:600, fontSize:'14px', fontFamily:'inherit',
+        }}>
+          <MdRefresh size={18}/> تحديث
+        </button>
+      </PageHeader>
 
       {/* Modal */}
       {showForm && (
@@ -309,7 +293,7 @@ export default function TrainingPeriodsPage() {
 
                 {submitError && (
                   <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'10px', padding:'10px 14px', marginTop:'14px', color:'#b91c1c', fontSize:'13px' }}>
-                    ⚠️ {submitError}
+                    <MdWarning size={16} style={{ verticalAlign: 'middle', marginLeft: '6px' }} /> {submitError}
                   </div>
                 )}
               </div>
@@ -329,12 +313,7 @@ export default function TrainingPeriodsPage() {
         </div>
       )}
 
-      {error && (
-        <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'12px', padding:'12px 18px', marginBottom:'20px', color:'#b91c1c', display:'flex', justifyContent:'space-between' }}>
-          <span>⚠️ {error}</span>
-          <button onClick={() => setError('')} style={{ background:'none', border:'none', cursor:'pointer', color:'#b91c1c' }}>✕</button>
-        </div>
-      )}
+      {error && <AlertBox type="error" message={error} onClose={() => setError('')} />}
 
       {/* Table Card */}
       {(() => {
@@ -358,30 +337,12 @@ export default function TrainingPeriodsPage() {
           { key:'ALLOCATED', label:'موزَّعة', count: counts.ALLOCATED },
         ];
         return (
-          <div style={{ background:'#fff', borderRadius:'16px', border:'1px solid #e5e7eb', boxShadow:'0 1px 4px rgba(0,0,0,0.04)', overflow:'hidden' }}>
+          <div style={{ background:'#fff', borderRadius:'16px', border:'1px solid #e5e7eb', boxShadow:'0 1px 4px rgba(0,0,0,0.04)', overflowX:'auto' }}>
             {/* Toolbar */}
             <div style={{ padding:'16px 24px', borderBottom:'1px solid #f3f4f6' }}>
               {/* Filter tabs */}
               <div style={{ marginBottom:'14px' }}>
-                <div style={{ display:'flex', gap:'4px', background:'#f3f4f6', borderRadius:'10px', padding:'4px', width:'fit-content' }}>
-                  {tabs.map(t => (
-                    <button key={t.key} onClick={() => setActiveFilter(t.key)} style={{
-                      display:'flex', alignItems:'center', gap:'6px',
-                      padding:'6px 14px', borderRadius:'8px', border:'none', cursor:'pointer',
-                      fontFamily:'inherit', fontSize:'13px', fontWeight:600, transition:'all 0.15s',
-                      background: activeFilter === t.key ? '#fff' : 'transparent',
-                      color:      activeFilter === t.key ? '#111827' : '#6b7280',
-                      boxShadow:  activeFilter === t.key ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                    }}>
-                      {t.label}
-                      <span style={{
-                        background: activeFilter === t.key ? P_LT : '#e5e7eb',
-                        color:      activeFilter === t.key ? P     : '#6b7280',
-                        borderRadius:'20px', padding:'1px 8px', fontSize:'12px',
-                      }}>{t.count}</span>
-                    </button>
-                  ))}
-                </div>
+                <FilterTabs tabs={tabs} active={activeFilter} onChange={setActiveFilter} />
               </div>
               {/* Search */}
               <div style={{ position:'relative' }}>

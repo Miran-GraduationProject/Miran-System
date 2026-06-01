@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/reports.css";
-import "../styles/search.css";
+import "../../styles/reports.css";
+import "../../styles/search.css";
 import { FaSearch, FaFileAlt, FaPlus } from "react-icons/fa";
 
 export default function Reports() {
@@ -13,39 +13,15 @@ export default function Reports() {
 
   const token = localStorage.getItem("token");
 
-  // دالة البحث
-  const handleSearch = async () => {
-    try {
-      setLoading(true);
-      let url = "";
-
-      if (!isNaN(search)) {
-        url = `http://localhost:3000/api/reviewCase/${search}`;
-      } else {
-        url = `http://localhost:3000/api/reviewCase/student/${search}`;
-      }
-
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (res.ok) {
-        setReports(Array.isArray(data.data) ? data.data : [data.data]);
-      } else {
-        setReports([]);
-      }
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      setReports([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // جلب التقارير المنشورة
   const fetchPublishedReports = async () => {
     try {
+      setLoading(true);
+
       const res = await fetch("http://localhost:3000/api/supervisor/reports", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
@@ -69,15 +45,19 @@ export default function Reports() {
     fetchPublishedReports();
   }, []);
 
-  // الفلترة
+  // فلترة التقارير داخل الصفحة حسب اسم التقرير أو الفترة
   const filteredReports = useMemo(() => {
+    const searchValue = search.trim().toLowerCase();
+
+    if (!searchValue) return reports;
+
     return reports.filter((report) => {
       const title = report.reportTitle || "";
       const periodName = report.periodName || "";
 
       return (
-        title.toLowerCase().includes(search.toLowerCase()) ||
-        periodName.toLowerCase().includes(search.toLowerCase())
+        title.toLowerCase().includes(searchValue) ||
+        periodName.toLowerCase().includes(searchValue)
       );
     });
   }, [reports, search]);
@@ -160,10 +140,9 @@ export default function Reports() {
             placeholder="ابحث باسم التقرير أو الفترة..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
 
-          <FaSearch className="icon" onClick={handleSearch} />
+          <FaSearch className="icon" />
         </div>
       </div>
 

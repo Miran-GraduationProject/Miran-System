@@ -1,6 +1,7 @@
 // Integration Test — Req 5: رغبات الطالب
 import request from 'supertest';
 import app from '../../../src/app.js';
+import dbConnect from '../../../src/config/dbConnect.js';
 
 let studentToken;
 
@@ -120,4 +121,8 @@ describe('Integration — Req 5: Student Preferences', () => {
         expect(res.statusCode).toBe(403);
     });
 
+});
+
+afterAll(async () => {
+    await dbConnect.promise().end();
 });
