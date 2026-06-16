@@ -214,6 +214,12 @@ const confirmAllocation = async (periodID) => {
             [periodID]
         );
 
+        // نحذف المسودة المؤقتة بعد الاعتماد — يمنع التناقض بين صفحة قوائم الطلاب وصفحة التوزيعات المؤكدة
+        await connection.execute(
+            `DELETE FROM ALLOCATION_PREVIEW WHERE periodID = ?`,
+            [periodID]
+        );
+
         await connection.commit();
         return { periodID, enrolledCount: allocations.length };
 
